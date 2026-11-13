@@ -9,7 +9,7 @@ page=re.sub(r'^package .*;\n|^import .*;\n','',(base/'ActiveMediaPage.java').rea
 source='''import java.util.*;import java.net.URI;
 class PlaybackTest extends Activity {
  final List<BrowserTab> browserTabs=new ArrayList<>();BrowserTab findTab(GeckoSession target){for(var tab:browserTabs)if(tab.session==target)return tab;return null;}
- static class BrowserTab{GeckoSession session;MediaSession media;String key=UUID.randomUUID().toString(),openerKey="",url="https://site.test/";BrowserTab(GeckoSession s){session=s;}}
+ static class BrowserTab{GeckoSession session;MediaSession media;String key=UUID.randomUUID().toString(),openerKey="",url="https://site.test/";int historyIndex=-1;BrowserTab(GeckoSession s){session=s;}}
  boolean backNavigationPending,returnToBrowserFromHome,inPageFullscreen;long lastHomeBackPress;Object runtime=new Object();final List<BrowserTab>closed=new ArrayList<>();
  GeckoSession createTabSession(){return new GeckoSession();}void selectTab(BrowserTab t){session=t.session;}void closeTab(BrowserTab t){closed.add(t);browserTabs.remove(t);}
  boolean currentTabHasPage(){BrowserTab t=findTab(session);return t!=null&&!"about:blank".equals(t.url);}
@@ -32,6 +32,7 @@ class PlaybackTest extends Activity {
  var late=MediaSession.createForEngine(app.session);app.session.delegate.onPlay(app.session,late);check(late.pauses==1 && late.muted,"Hidden late autoplay bypassed guard");
  app.showBrowserScreen();check(app.session.active && !app.browserMediaControl.muted,"Browser not reactivated");check(app.browserMediaControl.plays==0,"Returning to browser resumed video");
  int beforeBack=app.browserMediaControl.pauses;app.goBackInBrowser();check(app.session.backs==1 && app.browserMediaControl.pauses==beforeBack+1,"History back didn't pause media first");
+ app.browserCanGoBack=false;app.findTab(app.session).historyIndex=2;int viaHistory=app.session.backs;app.goBackInBrowser();check(app.session.backs==viaHistory+1,"History position ignored when Gecko flag was stale");app.findTab(app.session).historyIndex=0;
  app.browserCanGoBack=false;app.goBackInBrowser();check(app.activeScreen.equals("home"),"Back with no history failed to show home");
  app.onBackPressed();check(!app.movedBack && app.activeScreen.equals("home"),"First home back left the app");
  app.onBackPressed();check(app.movedBack && app.activeScreen.equals("home"),"Second home back did not leave");

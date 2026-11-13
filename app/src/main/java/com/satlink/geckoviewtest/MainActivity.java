@@ -138,6 +138,7 @@ public class MainActivity extends Activity {
     private boolean backNavigationPending;
     private boolean returnToBrowserFromHome;
     private long lastHomeBackPress;
+    private Object systemBackCallback;
     private LinearLayout capturePanel;
     private LinearLayout videoResults;
     private LinearLayout audioResults;
@@ -349,6 +350,7 @@ public class MainActivity extends Activity {
         });
 
         backButton.setOnClickListener(v -> goBackInBrowser());
+        registerSystemBack();
 
         renderShortcuts();
         boolean restored = restoreBrowserWorkspace();
@@ -2321,7 +2323,9 @@ public class MainActivity extends Activity {
     /** One step back: page history first, then the page that opened this tab, then home. */
     private void goBackInBrowser() {
         pauseBrowserMedia();
-        if (browserCanGoBack) {
+        BrowserTab visible = findTab(session);
+        boolean historyBehind = visible != null && visible.historyIndex > 0;
+        if (browserCanGoBack || historyBehind) {
             backNavigationPending = true;
             session.goBack();
             return;
@@ -3519,6 +3523,7 @@ public class MainActivity extends Activity {
         boolean canGoBack, canGoForward, loading, awaitingSelection;
         String savedState = "";
         String openerKey = "";
+        int historyIndex = -1;
         MediaSession media;
         BrowserTab(GeckoSession session) {this.session = session;}
     }
@@ -3557,6 +3562,16 @@ public class MainActivity extends Activity {
             }
         });
         created.setContentDelegate(new BrowserContentDelegate());
+        // The history list is a second, independent record of whether the tab can go back.
+        created.setHistoryDelegate(new GeckoSession.HistoryDelegate() {
+            @Override public void onHistoryStateChange(GeckoSession tab, GeckoSession.HistoryDelegate.HistoryList history) {
+                BrowserTab owner = findTab(tab);
+                if (owner == null || history == null) return;
+                owner.historyIndex = history.getCurrentIndex();
+                if (owner.historyIndex > 0) owner.canGoBack = true;
+                if (tab == MainActivity.this.session && owner.historyIndex > 0) browserCanGoBack = true;
+            }
+        });
         created.setNavigationDelegate(new BrowserNavigationDelegate());
         created.setProgressDelegate(new BrowserProgressDelegate());
         if (captureExtension != null) created.getWebExtensionController().setMessageDelegate(
@@ -3718,6 +3733,11 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
+        handleBackPress();
+    }
+
+    /** One step back for the back gesture, the back key and the app's own back button. */
+    private void handleBackPress() {
         if (inPageFullscreen && session != null) {
             // Back leaves the fullscreen video first; it must not leave the page.
             session.exitFullScreen();
@@ -3747,6 +3767,10 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (Build.VERSION.SDK_INT >= 33 && systemBackCallback != null) {
+            try { SystemBack.unregister(this, systemBackCallback); } catch (Throwable ignored) { }
+            systemBackCallback = null;
+        }
         if (downloadReceiver != null) {
             try { unregisterReceiver(downloadReceiver); } catch (Exception ignored) { }
         }
@@ -3767,6 +3791,31 @@ public class MainActivity extends Activity {
         analysisWatchdog.shutdown();
         super.onDestroy();
     }
+    /**
+     * Android 16 no longer calls onBackPressed() for apps targeting API 36; the back gesture
+     * and back button arrive only through OnBackInvokedCallback. Without it the system sends
+     * the app to the phone's home screen. Older Android versions keep using onBackPressed().
+     */
+    private void registerSystemBack() {
+        if (Build.VERSION.SDK_INT < 33) return;
+        systemBackCallback = SystemBack.register(this, this::handleBackPress);
+    }
+
+    private static final class SystemBack {
+        static Object register(Activity activity, Runnable handler) {
+            android.window.OnBackInvokedCallback callback = handler::run;
+            activity.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, callback);
+            return callback;
+        }
+
+        static void unregister(Activity activity, Object callback) {
+            if (callback instanceof android.window.OnBackInvokedCallback)
+                activity.getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(
+                        (android.window.OnBackInvokedCallback) callback);
+        }
+    }
+
     private static String cleanCookieField(String value) {
         return value == null ? "" : value.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
     }
