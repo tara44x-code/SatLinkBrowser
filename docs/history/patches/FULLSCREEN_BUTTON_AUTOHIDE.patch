@@ -1,0 +1,59 @@
+--- a/app/src/main/assets/media_capture/fullscreen_fit.js
++++ b/app/src/main/assets/media_capture/fullscreen_fit.js
+@@ -3,8 +3,22 @@
+   'use strict';
+   let root = null, video = null, button = null, observer = null, timer = null;
+   let cover = true;
++  let hideButtonTimer = null;
+   const originals = new Map();
+   const fullscreen = () => document.fullscreenElement || document.mozFullScreenElement;
++  function showFitButton() {
++    if (!button || fullscreen() !== root) return;
++    if (hideButtonTimer !== null) clearTimeout(hideButtonTimer);
++    button.style.setProperty('visibility', 'visible', 'important');
++    button.style.setProperty('pointer-events', 'auto', 'important');
++    hideButtonTimer = setTimeout(() => {
++      hideButtonTimer = null;
++      if (!button) return;
++      if (document.activeElement === button) button.blur();
++      button.style.setProperty('visibility', 'hidden', 'important');
++      button.style.setProperty('pointer-events', 'none', 'important');
++    }, 2000);
++  }
+   function set(element, name, value) {
+     let saved = originals.get(element);
+     if (!saved) { saved = new Map(); originals.set(element, saved); }
+@@ -16,6 +30,8 @@
+       element.style.setProperty(name, value, 'important');
+   }
+   function restore() {
++    if (hideButtonTimer !== null) clearTimeout(hideButtonTimer);
++    hideButtonTimer = null;
+     if (observer) observer.disconnect();
+     observer = null;
+     if (timer !== null) clearTimeout(timer);
+@@ -76,6 +92,7 @@
+       button.style.cssText = 'position:fixed!important;top:12px!important;right:12px!important;z-index:2147483647!important;width:auto!important;height:auto!important;padding:8px 12px!important;background:rgba(0,0,0,.65)!important;color:white!important;border:1px solid #aaa!important;border-radius:8px!important;font:14px sans-serif!important;cursor:pointer!important;';
+       button.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); toggle(); });
+       root.appendChild(button);
++      showFitButton();
+     }
+     if (button) {
+       const label = cover ? 'عرض كامل' : 'ملء الشاشة';
+@@ -83,7 +100,15 @@
+       button.setAttribute('aria-label', label); button.title = 'SatLink: ' + label + ' (Z)';
+     }
+   }
+-  function toggle() { if (video) { cover = !cover; update(); } }
++  function toggle() { if (video) { cover = !cover; update(); showFitButton(); } }
++  // Capture phase observes screen touches without consuming site/player gestures.
++  function screenInteraction(e) {
++    if (button && fullscreen() === root && root.contains(e.target)) showFitButton();
++  }
++  document.addEventListener('pointerdown', screenInteraction, true);
++  document.addEventListener('pointerup', screenInteraction, true);
++  document.addEventListener('pointercancel', screenInteraction, true);
++  document.addEventListener('keydown', screenInteraction, true);
+   document.addEventListener('fullscreenchange', update);
+   document.addEventListener('mozfullscreenchange', update);
+   document.addEventListener('loadedmetadata', schedule, true);

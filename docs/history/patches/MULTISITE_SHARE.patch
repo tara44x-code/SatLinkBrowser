@@ -1,0 +1,721 @@
+--- a/README_AR.md
++++ b/README_AR.md
+@@ -1,19 +1,21 @@
+-# SatLink Browser PRO 1.9.6 — توحيد تحليل SL.Tube
++# SatLink Browser PRO 1.9.7 — المواقع والمشاركة
+ 
+-المشروع الكامل للمصدر؛ لم ينتج APK في بيئة الفحص. تقرير النتائج والحدود داخل TEST_REPORT_AR.md.
++مشروع المصدر الكامل المعدّل. هذه الحزمة لا تحتوي APK مبنياً؛ نتائج الفحص وحدوده داخل TEST_REPORT_AR.md.
+ 
+-## التغيير الحالي
++## التغييرات
+ 
+-- طلب تحليل يوتيوب الأول مطابق لخيارات SL.Tube DownloadRequestFactory.info وVrkaDownloadManager.analyze للرابط المباشر. لا يضاف User-Agent/كوكيز/Origin المتصفح لهذا الطلب، ولا عميل يوتيوب ثابت أو محدد -f.
+-- إذا أخفق هذا الطلب أو رجّع حتى 360p فقط، تجرّب جلسة المتصفح كطلب مستقل. يحفظ التطبيق نتيجة الاستجابة الأفضل كاملة، ويختار إعداد الجلسة الناجح للتنزيل والإيقاف والاستئناف. لا تخلط صيغاً من استجابتين مختلفتين.
+-- عرض كل معرّف صيغة مستقل كما في SL.Tube؛ أزيل التجميع السابق حسب الدقة والترميز والحاوية الذي كان يخفي صيغاً مختلفة.
+-- الصيغ التي يرجعها yt-dlp بمعرّف صالح دون رابط ملف منفرد تبقى قابلة للاختيار من صفحة الفيديو ومعرّفها. لم يتغير رفض روابط signatureCipher الخام في الالتقاط الاحتياطي.
+-- تبقى أعلى دقة أولاً، مع صيغة صوت متوافقة محددة، أو MKV عند اختلاف الحاويتين. MKV وTS ضمن الفيديو، وأربع قيم MP3 هي أهداف تحويل الصوت.
+-- أزيل فرض android_vr عند إعادة محاولة التنزيل؛ يستخدم الطلب إعدادات التحليل الناجحة.
++- استقبال روابط text/plain من قائمة مشاركة أندرويد. اختر SatLink Browser PRO بعد مشاركة رابط تيك توك أو غيره؛ يفتح الرابط وخيارات التحميل، ثم تختار الجودة قبل التنزيل.
++- قراءة الرابط من النص المرفق معه، مع دعم الروابط المختصرة والحفاظ على معاملات الرابط الموقّعة. يدعم تشغيل التطبيق لأول مرة واستقبال مشاركة جديدة وهو مفتوح، ويزيل بيانات جلسة الرابط السابق.
++- المواقع العامة: تحليل صفحة المنشور الأصلية عبر محرك SL.Tube المرفق، دون فرض محدد جودة أو User-Agent سابق. عند فشل الطلب تجرّب جلسة المتصفح، ثم HLS/DASH master أو صفحة المشغّل الملتقطة إن وجدت. تحفظ كل الصيغ التي يرجعها المحرك، بترتيب الدقة والفريمات ومعدل البت تنازلياً.
++- الالتقاط الاحتياطي لتيك توك: قراءة بيانات JSON للمنشور الحالي، ونسخ bitrateInfo وplayAddr وdownloadAddr، مع الدقة والحجم ومعدل البت المتاح. لا تختلط فيديوهات الاقتراحات مع المنشور الحالي. بيانات الملفات تأتي وفق قواعد مستخرج تيك توك في المحرك المرفق؛ يستثنى مسار hvc1 المعروف بأنه قد يكون فيديو دون صوت.
++- خيارات MP3 لتيك توك تستخدم صوت نسخة الفيديو التي تحتوي صوتاً؛ لا تستبدل صوت المقطع بملف موسيقى الخلفية عندما تتوفر نسخة فيديو بصوت. لا يدمج ملف موسيقى الخلفية مع نسخة تيك توك الصامتة.
++- يبقى MKV وTS ضمن الفيديو. خيارات MP3 الأربع أهداف تحويل 320/256/192/128 وليست أربع جودات أصلية مؤكدة.
+ 
+-## الأجزاء المحفوظة
++ليس كل موقع يوفّر عدة دقات أو ملف صوت مستقلاً. لا تُنشأ دقات وهمية أو ترقية دقة؛ تُعرض النسخ المتاحة فعلياً من المحرك أو الصفحة. المواقع غير المدعومة قد تتطلب تشغيل الفيديو داخل المتصفح لإظهار الالتقاط الاحتياطي.
+ 
+-محرك SL.Tube المرفق 2026.08.19 مع EJS، تثبيت/ترقية مع تحقق SHA-256 و--version وتراجع عند الفشل، إبقاء المحرك الأحدث، تحديث المحرك التلقائي، QuickJS الأصلي، الالتقاط المبكر، قراءة HLS master ضمن حدود زمن وحجم، عزل التبويبات والتنقل، والحفاظ على التنزيلات الجارية.
++## المكونات الحالية
++
++أبقي مسار يوتيوب من 1.9.6، وتثبيت محرك SL.Tube 2026.08.19 المتحقق منه، وEJS وQuickJS، والتحديث التلقائي، وقراءة HLS master، وعزل التبويبات والتنقل، وحفظ التنزيلات الجارية.
+ 
+ ## البناء
+ 
+@@ -23,19 +25,8 @@
+ - لينكس/macOS: bash BUILD-SATLINK.sh.
+ - المخرج عند نجاح البناء: app/build/outputs/apk/debug/app-debug.apk.
+ 
+-الإصدار 196 / PRO 1.9.6 SL.Tube Analysis. تحديث نسخة مثبتة مباشرة يتطلب مفتاح توقيعها نفسه.
++الإصدار 197 / PRO 1.9.7 Share & Sites. تحديث تطبيق مثبت يتطلب مفتاح التوقيع نفسه.
+ 
+-## الاختبارات
++## الفحص
+ 
+-- node tests/capture.test.cjs
+-- node tests/player_metadata.test.cjs
+-- node tests/hls.test.cjs
+-- python3 tests/format_rules_test.py
+-- python3 tests/format_parser_test.py
+-- python3 tests/download_plan_test.py
+-- python3 tests/download_request_test.py
+-- python3 tests/bundled_engine_test.py
+-- python3 tests/sltube_analysis_test.py
+-- java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/*.java
+-
+-اختبارات Java تتطلب JDK 17. اختبار المحرك يتطلب Python 3.10 أو أحدث. tests/reference يحتوي النسخ المرجعية من SL.Tube المستخدمة لفحص تطابق الطلب. بيانات 37 صيغة و4K في الاختبارات اصطناعية وليست نتيجة استخراج حي للرابط المرسل.
++الأوامر والمخرجات داخل TEST_OUTPUT.txt. الاختبارات تستعمل بيانات مصطنعة، ومحركاً بديلاً لردود الشبكة، وتنفذ دوال المصدر نفسها. فحص صياغة Java ليس بناءً لأندرويد. لم يُجرَ اختبار حي على هاتف أو على روابط تيك توك ومواقع أخرى من هذه البيئة.
+--- /dev/null
++++ b/TEST_OUTPUT.txt
+@@ -0,0 +1,43 @@
++$ node tests/capture.test.cjs
++PASS background: MKV/TS, 4GiB sizes, headers, bounded flush, tab isolation, navigation cleanup
++PASS content: immediate snapshot, automatic discovery, coalesced mutations, forced scan, SPA cleanup
++
++$ node tests/player_metadata.test.cjs
++PASS player metadata: exact resolution/FPS/size, muxed audio, audio-only, encrypted cipher, video identity, UMP rejection, full signed stream
++PASS capture integration: player metadata + seven network ranges produce one 1080p60 video, one audio source, exact total size
++
++$ node tests/hls.test.cjs
++PASS HLS: 360/1080p60/4K, relative signed URLs, separate audio groups, no segment cards, exact selectors, credentials, bounded fetch, no recursion, navigation isolation
++
++$ node tests/site_metadata.test.cjs
++PASS TikTok passive fixtures: current post only, all supplied variants, dimensions, bitrate, muxed AAC, hvc1 exception, signed URL, metadata precedence, background-music isolation
++
++$ python3 tests/format_rules_test.py
++PASS Java format rules: real MKV/TS, AV1 MP4, audio separation, 1080p60 label
++
++$ python3 tests/format_parser_test.py
++PASS full production parser: 8K > 4K > 1080p, AV1, MKV/TS, audio pairing, four MP3 targets, progressive audio, storyboard exclusion, highest-resolution selection
++
++$ python3 tests/download_plan_test.py
++PASS download plans: adaptive merge, direct audio, progressive MP3 input, signed URLs, native QuickJS path
++
++$ python3 tests/download_request_test.py
++PASS production download requests: exact video+audio selector, original page refresh, session UA, EJS, signed HLS master without extension, selected 4K, pause/resume persistence, MP3 extraction, MKV plan
++
++$ python3 tests/bundled_engine_test.py
++PASS bundled engine: exact SL.Tube bytes, SHA-256, fresh install, upgrade, no downgrade, validation failure rollback, corrupt-file rejection, staging cleanup
++2026.08.19
++PASS engine execution --version and bundled EJS solver files (host Python, not Android)
++
++$ python3 tests/sltube_analysis_test.py
++PASS exact SL.Tube request parity and production routing: anonymous first, 37 synthetic video IDs preserved, 4K retained, session recovery, correct download profile, no forced client/filter, fragment-backed format score
++
++$ python3 tests/share_test.py
++PASS production share handler: cold/warm intent, caption, short URL, signed query, stale session reset, ClipData, malformed input, single consumption
++PASS Android share manifest
++
++$ python3 tests/site_analysis_test.py
++PASS production site routing: original post, all formats, anonymous profile, session retry, master fallback, passive variant preservation, cancellation
++
++$ java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java app/src/main/java/com/satlink/geckoviewtest/CapturedDownloadPlan.java app/src/main/java/com/satlink/geckoviewtest/EngineBootstrap.java app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java app/src/main/java/com/satlink/geckoviewtest/MainActivity.java app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java app/src/main/java/com/satlink/geckoviewtest/SLTubeAnalysisRequest.java app/src/main/java/com/satlink/geckoviewtest/SharedUrlParser.java
++PASS Java syntax (not Android compilation)
+--- a/TEST_REPORT_AR.md
++++ b/TEST_REPORT_AR.md
+@@ -1,38 +1,31 @@
+-# فحص PRO 1.9.6 SL.Tube Analysis
++# فحص PRO 1.9.7 Share & Sites
+ 
+-التاريخ: 2026-10-04
++التاريخ: 2026-10-05.
+ 
+-## الدليل المتاح
++## النتيجة
+ 
+-صورة المستخدم تعرض SL.Tube بقائمة 37 صيغة فيديو لنفس الرابط KxV33MvXzBw، بينها 2160p60 بترميز AV1/VP9 وصيغ MP4/WEBM. صورة المتصفح السابقة تحمل الإصدار 1.9.3 وتعرض 360p فقط. هذا يثبت الفرق المعروض على الهاتف، ولا يثبت أن الإصدار المصدر 1.9.5 بُني أو جُرّب أو أخفق على الهاتف.
++نجحت 13 مجموعة فحص. كل المخرجات محفوظة في TEST_OUTPUT.txt. لا يوجد APK مبني أو تأكيد تشغيل حي على هاتف ضمن هذه الحزمة.
+ 
+-## فروق مصدر مثبتة وصححت
++## التغطية
+ 
+-- المتصفح كان يفرض User-Agent وReferer وOrigin والكوكيز أثناء التحليل، بينما المسار المباشر في SL.Tube يبدأ بدونها إن لم يدخل المستخدم رؤوساً مخصصة. طلب يوتيوب الأول أصبح مطابقاً لخيارات المسار المباشر. الجلسة تستعمل كاستعادة مستقلة فقط عند الإخفاق أو الاكتفاء بدقة حتى 360p.
+-- خيارات التحليل السابقة تضمنت محدد صيغة وgeo-bypass ومحاولات عميل ثابت. أزيلت من مسار يوتيوب الجديد لصالح خيارات SL.Tube الأصلية.
+-- القائمة السابقة تدمج معرّفات مختلفة إذا اتفقت الدقة والحاوية والترميز. أزيل هذا التجميع، وبقي منع تكرار معرّف الصيغة نفسه.
+-- SL.Tube يقبل صيغة بمعرّف صالح دون اشتراط URL مفرد. شرط المتصفح كان يسقطها. أصبحت هذه الصيغ تحمل صفحة الفيديو ومعرّفها للتنزيل بواسطة المحرك؛ لا تعامل كرابط مباشر.
+-- حفظ إعداد جلسة الاستجابة المختارة ضمن الصيغة ومهمة التنزيل والاستئناف، حتى لا يتحول تحليل مباشر ناجح إلى طلب مختلف عند التحميل.
+-- أزيل android_vr من إعادة محاولة التنزيل. الاستجابة الأفضل لا تمزج مع صوت من استجابة أخرى.
++1. capture.test.cjs: التقاط مبكر، MKV/TS، أحجام تتجاوز 4GB، عزل التبويبات والتنقل، ومسح تلقائي محدود.
++2. player_metadata.test.cjs: بيانات يوتيوب الدقيقة، الصوت المدمج، رفض signatureCipher غير المفكوك، ودمج طلبات النطاق.
++3. hls.test.cjs: قوائم master بدقات مصطنعة من 360 إلى 4K، الصوت المنفصل، الروابط الموقّعة، حدود الطلب وعزل التنقل.
++4. site_metadata.test.cjs: بيانات JSON مصطنعة لتيك توك، كل النسخ المتاحة، أبعاد أعلى وأدنى نسخة، استثناء hvc1، ومنع خلط الاقتراحات أو موسيقى الخلفية.
++5. format_rules_test.py: الحاويات الحقيقية، فصل الصوت، وعرض 1080p60.
++6. format_parser_test.py: تنفيذ محلل المصدر، حفظ معرّفات الصيغ، ترتيب أعلى وأدنى دقة، MKV/TS وAV1، ومصدر MP3 الكامل من فيديو تيك توك ذي الصوت.
++7. download_plan_test.py: ملفات التحليل المباشرة للتحميل، الدمج، إدخال فيديو بصوت لتحويل MP3، وQuickJS.
++8. download_request_test.py: طلب التنزيل الحقيقي، معرّف الفيديو والصوت، جلسة المتصفح، HLS، MP3، وإبقاء الإعدادات عند التوقف والاستئناف.
++9. bundled_engine_test.py: مطابقة بايتات محرك SL.Tube، SHA-256، التثبيت والترقية والتراجع، وعدم خفض محرك أحدث، وتنفيذ --version على Python المضيف.
++10. sltube_analysis_test.py: خيارات طلب يوتيوب والمقارنة المرجعية مع SL.Tube، الإبقاء على الرد الأعلى والجلسة التي نجحت، و37 معرّف صيغة مصطنعاً.
++11. share_test.py: تنفيذ معالج المشاركة من المصدر عند البدء وأثناء تشغيل التطبيق، نصوص عربية، رابط مختصر، معاملات موقّعة، ClipData، إزالة جلسة قديمة، ورفض المدخل غير الصالح. وفحص intent-filter في AndroidManifest.
++12. site_analysis_test.py: تنفيذ توجيه تحليل المواقع من المصدر، المنشور الأصلي أولاً، جلسة احتياطية، master playlist، الحفاظ على كل النسخ الاحتياطية وعدم اختزالها إلى ملف CDN واحد، وإلغاء الصفحة السابقة.
++13. ValidateJava.java: صياغة كل ملفات Java فقط، دون Android SDK أو فحص ربط الاعتماديات.
+ 
+-هذه فروق مثبتة في المصدر، ولا يمكن نسب سبب 360p المحدد على الهاتف لأحدها دون سجل استخراج وتشغيل فعلي. لم يدّع التقرير تحديد هذا السبب نهائياً.
++## بناء أندرويد وحدود التحقق
+ 
+-## اختبارات نجحت
++الأمر bash gradlew :app:assembleDebug --console=plain توقف أثناء تنزيل gradle-8.11.1-bin.zip من services.gradle.org بسبب java.net.SocketException: Network is unreachable.
+ 
+-- sltube_analysis_test.py: مقارنة خيارات SLTubeAnalysisRequest مع خيارات المصدر المرجعي الحقيقي DownloadRequestFactory.kt/VrkaDownloadManager.kt. ثم تشغيل executeYouTubeAnalysis وextractionScore الفعليين ببدائل صغيرة، وفحص نجاح مباشر 4K دون إضافة جلسة، وبقاء 37 معرّفاً اصطناعياً، واستعادة 360p إلى 4K في طلب جلسة ثانٍ، والحفاظ على النتيجة الأولى عند فشل الاستعادة، واختيار صيغ ذات أجزاء بلا URL مفرد.
+-- format_parser_test.py: تشغيل parseFormats الكامل. 37 معرّف فيديو اصطناعياً بقيت 37 بطاقة، مع ترتيب 4K أولاً؛ حفظ إعداد الجلسة للفيديو وMP3؛ دعم المعرف دون URL؛ ترتيب 8K/4K/1080p، صيغ AV1/MKV/TS، صوت محدد، حاوية متوافقة، استبعاد DRM والمعاينات، وعلامة الحجم التقريبي.
+-- download_request_test.py: تشغيل buildRequest وTaskState الفعليين ببدائل Android، وفحص الصيغة الدقيقة، وعدم إضافة رؤوس/كوكيز المتصفح إلى التنزيل المباشر الناجح، وحفظ هذا الإعداد في الاستئناف؛ HLS موقّع دون امتداد، الدقة المختارة، MP3 وMKV.
+-- capture.test.cjs وplayer_metadata.test.cjs وhls.test.cjs: الالتقاط المبكر والتلقائي، MKV/TS، الحجم الكلي، عزل الصفحة والتبويب، بيانات المشغل، دمج طلبات الأجزاء، وعدم عرض الأجزاء كجودات HLS، وحفظ روابط التوقيع.
+-- format_rules_test.py وdownload_plan_test.py وbundled_engine_test.py: دوال Java الأصلية للصيغ وخطة التنزيل ومسار QuickJS وتثبيت المحرك والتحقق والتراجع ومنع الرجوع إلى الأقدم.
+-- شغّل Python المضيف المحرك الأصلي المرفق وأرجع --version = 2026.08.19. تحقق وجود ملفات EJS.
+-- تحليل قواعد Java لجميع ملفات التطبيق، وnode --check لجميع JavaScript، وصحة XML ومعرفات R.id وملفات الإضافة، نجحت.
++لم يكتمل بناء أندرويد، ولم يتم تشغيل التطبيق على هاتف أو تنزيل ملف حي من تيك توك. البيانات المصطنعة تؤكد سلوك الدوال تحت الاختبار؛ لا تؤكد أن رابطاً حياً يعرض الدقات نفسها، ولا أن كل موقع تدعمه الخدمة حالياً. المحرك يحدد الصيغ التي يوفرها الموقع، والالتقاط الاحتياطي يتطلب بيانات فعلية من الصفحة.
+ 
+-## ما تعذّر التحقق منه
+-
+-محاولة assembleDebug توقفت قبل التجميع: Network is unreachable عند تنزيل Gradle 8.11.1. لا يوجد APK جديد في هذا الملف. لم تحصل تجربة Android/GeckoView كاملة، ولا تنزيل/دمج فعلي على الهاتف.
+-
+-المحاولة الحية السابقة للرابط المرسل انتهت بمهلة اتصال إلى صفحة يوتيوب وAPI وملف المشغل. لم تُستخرج قائمة جودات حية منه في هذه البيئة. اختبارات 37 صيغة و4K تعتمد بيانات مضبوطة؛ ليست تأكيداً أن الرابط نفسه صار يستخرج 4K على الهاتف.
+-
+-المرجع هو SL.Tube-4.5.3-sltube.3-source-unbuilt.zip، والمحركان يستخدمان library/ffmpeg 0.18.1. سجلات الاختبار التاريخية داخل SL.Tube لا تعتبر تحققاً لهذا الدمج.
+-
+-فروق الإصدار الحالي عن 1.9.5 داخل ANALYSIS_PARITY.patch. تقرير 1.9.5 محفوظ في docs/history.
++MULTISITE_SHARE.patch يحتوي الفرق عن مصدر PRO 1.9.6 السابق.
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -10,8 +10,8 @@
+         applicationId 'com.satlink.geckoviewtest'
+         minSdk 26
+         targetSdk 36
+-        versionCode 196
+-        versionName 'PRO 1.9.6 SL.Tube Analysis'
++        versionCode 197
++        versionName 'PRO 1.9.7 Share & Sites'
+ 
+         ndk {
+             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -28,6 +28,7 @@
+ 
+         <activity
+             android:name=".MainActivity"
++            android:launchMode="singleTop"
+             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+             android:exported="true"
+             android:windowSoftInputMode="stateUnspecified|adjustResize">
+@@ -35,6 +36,11 @@
+                 <action android:name="android.intent.action.MAIN" />
+                 <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
++            <intent-filter>
++                <action android:name="android.intent.action.SEND" />
++                <category android:name="android.intent.category.DEFAULT" />
++                <data android:mimeType="text/plain" />
++            </intent-filter>
+         </activity>
+     </application>
+ </manifest>
+--- a/app/src/main/assets/media_capture/capture.js
++++ b/app/src/main/assets/media_capture/capture.js
+@@ -78,6 +78,7 @@
+             scheduleSend();
+           }
+         }
++        if (/(^|\.)tiktok\.com$/i.test(location.hostname)) continue;
+         const normalized = text.replace(/\\u0026/g, '&').replace(/\\\//g, '/');
+         const matches = normalized.match(/https?:\/\/[^"'<>\\\s]+/g) || [];
+         for (const raw of matches.slice(0, 500)) {
+--- a/app/src/main/assets/media_capture/media_metadata.js
++++ b/app/src/main/assets/media_capture/media_metadata.js
+@@ -31,7 +31,7 @@
+     if (incoming.type==='transport') item.type='transport';
+     else if ((incoming.type==='unknown' || !incoming.type) && previous.type) item.type=previous.type;
+     // Inferred guesses never overwrite explicit player facts.
+-    if (previous.metadataSource==='player-json' && incoming.metadataSource!=='player-json') {
++    if (['player-json','site-json'].includes(previous.metadataSource) && !['player-json','site-json'].includes(incoming.metadataSource)) {
+       for(const key of ['mime','type','width','height','fps','bitrate','size','duration','qualityLabel','hasAudio','audioCodec','videoCodec']) {
+         if(previous[key]!=null && previous[key]!=='') item[key]=previous[key];
+       }
+@@ -77,8 +77,47 @@
+     }
+     const formats=[]; let visited=0;
+     const activeId=query(pageUrl,'v') || (()=>{try{return new URL(pageUrl).pathname.match(/\/(?:shorts|embed)\/([^/?]+)/)?.[1]||'';}catch(_){return '';}})();
++    let tikTokId='', tikTokPage=false;
++    try { const u=new URL(pageUrl); tikTokPage=/(^|\.)tiktok\.com$/i.test(u.hostname); tikTokId=u.pathname.match(/\/video\/(\d+)/)?.[1]||''; } catch (_) {}
++    function tikTokFormats(item) {
++      const video=item.video, id=String(item.id||item.aweme_id||'');
++      if(!id || (tikTokId && id!==tikTokId) || !video || typeof video!=='object') return false;
++      const duration=positive(video.duration), width=positive(video.width), height=positive(video.height);
++      function addAddress(address, extra={}) {
++        const urls=typeof address==='string'?[address]:Array.isArray(address)?address.map(x=>x?.src):address?.UrlList||[];
++        for(let url of urls) {
++          if(typeof url!=='string') continue;
++          if(url.startsWith('//')) url='https:'+url;
++          let u; try {u=new URL(url);} catch (_) {continue;}
++          if(!/^https?:$/.test(u.protocol) || /(^|\.)tiktok\.com$/i.test(u.hostname)) continue;
++          // Same exception as the bundled TikTok extractor: hvc1 endpoints can be video-only.
++          const hasAudio=!u.pathname.endsWith('/media-video-hvc1/');
++          formats.push({url,type:'video',mime:'video/mp4',width,height,duration,
++            size:positive(address?.DataSize),fps:0,bitrate:0,videoCodec:'h264',
++            ...extra,hasAudio,audioCodec:hasAudio?'aac':'',metadataSource:'site-json',
++            source:'tiktok-player-json',videoId:id,frameUrl:pageUrl});
++        }
++      }
++      for(const rate of video.bitrateInfo||video.bitRateInfo||[]) {
++        const address=rate.PlayAddr; if(!address) continue;
++        const parsed=String(address.UrlKey||'').match(/v[^_]+_([^_]+)_(\d+)p_(\d+)/);
++        let w=positive(address.Width), h=positive(address.Height);
++        if((!w||!h) && parsed && width && height) {
++          let dimension=Number(parsed[2]); if(dimension===540) dimension=576;
++          if(width<height) {w=dimension;h=Math.floor(dimension*height/width/2)*2;}
++          else {h=dimension;w=Math.ceil(dimension*width/height/2)*2;}
++        }
++        addAddress(address,{width:w,height:h,bitrate:positive(rate.Bitrate)||positive(parsed?.[3]),
++          videoCodec:parsed?.[1]==='bytevc1'?'h265':parsed?.[1]||video.codecType||'h264'});
++      }
++      addAddress(video.playAddr);
++      addAddress(video.downloadAddr,{width:0,height:0});
++      // music.playUrl is background music, not necessarily the video's full soundtrack.
++      return true;
++    }
+     function walk(obj,depth=0) {
+       if(!obj || typeof obj!=='object' || depth>10 || ++visited>5000) return;
++      if(tikTokPage && obj.video && (obj.id || obj.aweme_id)) { tikTokFormats(obj); return; }
+       if(obj.streamingData) {
+         if(activeId && obj.videoDetails?.videoId && obj.videoDetails.videoId!==activeId) return;
+         const data=obj.streamingData;
+--- a/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
+@@ -164,6 +164,7 @@
+     private JSONArray lastCapturedItems;
+     private volatile String preferredPlayerPageUrl;
+     private volatile String latestUserAgent = "Mozilla/5.0 (Android 14; Mobile; rv:150.0) Gecko/150.0 Firefox/150.0";
++    private boolean sharedNavigationPending;
+     private volatile String latestCookieFilePath;
+     private String latestCookieContents = "";
+     private volatile String latestCookieHeader;
+@@ -312,12 +313,50 @@
+         backButton.setOnClickListener(v -> session.goBack());
+ 
+         renderShortcuts();
++        if (savedInstanceState == null && handleSharedLink(getIntent())) return;
+         if (savedInstanceState == null) {
+             session.loadUri("about:blank");
+             showHomeScreen();
+         } else {
+             showHomeScreen();
+         }
++    }
++
++    @Override
++    protected void onNewIntent(Intent intent) {
++        super.onNewIntent(intent);
++        setIntent(intent);
++        handleSharedLink(intent);
++    }
++
++    private boolean handleSharedLink(Intent intent) {
++        if (intent == null || !Intent.ACTION_SEND.equals(intent.getAction())) return false;
++        CharSequence text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT);
++        if (text == null && intent.getClipData() != null && intent.getClipData().getItemCount() > 0)
++            text = intent.getClipData().getItemAt(0).getText();
++        String url = SharedUrlParser.firstHttpUrl(text);
++        if (url.isEmpty()) {
++            Toast.makeText(this, "المشاركة لا تحتوي رابط فيديو صالحاً", Toast.LENGTH_LONG).show();
++            return false;
++        }
++        closeCapturePanel();
++        lastCapturedItems = null;
++        lastPlayerFormats = null;
++        capturedDurationSeconds = 0;
++        latestCookieHeader = "";
++        latestCookieFilePath = "";
++        latestOrigin = "";
++        latestUserAgent = "";
++        preferredPlayerPageUrl = "";
++        pendingPageTitle = "";
++        pendingPageUrl = normalizePageUrl(url);
++        sharedNavigationPending = true;
++        openUrl(url);
++        requestMediaScan();
++        // A recreated activity must not consume the same share twice.
++        intent.setAction(null);
++        intent.removeExtra(Intent.EXTRA_TEXT);
++        return true;
+     }
+ 
+     private void refreshCurrentPage() {
+@@ -723,8 +762,8 @@
+                             ? preferredPlayerPageUrl
+                             : (TextUtils.isEmpty(manifestUrl) ? pendingPageUrl : manifestUrl));
+                 } else {
+-                    String manifestUrl = strongestManifestUrl(lastCapturedItems);
+-                    analyzePage(TextUtils.isEmpty(manifestUrl) ? pendingPageUrl : manifestUrl);
++                    // Site extractors need the original post, not a single CDN rendition.
++                    analyzePage(pendingPageUrl);
+                 }
+             } else if (engineFailed.get()) {
+                 analysisProgress.setVisibility(View.GONE);
+@@ -880,35 +919,73 @@
+     }
+ 
+     private JSONObject executeAnalysis(String pageUrl) throws Exception {
+-        YoutubeDLRequest request = new YoutubeDLRequest(pageUrl);
+-        request.addOption("--dump-single-json");
+-        request.addOption("--format", "bestvideo+bestaudio/best/bestvideo/bestaudio");
+-        request.addOption("--skip-download");
+-        request.addOption("--no-playlist");
+-        request.addOption("--ignore-config");
+-        request.addOption("--geo-bypass");
+-        request.addOption("--legacy-server-connect");
+-        request.addOption("--socket-timeout", "25");
+-        request.addOption("--retries", "1");
+-        request.addOption("--extractor-retries", "2");
+-        EngineRuntimeOptions.apply(getApplicationContext(), request);
+-        applySessionOptions(request, pageUrl);
+-
+-        String processId = "satlink-analysis-" + System.currentTimeMillis();
+-        YoutubeDLResponse response = runAnalysisRequest(request, processId);
+-        String output = response.getOut();
+-        try {
+-            return parseResponseJson(output);
+-        } catch (Throwable parseError) {
+-            String lower = output == null ? "" : output.toLowerCase(Locale.US);
+-            if (lower.contains("429") || lower.contains("too many requests")
+-                    || lower.contains("unable to fetch gvs")
+-                    || lower.contains("sign in to confirm")) {
+-                throw new IllegalStateException("YouTube HTTP 429 / GVS: "
+-                        + compactEngineOutput(output), parseError);
+-            }
+-            throw parseError;
+-        }
++        final int serial = captureRequestSerial;
++        final JSONArray captured = lastCapturedItems;
++        Exception lastError = null;
++        // Start with the site's extractor and retain every format from its response.
++        for (boolean useSession : new boolean[]{false, true}) {
++            if (serial != captureRequestSerial || Thread.currentThread().isInterrupted())
++                throw new InterruptedException("تم إلغاء تحليل الصفحة السابقة");
++            try {
++                return executeSiteRequest(pageUrl, useSession);
++            } catch (Exception error) { lastError = error; }
++        }
++        // Embedded sites can provide a master playlist or a separate player page.
++        // Do not replace all passively captured renditions with one direct CDN file.
++        List<String> candidates = new ArrayList<>();
++        String manifest = strongestManifestUrl(captured);
++        if (!TextUtils.isEmpty(manifest) && !manifest.equals(pageUrl)) candidates.add(manifest);
++        if (captured != null) {
++            for (int i = captured.length()-1; i >= 0 && candidates.size() < 3; i--) {
++                JSONObject item = captured.optJSONObject(i);
++                if (item == null || !"page".equals(item.optString("type"))) continue;
++                String url = item.optString("url");
++                if (looksLikeAdUrl(url)) continue;
++                if (url.startsWith("https://") && !url.equals(pageUrl) && !candidates.contains(url))
++                    candidates.add(url);
++            }
++        }
++        for (String candidate : candidates) {
++            if (serial != captureRequestSerial || Thread.currentThread().isInterrupted())
++                throw new InterruptedException("تم إلغاء تحليل الصفحة السابقة");
++            try { return executeSiteRequest(candidate, true); }
++            catch (Exception error) { lastError = error; }
++        }
++        if (lastError != null) throw lastError;
++        throw new IllegalStateException("لم يرجع الموقع صيغ فيديو أو صوت");
++    }
++
++    private JSONObject executeSiteRequest(String url, boolean useSession) throws Exception {
++        YoutubeDLRequest request = SLTubeAnalysisRequest.create(getApplicationContext(), url);
++        if (useSession) applySessionOptions(request, url);
++        YoutubeDLResponse response = runAnalysisRequest(request,
++                "satlink-site-analysis-" + java.util.UUID.randomUUID());
++        if (response.getExitCode() != 0) throw new IllegalStateException("فشل تحليل الموقع");
++        JSONObject root = parseResponseJson(response.getOut());
++        // Generic extractors may know the container but omit codec metadata.
++        // Keep real media selectable without asserting that an MP4 has sound.
++        JSONArray formats = root.optJSONArray("formats");
++        if (formats == null) {
++            formats = new JSONArray(); formats.put(root);
++            if (TextUtils.isEmpty(root.optString("format_id"))
++                    && root.optString("url").matches("https?://.*")) root.put("format_id", "best");
++        }
++        for (int i = 0; i < formats.length(); i++) {
++            JSONObject format = formats.optJSONObject(i);
++            if (format == null) continue;
++            String ext = format.optString("ext").toLowerCase(Locale.US);
++            if (TextUtils.isEmpty(format.optString("vcodec"))) {
++                if (ext.matches("mp4|webm|mkv|mov|m4v|ts") || numberToInt(format.opt("height")) > 0)
++                    format.put("vcodec", "unknown");
++                else if (ext.matches("mp3|m4a|aac|ogg|opus|wav|flac")) {
++                    format.put("vcodec", "none");
++                    if (TextUtils.isEmpty(format.optString("acodec"))) format.put("acodec", "unknown");
++                }
++            }
++        }
++        if (!extractionScore(root).hasMedia()) throw new IllegalStateException("لا توجد صيغ قابلة للتنزيل");
++        root.put("_satlink_browser_session", useSession);
++        return root;
+     }
+ 
+     private static String compactEngineOutput(String output) {
+@@ -1093,6 +1170,8 @@
+         Set<String> videoKeys = new HashSet<>();
+         Set<String> audioKeys = new HashSet<>();
+         List<MediaFormatItem> sourceAudios = new ArrayList<>();
++        boolean tikTokSource = root.optString("extractor_key", "").startsWith("TikTok")
++                || result.sourceUrl.matches("(?i)https?://([a-z0-9-]+\\.)*tiktok\\.com/.*");
+ 
+         for (int i = 0; i < formats.length(); i++) {
+             JSONObject format = formats.optJSONObject(i);
+@@ -1180,7 +1259,7 @@
+ 
+         // SL.Tube pairs an exact audio format and preserves container compatibility.
+         for (MediaFormatItem video : result.videos) {
+-            if (video.hasAudio || sourceAudios.isEmpty()) continue;
++            if (video.hasAudio || sourceAudios.isEmpty() || tikTokSource) continue;
+             MediaFormatItem audio = sourceAudios.get(0);
+             for (MediaFormatItem candidate : sourceAudios) {
+                 if (("mp4".equals(video.ext) && "m4a".equals(candidate.ext))
+@@ -1201,9 +1280,12 @@
+             } else {video.sizeBytes = 0;video.sizeEstimated = false;}
+         }
+ 
+-        if (sourceAudios.isEmpty()) {
++        if (sourceAudios.isEmpty() || tikTokSource) {
+             for (MediaFormatItem video : result.videos) {
+-                if (video.hasAudio) { sourceAudios.add(video); break; }
++                if (video.hasAudio) {
++                    if (tikTokSource) sourceAudios.clear();
++                    sourceAudios.add(video); break;
++                }
+             }
+         }
+ 
+@@ -1220,7 +1302,7 @@
+                 item.useBrowserSession = root.optBoolean("_satlink_browser_session", true);
+                 item.directUrl = bestSource.directUrl;
+                 item.useBrowserSession = bestSource.useBrowserSession;
+-                item.formatId = "bestaudio/best";
++                item.formatId = tikTokSource ? bestSource.formatId : "bestaudio/best";
+                 item.ext = "mp3";
+                 item.bitrate = quality;
+                 item.audioQualityKbps = quality;
+@@ -1409,7 +1491,7 @@
+                     && !json.optBoolean("resolvedFromNetwork") && TextUtils.isEmpty(itag)) continue;
+             String formatKey = !TextUtils.isEmpty(itag) ? "itag:" + itag
+                     : item.ext + "|" + item.videoCodec + "|" + item.height
+-                    + "|" + Math.round(item.fps) + "|" + qualityLabel
++                    + "|" + Math.round(item.fps) + "|" + Math.round(item.bitrate) + "|" + qualityLabel
+                     + ((item.height > 0 || item.width > 0) ? "" : "|" + canonicalCaptureUrl(url));
+             if (!seen.add(formatKey)) continue;
+ 
+@@ -2014,6 +2096,7 @@
+ 
+     private void closeCapturePanel() {
+         capturePanel.setVisibility(View.GONE);
++        sharedNavigationPending = false;
+         captureRequestSerial++;
+         stopActiveAnalysis();
+     }
+@@ -3234,7 +3317,8 @@
+                                      Boolean hasUserGesture) {
+             if (url != null) {
+                 if (!normalizePageUrl(url).equals(pendingPageUrl)) {
+-                    closeCapturePanel();
++                    if (!sharedNavigationPending) closeCapturePanel();
++                    else { captureRequestSerial++; stopActiveAnalysis(); detailedFormatsShown = false; }
+                     lastCapturedItems = null;
+                     lastPlayerFormats = null;
+                     capturedDurationSeconds = 0;
+@@ -3271,6 +3355,11 @@
+         public void onPageStop(GeckoSession session, boolean success) {
+             progressBar.setProgress(100);
+             progressBar.setVisibility(View.GONE);
++            if (sharedNavigationPending) {
++                sharedNavigationPending = false;
++                if (capturePanel.getVisibility() == View.VISIBLE && !analyzing.get() && !detailedFormatsShown)
++                    requestMediaScan();
++            }
+         }
+     }
+ 
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/SharedUrlParser.java
+@@ -0,0 +1,41 @@
++package com.satlink.geckoviewtest;
++
++import java.net.URI;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++
++/** Reads a shared web link without changing signed query parameters. */
++final class SharedUrlParser {
++    private static final Pattern URL = Pattern.compile("https?://[^\\s<>\\\"'\\u200e\\u200f]+", Pattern.CASE_INSENSITIVE);
++
++    static String firstHttpUrl(CharSequence sharedText) {
++        if (sharedText == null) return "";
++        String text = sharedText.toString();
++        if (text.length() > 100_000) text = text.substring(0, 100_000);
++        Matcher matcher = URL.matcher(text);
++        while (matcher.find()) {
++            String candidate = matcher.group();
++            while (!candidate.isEmpty()) {
++                char tail = candidate.charAt(candidate.length()-1);
++                boolean punctuation = candidate.indexOf('?') < 0 && ".,،؛!؟".indexOf(tail) >= 0;
++                boolean unmatched = tail == ')' && count(candidate, ')') > count(candidate, '(')
++                        || tail == ']' && count(candidate, ']') > count(candidate, '[');
++                if (!punctuation && !unmatched) break;
++                candidate = candidate.substring(0, candidate.length()-1);
++            }
++            try {
++                URI uri = new URI(candidate);
++                if (uri.getHost() != null && uri.getRawUserInfo() == null
++                        && ("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme())))
++                    return candidate;
++            } catch (Exception ignored) { }
++        }
++        return "";
++    }
++
++    private static int count(String text, char value) {
++        int result = 0;
++        for (int i = 0; i < text.length(); i++) if (text.charAt(i) == value) result++;
++        return result;
++    }
++}
+--- a/tests/format_parser_test.py
++++ b/tests/format_parser_test.py
+@@ -51,6 +51,13 @@
+   check(parsed.audios.get(0).audioQualityKbps==320,"MP3 conversion targets are not ordered");
+   var progressive=parser.parseFormats(new JSONObject().put("duration",60).put("formats",new JSONArray().put(video("18","mp4","avc1",360,true))));
+   check(progressive.audios.size()==4,"Progressive video with sound must provide MP3 extraction");
++  var tikTok=parser.parseFormats(new JSONObject().put("extractor_key","TikTok").put("webpage_url","https://www.tiktok.com/@u/video/123").put("formats",new JSONArray()
++    .put(video("high","mp4","h264",1080,true)).put(video("low","mp4","h264",360,true))
++    .put(video("silent","mp4","h265",720,false))
++    .put(new JSONObject().put("format_id","audio").put("url","https://cdn.test/background.m4a").put("vcodec","none").put("acodec","aac").put("ext","m4a"))));
++  check(tikTok.videos.size()==3 && tikTok.videos.get(0).height==1080 && tikTok.videos.get(2).height==360,"TikTok max/min lost");
++  check(tikTok.audios.get(0).directUrl.equals("https://cdn.test/high.mp4") && tikTok.audios.get(0).formatId.equals("high"),"TikTok MP3 substituted background music for full soundtrack");
++  check(tikTok.videos.get(1).directAudioUrl==null,"TikTok video-only variant must not receive unrelated music");
+   var onlyImages=parser.parseFormats(new JSONObject().put("formats",new JSONArray().put(video("sb","mhtml","images",9000,false))));
+   check(onlyImages.videos.isEmpty() && onlyImages.audios.isEmpty(),"Images must not count as downloadable media");
+   JSONArray allFormats=new JSONArray();
+--- /dev/null
++++ b/tests/share_test.py
+@@ -0,0 +1,47 @@
++from pathlib import Path
++import re,subprocess,tempfile,xml.etree.ElementTree as ET
++root=Path(__file__).resolve().parents[1];base=root/'app/src/main/java/com/satlink/geckoviewtest'
++parser=re.sub(r'^package .*;\n','',(base/'SharedUrlParser.java').read_text(),flags=re.M)
++s=(base/'MainActivity.java').read_text();start=s.index('    @Override\n    protected void onNewIntent');end=s.index('    private void refreshCurrentPage',start)
++methods=s[start:end].replace('@Override','')
++imports='\n'.join(re.findall(r'^import .*;',parser,re.M))+'\n'
++parser=re.sub(r'^import .*;\n','',parser,flags=re.M)
++source=imports+'''\nclass ShareTest extends Activity {
++ Object lastCapturedItems="old",lastPlayerFormats="old";double capturedDurationSeconds=99;
++ String latestCookieHeader="old",latestCookieFilePath="old",latestOrigin="old",latestUserAgent="old",preferredPlayerPageUrl="old",pendingPageTitle="old",pendingPageUrl="";
++ boolean sharedNavigationPending;int scans=0,closed=0;String opened="";
++ void closeCapturePanel(){closed++;sharedNavigationPending=false;}void openUrl(String url){opened=url;}
++ void requestMediaScan(){scans++;}String normalizePageUrl(String url){return url;}
++'''+methods+'''
++ static void check(boolean v,String m){if(!v)throw new AssertionError(m);}
++ public static void main(String[] a){
++ check(SharedUrlParser.firstHttpUrl("شوف المقطع (https://vm.tiktok.com/AbCd/). نص").equals("https://vm.tiktok.com/AbCd/"),"Short link in caption");
++ check(SharedUrlParser.firstHttpUrl("https://cdn.test/video?a=x%2By&sig=ABC%2FDEF").equals("https://cdn.test/video?a=x%2By&sig=ABC%2FDEF"),"Signed query changed");
++ check(SharedUrlParser.firstHttpUrl("https://site.test/video_(abc)").endsWith("_(abc)"),"Balanced URL parentheses removed");
++ check(SharedUrlParser.firstHttpUrl("javascript:alert(1)").isEmpty(),"Invalid scheme");
++ check(SharedUrlParser.firstHttpUrl("https://name:secret@site.test/").isEmpty(),"Embedded credentials accepted");
++ var app=new ShareTest();var cold=new Intent(Intent.ACTION_SEND,"شوف https://vm.tiktok.com/AbCd/");
++ check(app.handleSharedLink(cold) && app.scans==1 && app.opened.equals("https://vm.tiktok.com/AbCd/"),"Cold share didn't open capture");
++ check(app.lastCapturedItems==null && app.latestCookieHeader.isEmpty() && app.sharedNavigationPending,"Old page leaked into new share");
++ check(!app.handleSharedLink(cold) && app.scans==1,"Same intent consumed twice");
++ app.onNewIntent(new Intent(Intent.ACTION_SEND,"https://www.tiktok.com/@u/video/123"));
++ check(app.scans==2 && app.opened.endsWith("/123"),"Warm share not handled");
++ var clip=new Intent(Intent.ACTION_SEND,null);clip.clip=new ClipData("https://site.test/video");check(app.handleSharedLink(clip),"ClipData text fallback failed");
++ check(!app.handleSharedLink(new Intent("MAIN","https://site.test/")),"Launcher interpreted as share");
++ check(!app.handleSharedLink(new Intent(Intent.ACTION_SEND,"No link")),"Missing URL accepted");
++ System.out.println("PASS production share handler: cold/warm intent, caption, short URL, signed query, stale session reset, ClipData, malformed input, single consumption");
++ }
++}
++class Activity {protected void onNewIntent(Intent i){}void setIntent(Intent i){}}
++class Intent {static final String ACTION_SEND="SEND",EXTRA_TEXT="TEXT";String action,text;ClipData clip;Intent(String a,String t){action=a;text=t;}String getAction(){return action;}CharSequence getCharSequenceExtra(String k){return text;}ClipData getClipData(){return clip;}void setAction(String a){action=a;}void removeExtra(String k){text=null;}}
++class ClipData {String text;ClipData(String s){text=s;}int getItemCount(){return 1;}ClipData getItemAt(int i){return this;}CharSequence getText(){return text;}}
++class Toast {static final int LENGTH_LONG=1;static Toast makeText(Object c,String s,int t){return new Toast();}void show(){}}
++'''
++source+=parser
++with tempfile.TemporaryDirectory() as tmp:
++ p=Path(tmp)/'ShareTest.java';p.write_text(source);subprocess.run(['java',str(p)],check=True)
++ns='{http://schemas.android.com/apk/res/android}'
++activity=ET.parse(root/'app/src/main/AndroidManifest.xml').find('./application/activity')
++assert activity.get(ns+'exported')=='true' and activity.get(ns+'launchMode')=='singleTop'
++assert any(f.find('action').get(ns+'name')=='android.intent.action.SEND' and any(c.get(ns+'name')=='android.intent.category.DEFAULT' for c in f.findall('category')) and any(d.get(ns+'mimeType')=='text/plain' for d in f.findall('data')) for f in activity.findall('intent-filter'))
++print('PASS Android share manifest')
+--- /dev/null
++++ b/tests/site_analysis_test.py
+@@ -0,0 +1,52 @@
++"""Runs the production generic-site routing with an in-memory engine and JSON fixture API."""
++from pathlib import Path
++import re,subprocess,tempfile
++root=Path(__file__).resolve().parents[1];base=root/'app/src/main/java/com/satlink/geckoviewtest'
++s=(base/'MainActivity.java').read_text()
++methods=s[s.index('    private JSONObject executeAnalysis(String pageUrl)'):s.index('    private static String compactEngineOutput')]
++score=s[s.index('    private FormatSelectionPolicy.Score extractionScore'):s.index('    private JSONObject executeYouTubeAnalysis')]
++parts=[]
++for name in ['SLTubeAnalysisRequest.java','EngineRuntimeOptions.java','FormatSelectionPolicy.java']:
++ parts.append(re.sub(r'^package .*;\n|^import .*;\n','',(base/name).read_text(),flags=re.M))
++source='''import java.util.*;import java.io.*;
++class SiteAnalysisTest {
++ int captureRequestSerial=1;JSONArray lastCapturedItems=new JSONArray();final List<YoutubeDLRequest> executed=new ArrayList<>();final Deque<Object> responses=new ArrayDeque<>();final Map<String,JSONObject> json=new HashMap<>();
++ Context getApplicationContext(){return new Context();}
++ static int numberToInt(Object v){return v instanceof Number?((Number)v).intValue():0;}
++ void applySessionOptions(YoutubeDLRequest r,String url){r.addOption("--cookies","private-browser-session");}
++ String strongestManifestUrl(JSONArray rows){for(int i=0;i<rows.length();i++){JSONObject v=rows.optJSONObject(i);if(v.optString("url").endsWith(".m3u8"))return v.optString("url");}return "";}
++ static boolean looksLikeAdUrl(String url){return url.contains("doubleclick");}
++ YoutubeDLResponse runAnalysisRequest(YoutubeDLRequest r,String id)throws Exception{executed.add(r);Object n=responses.removeFirst();if(n instanceof Exception)throw (Exception)n;return (YoutubeDLResponse)n;}
++ JSONObject parseResponseJson(String out){return json.get(out);}
++'''+methods+score+'''
++ static void check(boolean c,String s){if(!c)throw new AssertionError(s);}
++ static JSONObject result(){JSONArray rows=new JSONArray();for(int h:new int[]{360,720,1080})rows.put(new JSONObject().put("format_id","v"+h).put("url","https://cdn.test/"+h).put("vcodec","h264").put("acodec","aac").put("height",h).put("ext","mp4"));return new JSONObject().put("formats",rows);}
++ public static void main(String[] args)throws Exception {
++ var direct=new SiteAnalysisTest();direct.json.put("ok",result());direct.responses.add(new YoutubeDLResponse("ok"));
++ var out=direct.executeAnalysis("https://www.tiktok.com/@u/video/123");
++ check(direct.executed.size()==1 && direct.executed.get(0).url.contains("/video/123"),"Original post skipped");
++ check(out.optJSONArray("formats").length()==3 && !out.optBoolean("_satlink_browser_session",true),"Formats/profile lost");
++ check(!direct.executed.get(0).options.containsKey("--format") && !direct.executed.get(0).options.containsKey("--user-agent"),"Site request has stale filtering/UA");
++ var auth=new SiteAnalysisTest();auth.json.put("ok",result());auth.responses.add(new IOException("auth required"));auth.responses.add(new YoutubeDLResponse("ok"));
++ out=auth.executeAnalysis("https://site.test/post");check(out.optBoolean("_satlink_browser_session",false) && auth.executed.get(1).options.containsKey("--cookies"),"Session retry missing");
++ var embedded=new SiteAnalysisTest();embedded.lastCapturedItems.put(new JSONObject().put("type","video").put("url","https://cdn.test/master.m3u8"));embedded.json.put("ok",result());embedded.responses.add(new IOException("unsupported"));embedded.responses.add(new IOException("unsupported"));embedded.responses.add(new YoutubeDLResponse("ok"));
++ out=embedded.executeAnalysis("https://site.test/post");check(embedded.executed.get(2).url.endsWith("master.m3u8") && out.optJSONArray("formats").length()==3,"Master fallback lost variants");
++ var passive=new SiteAnalysisTest();passive.lastCapturedItems.put(new JSONObject().put("type","video").put("url","https://cdn.test/low.mp4"));passive.responses.add(new IOException("unsupported"));passive.responses.add(new IOException("unsupported"));
++ try {passive.executeAnalysis("https://site.test/post");throw new AssertionError("Unexpected success");}catch(IOException expected){}
++ check(passive.executed.size()==2,"Single captured CDN file replaced all passive renditions");
++ var generic=new SiteAnalysisTest();generic.json.put("file",new JSONObject().put("url","https://cdn.test/movie.mp4").put("ext","mp4"));generic.responses.add(new YoutubeDLResponse("file"));
++ out=generic.executeAnalysis("https://site.test/post");check(out.optString("vcodec").equals("unknown") && out.optString("format_id").equals("best") && out.optString("acodec").isEmpty(),"Generic container disappeared or sound was invented");
++ var interrupted=new SiteAnalysisTest();Thread.currentThread().interrupt();try{interrupted.executeAnalysis("https://site.test/");throw new AssertionError("Interrupted request ran");}catch(InterruptedException expected){}finally{Thread.interrupted();}
++ check(interrupted.executed.isEmpty(),"Canceled page executed an engine request");
++ System.out.println("PASS production site routing: original post, all formats, anonymous profile, session retry, master fallback, passive variant preservation, cancellation");
++ }
++}
++class Context{ApplicationInfo getApplicationInfo(){return new ApplicationInfo();}}class ApplicationInfo{String nativeLibraryDir="/test/no/runtime";}
++class TextUtils{static boolean isEmpty(String s){return s==null||s.isEmpty();}}
++class YoutubeDLRequest{final String url;final Map<String,String>options=new LinkedHashMap<>();YoutubeDLRequest(String u){url=u;}void addOption(String k){options.put(k,"");}void addOption(String k,String v){options.put(k,v);}}
++class YoutubeDLResponse{String out;YoutubeDLResponse(String s){out=s;}String getOut(){return out;}int getExitCode(){return 0;}}
++class JSONObject{final Map<String,Object>data=new HashMap<>();JSONObject put(String k,Object v){data.put(k,v);return this;}Object opt(String k){return data.get(k);}String optString(String k){return optString(k,"");}String optString(String k,String d){Object v=data.get(k);return v==null?d:v.toString();}boolean optBoolean(String k,boolean d){Object v=data.get(k);return v instanceof Boolean?(Boolean)v:d;}JSONArray optJSONArray(String k){return (JSONArray)data.get(k);}}
++class JSONArray{final List<JSONObject>rows=new ArrayList<>();JSONArray put(JSONObject v){rows.add(v);return this;}int length(){return rows.size();}JSONObject optJSONObject(int i){return rows.get(i);}}
++'''+''.join(parts)
++with tempfile.TemporaryDirectory() as tmp:
++ p=Path(tmp)/'SiteAnalysisTest.java';p.write_text(source);subprocess.run(['java',str(p)],check=True)
+--- /dev/null
++++ b/tests/site_metadata.test.cjs
+@@ -0,0 +1,26 @@
++const assert=require('node:assert/strict');
++const media=require('../app/src/main/assets/media_capture/media_metadata.js');
++const video={width:1080,height:1920,duration:35,playAddr:'https://cdn.test/play?token=a%2Bb',
++  bitrateInfo:[
++    {Bitrate:2500000,PlayAddr:{UrlKey:'v123_h264_1080p_2500000',DataSize:12000000,UrlList:['https://cdn.test/high']}},
++    {Bitrate:600000,PlayAddr:{UrlKey:'v123_h264_360p_600000',DataSize:3000000,UrlList:['https://cdn.test/low']}},
++    {Bitrate:1900000,PlayAddr:{UrlKey:'v123_bytevc1_720p_1900000',UrlList:['https://cdn.test/media-video-hvc1/']}}
++  ]};
++const item={id:'123456',video,music:{playUrl:'https://cdn.test/background.m4a'}};
++const root={__DEFAULT_SCOPE__:{'webapp.video-detail':{itemInfo:{itemStruct:item}}, recommendations:[{...item,id:'999999'}]}};
++const page='https://www.tiktok.com/@user/video/123456';
++const formats=media.formatsFromText(JSON.stringify(root),page);
++assert.equal(formats.length,4,'Only current post renditions are selectable');
++assert.equal(formats.find(x=>x.url.endsWith('/high')).height,1920);
++assert.equal(formats.find(x=>x.url.endsWith('/low')).height,640);
++assert.equal(formats.find(x=>x.url.endsWith('/low')).width,360);
++assert.equal(formats.find(x=>x.url.endsWith('/high')).hasAudio,true);
++assert.equal(formats.find(x=>x.url.endsWith('/media-video-hvc1/')).hasAudio,false);
++assert(!formats.some(x=>x.url.endsWith('.m4a')),'Background music must not impersonate full soundtrack');
++assert.equal(formats.find(x=>x.url.includes('token=')).url,'https://cdn.test/play?token=a%2Bb');
++const low=formats.find(x=>x.url.endsWith('/low'));
++const merged=media.merge(low,{height:1080,width:1920,hasAudio:false,mime:'video/mp4',metadataSource:'network'});
++assert.equal(merged.height,640);assert.equal(merged.hasAudio,true);
++assert.equal(media.formatsFromText(JSON.stringify(root),'https://www.tiktok.com/@user/video/777777').length,0);
++assert.equal(media.formatsFromText(JSON.stringify(root),'https://example.test/').length,0);
++console.log('PASS TikTok passive fixtures: current post only, all supplied variants, dimensions, bitrate, muxed AAC, hvc1 exception, signed URL, metadata precedence, background-music isolation');

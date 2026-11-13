@@ -1,0 +1,29 @@
+# Gradle / Android build output
+.gradle/
+build/
+app/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Signing keys must never be committed
+*.jks
+*.keystore
+keystore.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS / tools
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+node_modules/

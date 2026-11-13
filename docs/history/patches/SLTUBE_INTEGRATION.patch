@@ -1,0 +1,998 @@
+--- /dev/null
++++ b/BUILD-SATLINK.bat
+@@ -0,0 +1,5 @@
++@echo off
++cd /d "%~dp0"
++call gradlew.bat :app:assembleDebug --console=plain
++if errorlevel 1 exit /b 1
++echo APK: app/build/outputs/apk/debug/app-debug.apk
+--- /dev/null
++++ b/BUILD-SATLINK.sh
+@@ -0,0 +1,5 @@
++#!/usr/bin/env bash
++set -euo pipefail
++cd -- "$(dirname -- "$0")"
++bash gradlew :app:assembleDebug --console=plain
++printf '%s\n' 'APK: app/build/outputs/apk/debug/app-debug.apk'
+--- a/README_AR.md
++++ b/README_AR.md
+@@ -1,8 +1,24 @@
+-# SatLink Browser PRO 1.9.4 — مشروع المصدر المعدّل
++# SatLink Browser PRO 1.9.5 — مشروع المصدر المعدّل
+ 
+ تطبيق أندرويد للتصفح والتقاط روابط الفيديو وتنزيل الفيديو والصوت باستخدام GeckoView وyt-dlp وFFmpeg.
+ 
+-## إصلاحات مراجعة 1.9.4
++## دمج مسار SL.Tube
++
++المصدر المرجعي: SL.Tube-4.5.3-sltube.3-source-unbuilt.zip. روجعت ملفات DownloadRequestFactory وVrkaDownloadManager وMediaFormats وإضافة media-detector، ثم كُيّف المسار لواجهة وجلسات SatLink Browser.
++
++- تضمين ملف yt-dlp نفسه من SL.Tube (2026.08.19)، بما فيه حزمة yt_dlp_ejs وملفات solver؛ تثبيت محرك البداية لا يحتاج تنزيل ملف المحرك من الإنترنت.
++- التهيئة المشتركة للالتقاط وخدمة التنزيل. فحص SHA-256، والتحقق بواسطة --version، واستعادة المحرك السابق عند فشل التثبيت، وإبقاء المحرك المثبت إذا كان أحدث.
++- استخدام عملاء yt-dlp الافتراضيين أولاً، ومسار QuickJS الأصلي وإعداد EJS من SL.Tube، وخيار توافق الاتصال TLS الموجود فيه. يستمر تحديث المحرك تلقائياً.
++- تحديث التحليل بعد تحديث المحرك حتى لو كانت النتيجة السابقة جودة منخفضة؛ لا يستبدل التحكم بتنزيل بدأ.
++- قراءة جودات HLS من قائمة master، مع الدقة والفريمات والبتريت والترميز المعلن. طلب القراءة محدود زمنياً وحجمياً ولا يؤخر نتائج الالتقاط الأولية.
++- لا تظهر أجزاء TS من قائمة media كجودات مستقلة. تُحفظ روابط MKV/TS المستقلة ضمن الفيديو.
++- جودة HLS المختارة تمر عبر القائمة الأصلية مع محدد دقة، حتى يتولى المحرك قراءة مجموعة الصوت وأجزاء الفيديو. تبقى الجلسة وروابط التوقيع محفوظة.
++- ربط الفيديو الصامت بصيغة صوت محددة ومتوافقة، واختيار MKV عند عدم توافق حاويتي الفيديو والصوت، كما في MediaFormats الخاص بـSL.Tube.
++- تمييز filesize_approx والحجم بعد دمج الصوت كتقدير، واستبعاد DRM وصور المعاينة.
++
++يعرض التطبيق الدقات التي يرجعها الموقع والمحرك فعلياً. اختبارات 4K و8K تستخدم بيانات مضبوطة ولا تثبت أن الفيديو المحدد في الصورة يُستخرج بهذه الدقات على الهاتف.
++
++## إصلاحات مراجعة 1.9.5
+ 
+ - اختيار استجابة المحرك حسب أعلى دقة فيديو قابلة للتنزيل، واستبعاد صور المعاينة والروابط الفارغة من الاختيار.
+ - ترتيب قائمة الفيديو من أعلى دقة إلى الأدنى، مع صوت منفصل أو مصدر فيديو بصوت لاستخراج MP3.
+@@ -21,7 +37,7 @@
+ - تعيين مسار ملف QuickJS الأصلي libqjs.so عند وجوده بدلاً من اسم qjs غير الموجود بالضرورة في PATH، وإتاحة تنزيل مكونات EJS المطابقة للمحرك.
+ - تنزيل المصادر الملتقطة فعلياً عبر بيانات yt-dlp المحلية، بما فيها دمج الصوت المنفصل، بدلاً من إجبارها على إعادة تحليل صفحة فشلت سابقاً. المصادر الأولية ليوتيوب تبقى على مسار التحليل المعتاد لتجديد التوقيع.
+ - تمييز الحجم التقديري بعلامة ≈، وإزالة التخمين H.264/H.265 ووعد دمج الصوت عند عدم وجود مسار صوت مؤكد.
+-- تحديث الرقم الظاهر في الواجهة من PRO 1.8.7 إلى PRO 1.9.4.
++- تحديث الرقم الظاهر في الواجهة من PRO 1.8.7 إلى PRO 1.9.5.
+ 
+ ## التعديلات السابقة المحفوظة
+ 
+@@ -49,15 +65,18 @@
+ 4. على لينكس/macOS: `chmod +x gradlew` ثم `./gradlew :app:assembleDebug`.
+ 5. ينتج ملف التجربة: `app/build/outputs/apk/debug/app-debug.apk`.
+ 
+-رقم الإصدار 194، واسم الإصدار PRO 1.9.4 Reviewed Source. النسخة التجريبية لا تستبدل نسخة موقعة بمفتاح مختلف؛ لبناء تحديث تثبيت مباشر يلزم مفتاح توقيع النسخة الأصلية.
++رقم الإصدار 195، واسم الإصدار PRO 1.9.5 SL.Tube Engine. النسخة التجريبية لا تستبدل نسخة موقعة بمفتاح مختلف؛ لبناء تحديث تثبيت مباشر يلزم مفتاح توقيع النسخة الأصلية.
+ 
+ ## الفحص
+ 
+ - `node tests/capture.test.cjs`
+ - `node tests/player_metadata.test.cjs`
++- `node tests/hls.test.cjs`
+ - `python3 tests/format_rules_test.py` (يتطلب JDK 17)
+ - `python3 tests/download_plan_test.py` (يتطلب JDK 17)
+ - `python3 tests/format_parser_test.py` (يتطلب JDK 17)
++- `python3 tests/download_request_test.py` (يتطلب JDK 17)
++- `python3 tests/bundled_engine_test.py` (يتطلب JDK 17 وPython 3.10 أو أحدث)
+ - `java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/*.java`
+ 
+ راجع TEST_REPORT_AR.md لنتائج الاختبارات وحدودها. ملف CHANGES.patch يوضح فروق المصدر عن الملف المرفق.
+--- a/TEST_REPORT_AR.md
++++ b/TEST_REPORT_AR.md
+@@ -1,39 +1,48 @@
+-# تقرير فحص PRO 1.9.4 Reviewed Source
++# تقرير فحص دمج SL.Tube في SatLink Browser PRO 1.9.5
+ 
+-التاريخ: 2026-10-03
++التاريخ: 2026-10-04
+ 
+-## المشكلة التي روجعت
++## المصادر التي فُحصت
+ 
+-الصورة المقدمة تظهر فشل تحليل يوتيوب، ثم سبع بطاقات فيديو بلا أبعاد أو حجم، وصوتيات MP3 بعدد صفر. مراجعة المصدر وجدت أن مسار الالتقاط الاحتياطي يقبل روابط videoplayback دون بيانات جودة، وأن اختيار MP3 كان يعتمد على العثور على صوت منفصل فقط. كما أن خيار QuickJS كان اسم runtime دون مسار الملف الأصلي. الصورة لا تحتوي سجل المحرك، لذلك لا يمكن تأكيد سبب فشل المحرك نفسه من الصورة وحدها.
++- SL.Tube-4.5.3-sltube.3-source-unbuilt.zip: أحدث مصدر مطابق وجد في الملفات.
++- SatLinkBrowser-PRO-1.9.4-reviewed-source.zip: مصدر المشروع الهدف.
++- روجعت ملفات المحرك وطلبات التحليل والتنزيل واختيار الصيغ وإضافة الالتقاط في SL.Tube. المشروعان يستعملان library/ffmpeg 0.18.1؛ لا يوجد محرك NewPipe في مسار التحليل المرجعي.
+ 
+-## أخطاء إضافية مثبتة من مراجعة المصدر
++## ما نُقل وكُيّف
+ 
+-اختيار استجابة يوتيوب كان يعتمد على عدد الصيغ دون استبعاد صور المعاينة، والتحليل الفاشل لم يكن يعاد بعد اكتمال تحديث المحرك. بعض تحديثات الالتقاط كانت تمسح سبب الفشل برسالة عامة. صححت هذه المسارات، وأضافت المراجعة إلغاء التحليل القديم وحداً زمنياً لكل محاولة. هذه نتائج مراجعة المصدر؛ سبب فشل الفيديو المحدد على الهاتف يحتاج سجل تشغيل فعلي، ولم يدّع الفحص تأكيده.
++ملف yt-dlp 2026.08.19 نُقل بدون تعديل، ويحتوي yt_dlp_ejs وcore.min.js وlib.min.js. SHA-256:
+ 
+-## فحوص نجحت
++`1fa6733c37ea6fb51c99ad8fe785e7b7e5f3246c9b980230329d4fb72ed8d4d6`
+ 
+-- node tests/capture.test.cjs: إرسال مباشر وتلقائي، تجميع تغييرات DOM، رصد MKV وTS، الحفاظ على Referer، Content-Range بحجم 4 GiB، تنظيف التنقل، وتمرير بيانات الجودة من script إلى الالتقاط.
+-- node tests/player_metadata.test.cjs: JSON اصطناعي للمشغّل يتضمن فيديو 360p بصوت، فيديو 1080p60 وصوت منفصل. تحقق الاختبار من الأبعاد والترميز والحجم الفعلي داخل البيانات، وعدم التعامل مع signatureCipher مشفر كرابط صالح، وعدم استعمال بيانات فيديو سابق.
+-- الاختبار المتكامل للإضافة: سبعة طلبات أجزاء للفيديو نفسه صارت جودة واحدة 1080p60، مع إبقاء مصدر الصوت وحجم الفيديو الكلي، واستبعاد UMP. هذه بيانات اختبار وليست استخراجاً حياً للفيديو في الصورة.
+-- python3 tests/format_rules_test.py: تشغيل دوال Java الفعلية للصيغ والبيانات، وفحص MKV وTS وAV1 و1080p60.
+-- python3 tests/download_plan_test.py: تشغيل كود خطة التنزيل الفعلي وفحص رابط الفيديو والصوت المنفصلين، وبيانات الفيديو بصوت لاستخراج MP3، وصوت منفصل، ورفض blob، ومسار QuickJS الأصلي. تم استبدال Context وYoutubeDLRequest ببدائل اختبار صغيرة؛ لم ينفذ yt-dlp أو FFmpeg على أندرويد.
+-- python3 tests/format_parser_test.py: تشغيل دالة parseFormats الكاملة من التطبيق ببدائل JSON للقراءة. التحقق من ترتيب 8K ثم 4K ثم 1080p، وصيغ AV1/MKV/TS، وربط الصوت المنفصل، وأربع جودات هدف MP3، واستخراج الصوت من فيديو بصوت، واستبعاد صور المعاينة والروابط الفارغة، وتفضيل الاستجابة ذات أعلى دقة.
+-- اختبارات الالتقاط الإضافية: استرجاع طلب شبكة مجهول التبويب بصفحة مصدر مطابقة، ومنع خلط تبويبين من الموقع نفسه، ومنع ظهور طلب صفحة سابقة وموارد الأداء القديمة بعد التنقل.
+-- تحليل بناء ملفات Java باستخدام JDK 17 نجح، وnode --check لجميع ملفات JavaScript نجح.
+-- صحة XML ومطابقة مراجع R.id مع معرفات التخطيط نجحت.
++كُيّفت إعدادات QuickJS/EJS وlegacy-server-connect، وقراءة HLS master، واختيار صيغة فيديو مع صيغة صوت متوافقة. لم تُنسخ أخطاء المسار المرجعي التي كانت قد تحوّل URI لجزء TS داخل media playlist إلى بطاقة جودة أو تنقل أبعاد المشغل إلى كل طلب شبكة. يعتمد المشروع على الأبعاد المعلنة لكل جودة، ويعزل النتائج حسب الصفحة والتبويب.
+ 
+-## حدود التحقق
++أضيف تثبيت محرك موحّد قبل جاهزية الالتقاط وخدمة التنزيل، مع منع الرجوع إلى إصدار أقدم والتحقق والتراجع عند الفشل. بقي التحديث التلقائي الحالي للمحرك مفعلاً. لم تُنقل شاشة SL.Tube أو تاريخ تنزيلاته أو كامل مدير تحديث إضافاته.
+ 
+-أعيدت محاولة ./gradlew :app:assembleDebug. توقفت قبل تجميع أندرويد بسبب Network is unreachable عند تنزيل Gradle 8.11.1. لا يوجد APK جديد في هذه الحزمة.
++## فحوص نفذت ونجحت
+ 
+-لم يحصل بناء كامل أو تحقق من أنواع Android/GeckoView أو تجربة على هاتف أو استخراج حي من يوتيوب أو تنزيل/دمج فعلي بواسطة المحرك. الاختبارات المنطقية لا تعادل اختبار التطبيق على الهاتف، ولا تثبت أن كل فيديو متاح سيحمّل في ظروف الشبكة المختلفة.
++- capture.test.cjs: الإرسال المبكر والتلقائي، جدولة DOM، MKV/TS، Content-Range، جلسات الإطارات، وتنظيف التنقل وعزل الشبكة مجهولة التبويب.
++- player_metadata.test.cjs: الدقة/الفريمات/الحجم والترميز من JSON، عدم اعتبار signatureCipher المشفر رابطاً، ودمج سبعة طلبات أجزاء في جودة واحدة مع صوتها، واستبعاد UMP.
++- hls.test.cjs: قوائم 360p و1080p60 و4K، روابط نسبية وموقعة، مجموعات صوت، محدد الجودة، عدم تحويل الأجزاء إلى خيارات، الحفاظ على جلسة الطلب، عدم تكرار القراءة لكل variant، ومنع دخول نتيجة قائمة قديمة لصفحة جديدة.
++- format_rules_test.py: دوال Java الفعلية لصيغ MKV/TS/AV1 وتصحيح 1080p60.
++- format_parser_test.py: تشغيل parseFormats الكامل ببدائل JSON للقراءة؛ ترتيب 8K ثم 4K ثم 1080p، اختيار الصوت المحدد، الحاوية المتوافقة وMKV عند الحاجة، أربع وجهات MP3، صوت الفيديو المدمج، استبعاد المعاينة وDRM، وعلامة الحجم التقريبي.
++- download_plan_test.py: خطة بيانات التنزيل المباشر من روابط الشبكة الفعلية، دمج مسارين، MP3 من فيديو بصوت، روابط التوقيع، ومسار QuickJS.
++- download_request_test.py: تشغيل buildRequest وTaskState الفعليين ببدائل Android صغيرة؛ صيغة الفيديو+الصوت الدقيقة، تجديد رابط الصفحة، جلسة المتصفح، EJS، قائمة HLS موقعة بلا امتداد، الدقة المختارة، حفظ بيانات الإيقاف والاستئناف، استخراج MP3 وخطة MKV.
++- bundled_engine_test.py: تشغيل مثبت المحرك الفعلي على الملف المنقول؛ تطابق البايتات وSHA-256، تثبيت جديد، ترقية، إبقاء الأحدث، استعادة السابق عند فشل التحقق، رفض ملف تالف، وتنظيف الملفات المؤقتة.
++- شغّل Python المضيف ملف المحرك الحقيقي بواسطة --version وأرجع 2026.08.19. تحقق وجود ملفات EJS داخل أرشيف المحرك.
++- تحليل قواعد Java بجميع الملفات نجح؛ node --check لكل JavaScript نجح؛ XML ومعرفات R.id ومراجع ملفات manifest نجحت.
+ 
+-تبقى القيمة الدقيقة للحجم متاحة عندما يرسلها المصدر أو بيانات المشغّل. القيمة المستنتجة من مدة وبتريت تظهر بعلامة ≈. لا يولد التطبيق حجماً أو دقة وهميين.
++## حدود الفحص الفعلية
+ 
+-## مصادر القرارات التقنية
++محاولة `bash gradlew :app:assembleDebug --console=plain` توقفت عند تنزيل Gradle 8.11.1 برسالة Network is unreachable، قبل تجميع أندرويد. لا يوجد APK جديد في الحزمة.
+ 
+-- دليل yt-dlp الرسمي لمحركات JavaScript وEJS: https://github.com/yt-dlp/yt-dlp/wiki/EJS
+-- مصدر YoutubeDLRequest الرسمي يتيح قائمة روابط فارغة، المستخدمة مع --load-info-json: https://github.com/yausername/youtubedl-android/blob/master/library/src/main/java/com/yausername/youtubedl_android/YoutubeDLRequest.kt
+-- وثائق مكتبة أندرويد بشأن استخراج المكتبات الأصلية وتهيئة FFmpeg: https://github.com/yausername/youtubedl-android
++اختبارات Java تستعمل بدائل صغيرة لـAndroid/JSON/YoutubeDLRequest وتنفذ المنطق الإنتاجي، وليست تحقق أنواع Android/GeckoView كاملاً. تنفيذ --version تم على Python المضيف، وليس على هاتف. لم يحصل استخراج حي للفيديو في الصورة، أو تنزيل/دمج فعلي على أندرويد. اختبارات SL.Tube التاريخية الواردة داخل مشروعه ليست نتائج تحقق لهذا الدمج.
+ 
+-ملف CHANGES.patch يوضح تعديلات المصدر عن المشروع المرفق الأصلي.
++لا يمكن إعلان خلو التطبيق من كل خطأ أو تأكيد حل مشكلة 360p على الهاتف قبل البناء والتجربة الحية. ملفات المصدر والاختبارات وتقرير الحدود مرفقة كاملة.
++
++## مراجع
++
++- المصدر المرجعي المحلي: SL.Tube-4.5.3-sltube.3-source-unbuilt.zip.
++- مكتبة المحرك الرسمية: https://github.com/yausername/youtubedl-android
++- دليل EJS الرسمي: https://github.com/yt-dlp/yt-dlp/wiki/EJS
++
++فروق هذا الدمج عن 1.9.4 موجودة في SLTUBE_INTEGRATION.patch.
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES.md
+@@ -0,0 +1,14 @@
++# Engine notices transferred from SL.Tube
++
++### 4. yt-dlp / youtubedl-android
++- **Project**: yt-dlp & youtubedl-android (`io.github.junkfood02.youtubedl-android:library:0.18.1`)
++- **License**: The Unlicense / Apache-2.0
++- **Source**: https://github.com/yt-dlp/yt-dlp
++
++### 5. FFmpeg
++- **Project**: FFmpeg (`io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1`)
++- **License**: GNU Lesser General Public License v2.1+ (LGPL-2.1+)
++- **Source**: https://ffmpeg.org/
++
++
++The bundled yt-dlp file is transferred intact, including its vendored EJS components. Source: https://github.com/yt-dlp/ejs
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -10,8 +10,8 @@
+         applicationId 'com.satlink.geckoviewtest'
+         minSdk 26
+         targetSdk 36
+-        versionCode 194
+-        versionName 'PRO 1.9.4 Reviewed Source'
++        versionCode 195
++        versionName 'PRO 1.9.5 SL.Tube Engine'
+ 
+         ndk {
+             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
+--- a/app/src/main/assets/media_capture/background.js
++++ b/app/src/main/assets/media_capture/background.js
+@@ -3,8 +3,59 @@
+ const frameSnapshotsByTab = new Map();
+ const topSnapshotByTab = new Map();
+ const flushTimers = new Map();
++const hlsRequests = new Map();
++const pageGeneration = new Map();
+ const MAX_PER_TAB = 1500;
+ const MAX_AGE_MS = 30 * 60 * 1000;
++
++function isHls(item) {
++  return item?.metadataSource !== 'hls-master' &&
++    (/mpegurl/i.test(item?.mime || '') || /\.m3u8(?:$|[?#])/i.test(item?.url || ''));
++}
++
++function expandHls(tabId, item) {
++  const top=topSnapshotByTab.get(tabId);
++  if(!top || !isHls(item) || typeof fetch!=='function' || typeof SatLinkHls==='undefined') return;
++  const generation=pageGeneration.get(tabId)||0;
++  const key=tabId+'|'+generation+'|'+item.url;
++  const previous=hlsRequests.get(key);
++  if(previous && Date.now()-previous.time<300000) return;
++  const entry={time:Date.now(),variants:[]};hlsRequests.set(key,entry);
++  if(hlsRequests.size>200) hlsRequests.delete(hlsRequests.keys().next().value);
++  const controller=new AbortController();
++  const timeout=setTimeout(()=>controller.abort(),5000);
++  (async()=>{
++    try {
++      const response=await fetch(item.url,{credentials:'include',signal:controller.signal,
++        headers:{Referer:item.referer||top.pageUrl}});
++      if(!response.ok || Number(response.headers.get('content-length'))>2_000_000) return;
++      // Read a bounded body instead of loading an unbounded live playlist into memory.
++      let text='';
++      if(response.body?.getReader && typeof TextDecoder==='function') {
++        const reader=response.body.getReader(),decoder=new TextDecoder();let size=0;
++        try {
++          while(true) {
++            const part=await reader.read();if(part.done) break;
++            size+=part.value.byteLength;
++            if(size>2_000_000) {await reader.cancel();return;}
++            text+=decoder.decode(part.value,{stream:true});
++          }
++          text+=decoder.decode();
++        } finally {reader.releaseLock();}
++      } else text=await response.text();
++      if((pageGeneration.get(tabId)||0)!==generation || topSnapshotByTab.get(tabId)?.pageUrl!==top.pageUrl) return;
++      entry.variants=SatLinkHls.parse(text,response.url||item.url);
++      for(const variant of entry.variants) remember(tabId,{...variant,masterUrl:item.url,
++        referer:item.referer||top.pageUrl,userAgent:item.userAgent||top.userAgent,
++        frameUrl:item.frameUrl||top.pageUrl,resolvedFromNetwork:true});
++    } catch(_) {} finally {clearTimeout(timeout);}
++  })();
++}
++
++function clearHls(tabId) {
++  pageGeneration.set(tabId,(pageGeneration.get(tabId)||0)+1);
++  for(const key of hlsRequests.keys()) if(key.startsWith(tabId+'|')) hlsRequests.delete(key);
++}
+ 
+ function decodedParam(url, key) {
+   try { return new URL(url).searchParams.get(key) || ''; } catch (_) { return ''; }
+@@ -34,6 +85,8 @@
+ function mediaItem(url, mime = '', source = 'webRequest', size = 0, headers = {}) {
+   return {
+     url,
++    protocol: /mpegurl/i.test(mime) || /\.m3u8(?:$|[?#])/i.test(url) ? 'm3u8_native'
++      : /dash\+xml/i.test(mime) || /\.mpd(?:$|[?#])/i.test(url) ? 'http_dash_segments' : '',
+     mime: decodedParam(url, 'mime') || mime || '',
+     type: SatLinkMedia.typeOf(url, mime),
+     source,
+@@ -164,6 +217,8 @@
+   }
+   const cookies = await cookiesForMany([...new Set(cookieUrls)]);
+   if (topSnapshotByTab.get(tabId) !== top) { scheduleFlush(tabId); return; }
++  for(const item of merged.values()) expandHls(tabId,item);
++  const expandedMasters=new Set(Array.from(merged.values()).filter(item=>item.masterUrl).map(item=>item.masterUrl));
+   try {
+     await browser.runtime.sendNativeMessage('satlink_capture', {
+       action: 'captureResult',
+@@ -172,6 +227,7 @@
+       userAgent: top.userAgent || '',
+       duration,
+       items: Array.from(merged.values())
++        .filter(item=>!expandedMasters.has(item.url) || item.masterUrl)
+         .sort((a, b) => Number(!!b.resolvedFromNetwork) - Number(!!a.resolvedFromNetwork))
+         .slice(0, 1500),
+       cookies,
+@@ -222,12 +278,14 @@
+ 
+   browser.tabs.onUpdated.addListener((tabId, change) => {
+     if (change.status !== 'loading' && !change.url) return;
++    clearHls(tabId);
+     networkByTab.delete(tabId);
+     frameSnapshotsByTab.delete(tabId);
+     topSnapshotByTab.delete(tabId);
+   });
+ 
+   browser.tabs.onRemoved.addListener(tabId => {
++    clearHls(tabId);
+     networkByTab.delete(tabId);
+     frameSnapshotsByTab.delete(tabId);
+     topSnapshotByTab.delete(tabId);
+@@ -275,6 +333,7 @@
+   };
+   const oldTop = topSnapshotByTab.get(tabId);
+   if (isTopFrame && oldTop && oldTop.pageUrl !== snapshot.pageUrl) {
++    clearHls(tabId);
+     frames.clear();
+     networkByTab.delete(tabId);
+   }
+--- /dev/null
++++ b/app/src/main/assets/media_capture/hls_metadata.js
+@@ -0,0 +1,37 @@
++// SL.Tube's master-playlist discovery adapted to the SatLink session bridge.
++// Only EXT-X-STREAM-INF variants are qualities: media segments never become cards.
++(function(root) {
++  function attributes(line) {
++    const result={};
++    const pattern=/([A-Z0-9-]+)=("[^"]*"|[^,]*)/g; let match;
++    while((match=pattern.exec(line))) result[match[1]]=match[2].replace(/^"|"$/g,'');
++    return result;
++  }
++  function parse(text,masterUrl) {
++    if(typeof text!=='string' || text.length>2_000_000 || !text.trimStart().startsWith('#EXTM3U')) return [];
++    const result=[]; let pending=null;
++    for(const raw of text.split(/\r?\n/)) {
++      const line=raw.trim();
++      if(line.startsWith('#EXT-X-STREAM-INF:')) {pending=attributes(line);continue;}
++      if(!line || line.startsWith('#') || !pending) continue;
++      const data=pending; pending=null;
++      let url;try {url=new URL(line,masterUrl).href;}catch(_){continue;}
++      if(!/^https?:\/\//i.test(url)) continue;
++      const dimensions=(data.RESOLUTION||'').match(/^(\d+)x(\d+)$/i);
++      const width=dimensions?Number(dimensions[1]):0,height=dimensions?Number(dimensions[2]):0;
++      const fps=Number(data['FRAME-RATE'])||0;
++      const codecs=data.CODECS||'';
++      const videoCodec=codecs.split(',').find(c=>/^(avc|hev|hvc|vp0|av01)/i.test(c))||'';
++      const audioCodec=codecs.split(',').find(c=>/^(mp4a|opus|ac-3|ec-3)/i.test(c))||'';
++      const filter=height>0?'[height='+height+']'+(fps>0?'[fps<='+Math.ceil(fps)+']':''):'';
++      result.push({url,masterUrl,protocol:'m3u8_native',type:'video',mime:'application/vnd.apple.mpegurl',
++        width,height,fps,videoCodec,audioCodec,hasAudio:!!audioCodec||!!data.AUDIO,
++        bitrate:Number(data['AVERAGE-BANDWIDTH']||data.BANDWIDTH)||0,
++        formatSelector:height>0?'bestvideo'+filter+'+bestaudio/best'+filter+'/bestvideo'+filter:'',
++        qualityLabel:height>0?height+'p':'',source:'hls-master',metadataSource:'hls-master'});
++      if(result.length>=100) break;
++    }
++    return result;
++  }
++  root.SatLinkHls={parse};
++})(globalThis);
+--- a/app/src/main/assets/media_capture/manifest.json
++++ b/app/src/main/assets/media_capture/manifest.json
+@@ -1,7 +1,7 @@
+ {
+   "manifest_version": 2,
+   "name": "SatLink Media Capture",
+-  "version": "1.5",
++  "version": "1.6",
+   "description": "Captures top-page and iframe media while preserving the active browser session.",
+   "browser_specific_settings": {
+     "gecko": {
+@@ -11,6 +11,7 @@
+   "background": {
+     "scripts": [
+       "media_metadata.js",
++      "hls_metadata.js",
+       "background.js"
+     ]
+   },
+--- a/app/src/main/assets/media_capture/media_metadata.js
++++ b/app/src/main/assets/media_capture/media_metadata.js
+@@ -13,7 +13,9 @@
+     return 'unknown';
+   }
+   function urlMetadata(url, mime='') {
+-    return {url, mime:query(url,'mime')||mime, type:typeOf(url,mime), itag:query(url,'itag'),
++    const protocol=/mpegurl/i.test(mime) || /\.m3u8(?:$|[?#])/i.test(url) ? 'm3u8_native'
++      : /dash\+xml/i.test(mime) || /\.mpd(?:$|[?#])/i.test(url) ? 'http_dash_segments' : '';
++    return {url, protocol, mime:query(url,'mime')||mime, type:typeOf(url,mime), itag:query(url,'itag'),
+       duration:positive(query(url,'dur')||query(url,'duration')),
+       size:positive(query(url,'clen')||query(url,'contentLength')),
+       bitrate:positive(query(url,'bitrate')), fps:positive(query(url,'fps')),
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java
+@@ -0,0 +1,63 @@
++package com.satlink.geckoviewtest;
++
++import java.io.*;
++import java.nio.file.*;
++import java.security.MessageDigest;
++import java.util.Locale;
++
++/** Installs the exact SL.Tube engine, without downgrading a newer downloaded engine. */
++final class BundledEngineInstaller {
++    static final String VERSION = "2026.08.19";
++    static final String SHA256 = "1fa6733c37ea6fb51c99ad8fe785e7b7e5f3246c9b980230329d4fb72ed8d4d6";
++    interface Validator { String version() throws Exception; }
++
++    static boolean install(File target, InputStream bundled, String installedVersion, Validator validator) throws Exception {
++        File parent = target.getParentFile();
++        if (!parent.isDirectory() && !parent.mkdirs()) throw new IOException("Cannot create engine directory");
++        File staged = new File(parent, "satlink-bundled.stage");
++        File backup = new File(parent, "satlink-bundled.backup");
++        boolean replaced = false;
++        boolean hadActive = target.isFile();
++        try {
++            MessageDigest digest = MessageDigest.getInstance("SHA-256");
++            try (InputStream in = bundled; FileOutputStream out = new FileOutputStream(staged)) {
++                byte[] buffer = new byte[32768]; int count; long bytes = 0;
++                while ((count = in.read(buffer)) != -1) {
++                    bytes += count;
++                    if (bytes > 8L * 1024 * 1024) throw new IOException("Bundled engine is too large");
++                    digest.update(buffer, 0, count); out.write(buffer, 0, count);
++                }
++                out.getFD().sync();
++            }
++            StringBuilder hash = new StringBuilder();
++            for (byte value : digest.digest()) hash.append(String.format(Locale.US, "%02x", value & 255));
++            if (!SHA256.equals(hash.toString())) throw new IOException("Bundled engine checksum mismatch");
++            if (hadActive && !needsUpgrade(installedVersion)) return false;
++            if (hadActive) Files.copy(target.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
++            move(staged, target); replaced = true;
++            String actual = validator.version();
++            if (!VERSION.equals(actual == null ? "" : actual.trim()))
++                throw new IOException("Bundled engine did not return its expected version");
++            return true;
++        } catch (Exception error) {
++            if (replaced) {
++                if (hadActive && backup.isFile()) move(backup, target);
++                else Files.deleteIfExists(target.toPath());
++            }
++            throw error;
++        } finally {
++            Files.deleteIfExists(staged.toPath());
++            Files.deleteIfExists(backup.toPath());
++        }
++    }
++
++    static boolean needsUpgrade(String installed) {
++        if (installed == null || !installed.trim().matches("\\d{4}\\.\\d{2}\\.\\d{2}(?:[.\\-+].*)?")) return true;
++        return installed.trim().substring(0, 10).compareTo(VERSION) < 0;
++    }
++
++    private static void move(File from, File to) throws IOException {
++        try { Files.move(from.toPath(), to.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING); }
++        catch (AtomicMoveNotSupportedException error) { Files.move(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING); }
++    }
++}
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/EngineBootstrap.java
+@@ -0,0 +1,35 @@
++package com.satlink.geckoviewtest;
++
++import android.content.Context;
++import android.util.Log;
++import com.yausername.youtubedl_android.YoutubeDL;
++import com.yausername.youtubedl_android.YoutubeDLRequest;
++import com.yausername.ffmpeg.FFmpeg;
++import java.io.File;
++import java.util.Collections;
++
++/** Shared bootstrap for capture and the foreground download service. */
++final class EngineBootstrap {
++    private static boolean ready;
++    private EngineBootstrap() { }
++
++    static synchronized void initialize(Context context) throws Exception {
++        if (ready) return;
++        YoutubeDL.getInstance().init(context);
++        FFmpeg.getInstance().init(context);
++        String current;
++        try { current = version(); } catch (Exception error) { current = ""; }
++        File engine = new File(context.getNoBackupFilesDir(), "youtubedl-android/yt-dlp/yt-dlp");
++        boolean installed = BundledEngineInstaller.install(engine, context.getResources().openRawResource(R.raw.ytdlp),
++                current, EngineBootstrap::version);
++        Log.i("SatLinkEngine", "yt-dlp " + (installed ? BundledEngineInstaller.VERSION : current) + "; QuickJS native runtime configured per request");
++        ready = true;
++    }
++
++    private static String version() throws Exception {
++        YoutubeDLRequest request = new YoutubeDLRequest(Collections.<String>emptyList());
++        request.addOption("--ignore-config");
++        request.addOption("--version");
++        return YoutubeDL.getInstance().execute(request).getOut().trim();
++    }
++}
+--- a/app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java
+@@ -12,8 +12,8 @@
+         File quickJs = new File(context.getApplicationInfo().nativeLibraryDir, "libqjs.so");
+         if (quickJs.isFile() && quickJs.canExecute()) {
+             request.addOption("--js-runtimes", "quickjs:" + quickJs.getAbsolutePath());
+-            // Allows yt-dlp to obtain matching challenge scripts when the engine updates.
+-            request.addOption("--remote-components", "ejs:github");
+         }
++        // SL.Tube enables matching EJS components independently of runtime discovery.
++        request.addOption("--remote-components", "ejs:github");
+     }
+ }
+--- a/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
+@@ -481,8 +481,7 @@
+     private void initializeDownloadEngine() {
+         worker.execute(() -> {
+             try {
+-                YoutubeDL.getInstance().init(getApplicationContext());
+-                FFmpeg.getInstance().init(getApplicationContext());
++                EngineBootstrap.initialize(getApplicationContext());
+ 
+                 engineReady.set(true);
+                 runOnUiThread(() -> {
+@@ -503,7 +502,7 @@
+                                     getApplicationContext(), YoutubeDL.UpdateChannel._NIGHTLY);
+                             engineRevision++;
+                             runOnUiThread(() -> {
+-                                if (capturePanel.getVisibility() == View.VISIBLE && !detailedFormatsShown && !analyzing.get()) {
++                                if (capturePanel.getVisibility() == View.VISIBLE && !hasStartedCaptureDownload() && !analyzing.get()) {
+                                     analyzedRequestSerial = -1;
+                                     if (!TextUtils.isEmpty(pendingPageUrl)) analyzePage(pendingPageUrl);
+                                 }
+@@ -797,7 +796,7 @@
+                 runOnUiThread(() -> {
+                     if (analysisSerial == captureRequestSerial) {
+                         analysisProgress.setVisibility(View.GONE);
+-                        if (engineRevision != revisionAtStart && !detailedFormatsShown
++                        if (engineRevision != revisionAtStart && !hasStartedCaptureDownload()
+                                 && capturePanel.getVisibility() == View.VISIBLE) {
+                             analyzedRequestSerial = -1;
+                             analyzePage(pendingPageUrl);
+@@ -823,7 +822,8 @@
+         if (raw == null) { raw = new JSONArray(); raw.put(root); }
+         for (int i=0; i<raw.length(); i++) {
+             JSONObject format=raw.optJSONObject(i);
+-            if(format==null) continue;
++            if(format==null || format.optBoolean("has_drm",false)
++                    || "mhtml".equals(format.optString("protocol")) || "images".equals(format.optString("protocol"))) continue;
+             formats.add(new FormatSelectionPolicy.Format(format.optString("url"),format.optString("ext"),
+                     format.optString("vcodec","none"),format.optString("acodec","none"),numberToInt(format.opt("height"))));
+         }
+@@ -911,6 +911,7 @@
+         request.addOption("--no-playlist");
+         request.addOption("--ignore-config");
+         request.addOption("--geo-bypass");
++        request.addOption("--legacy-server-connect");
+         request.addOption("--socket-timeout", "25");
+         request.addOption("--retries", "1");
+         request.addOption("--extractor-retries", "2");
+@@ -931,6 +932,7 @@
+         request.addOption("--no-playlist");
+         request.addOption("--ignore-config");
+         request.addOption("--geo-bypass");
++        request.addOption("--legacy-server-connect");
+         request.addOption("--socket-timeout", "25");
+         request.addOption("--retries", "1");
+         request.addOption("--extractor-retries", "2");
+@@ -1128,6 +1130,7 @@
+ 
+     private FormatCollection parseFormats(JSONObject root) {
+         FormatCollection result = new FormatCollection();
++        if (root.optBoolean("has_drm", false)) throw new IllegalArgumentException("المحتوى محمي");
+         result.title = root.optString("title", pendingPageTitle);
+         result.durationSeconds = numberToDouble(root.opt("duration"));
+         result.sourceUrl = root.optString("webpage_url", pendingPageUrl);
+@@ -1148,7 +1151,9 @@
+ 
+         for (int i = 0; i < formats.length(); i++) {
+             JSONObject format = formats.optJSONObject(i);
+-            if (format == null) {
++            if (format == null || format.optBoolean("has_drm", false)
++                    || "mhtml".equals(format.optString("protocol"))
++                    || "images".equals(format.optString("protocol"))) {
+                 continue;
+             }
+ 
+@@ -1180,7 +1185,7 @@
+                 item.fps = fps;
+                 item.bitrate = tbr;
+                 item.sizeBytes = size > 0 ? size : estimateSize(result.durationSeconds, tbr);
+-                item.sizeEstimated = size <= 0 && item.sizeBytes > 0;
++                item.sizeEstimated = numberToLong(format.opt("filesize")) <= 0 && item.sizeBytes > 0;
+                 item.videoCodec = shortCodec(vcodec);
+                 item.audioCodec = shortCodec(acodec);
+                 item.hasAudio = !"none".equalsIgnoreCase(acodec) && !TextUtils.isEmpty(acodec);
+@@ -1203,7 +1208,7 @@
+                 item.ext = ext;
+                 item.bitrate = abr > 0 ? abr : tbr;
+                 item.sizeBytes = size > 0 ? size : estimateSize(result.durationSeconds, abr > 0 ? abr : tbr);
+-                item.sizeEstimated = size <= 0 && item.sizeBytes > 0;
++                item.sizeEstimated = numberToLong(format.opt("filesize")) <= 0 && item.sizeBytes > 0;
+                 item.audioCodec = shortCodec(acodec);
+                 item.sampleRate = numberToInt(format.opt("asr"));
+                 item.channels = numberToInt(format.opt("audio_channels"));
+@@ -1241,19 +1246,27 @@
+         result.videos.clear();
+         result.videos.addAll(cleanVideos.values());
+ 
+-        // Add the estimated best-audio size to video-only formats so the shown merged size is closer.
+-        if (!sourceAudios.isEmpty()) {
+-            MediaFormatItem bestAudio = sourceAudios.get(0);
+-            for (MediaFormatItem video : result.videos) {
+-                if (!video.hasAudio) {
+-                    video.directAudioUrl = bestAudio.directUrl;
+-                    video.audioCodec = bestAudio.audioCodec;
+-                    if (video.sizeBytes > 0 && bestAudio.sizeBytes > 0) {
+-                        video.sizeBytes += bestAudio.sizeBytes;
+-                        video.sizeEstimated |= bestAudio.sizeEstimated;
+-                    }
++        // SL.Tube pairs an exact audio format and preserves container compatibility.
++        for (MediaFormatItem video : result.videos) {
++            if (video.hasAudio || sourceAudios.isEmpty()) continue;
++            MediaFormatItem audio = sourceAudios.get(0);
++            for (MediaFormatItem candidate : sourceAudios) {
++                if (("mp4".equals(video.ext) && "m4a".equals(candidate.ext))
++                        || ("webm".equals(video.ext) && "webm".equals(candidate.ext))) {
++                    audio = candidate; break;
+                 }
+             }
++            video.directAudioUrl = audio.directUrl;
++            video.audioCodec = audio.audioCodec;
++            if (video.formatId.matches("[A-Za-z0-9_.:-]+") && audio.formatId.matches("[A-Za-z0-9_.:-]+"))
++                video.formatId += "+" + audio.formatId;
++            boolean compatible = ("mp4".equals(video.ext) && "m4a".equals(audio.ext))
++                    || ("webm".equals(video.ext) && "webm".equals(audio.ext)) || "mkv".equals(video.ext);
++            if (!compatible) video.ext = "mkv";
++            if (video.sizeBytes > 0 && audio.sizeBytes > 0) {
++                video.sizeBytes += audio.sizeBytes;
++                video.sizeEstimated = true; // Final muxed file may include container overhead.
++            } else {video.sizeBytes = 0;video.sizeEstimated = false;}
+         }
+ 
+         if (sourceAudios.isEmpty()) {
+@@ -1342,6 +1355,7 @@
+         String bestAudioUrl = "";
+         boolean bestAudioCapturedDirect = false;
+         String bestAudioExt = "";
++        String bestAudioProtocol = "";
+         String bestAudioCodec = "";
+         double bestAudioBitrate = 0;
+         long bestAudioSize = 0;
+@@ -1375,6 +1389,7 @@
+                 bestAudioBitrate = bitrate;
+                 bestAudioSize = size;
+                 bestAudioExt = detectedAudioExt;
++                bestAudioProtocol = json.optString("protocol", "");
+                 bestAudioCodec = detectedAudioCodec;
+             }
+             if ("m4a".equals(detectedAudioExt)) {
+@@ -1429,20 +1444,21 @@
+             String itag = json.optString("itag", "");
+ 
+             MediaFormatItem item = new MediaFormatItem();
+-            item.directUrl = url;
++            item.directUrl = TextUtils.isEmpty(json.optString("masterUrl")) ? url : json.optString("masterUrl");
+             item.capturedDirect = json.optBoolean("resolvedFromNetwork") || !isYouTubeUrl(pendingPageUrl);
+             String capturedReferer = json.optString("referer", "");
+             if (TextUtils.isEmpty(capturedReferer)) capturedReferer = json.optString("frameUrl", "");
+             if (TextUtils.isEmpty(capturedReferer)) capturedReferer = preferredPlayerPageUrl;
+             item.sourceUrl = TextUtils.isEmpty(capturedReferer) ? pendingPageUrl : capturedReferer;
+-            item.formatId = TextUtils.isEmpty(itag) ? "" : itag;
++            item.formatId = TextUtils.isEmpty(json.optString("formatSelector"))
++                    ? (TextUtils.isEmpty(itag) ? "" : itag) : json.optString("formatSelector");
+             // YouTube itag lets yt-dlp reopen the original page and download through its managed
+             // FFmpeg environment instead of executing temporary videoplayback links directly.
+             item.ext = "mkv".equals(detectedExt) || mime.contains("matroska") ? "mkv"
+                     : "ts".equals(detectedExt) || mime.contains("mp2t") ? "ts"
+                     : "webm".equals(detectedExt) || mime.contains("webm") ? "webm" : "mp4";
+             item.note = "رابط فيديو ملتقط من جلسة المتصفح";
+-            item.protocol = Uri.parse(url).getScheme();
++            item.protocol = json.optString("protocol", Uri.parse(url).getScheme());
+             item.type = MediaFormatItem.TYPE_VIDEO;
+             item.width = numberToInt(json.opt("width"));
+             item.height = numberToInt(json.opt("height"));
+@@ -1471,7 +1487,7 @@
+                 item.sizeEstimated = item.sizeBytes > 0;
+             }
+ 
+-            if (!item.hasAudio && !TextUtils.isEmpty(bestAudioUrl)) {
++            if (!item.hasAudio && !TextUtils.isEmpty(bestAudioUrl) && TextUtils.isEmpty(json.optString("masterUrl"))) {
+                 String pairedAudioUrl = bestAudioUrl;
+                 String pairedAudioCodec = bestAudioCodec;
+                 double pairedAudioBitrate = bestAudioBitrate;
+@@ -1534,6 +1550,7 @@
+                 item.directUrl = bestAudioUrl;
+                 item.capturedDirect = bestAudioCapturedDirect;
+                 item.hasAudio = true;
++                item.protocol = muxedAudioSource == null ? bestAudioProtocol : muxedAudioSource.protocol;
+                 if (muxedAudioSource != null) item.videoCodec = TextUtils.isEmpty(muxedAudioSource.videoCodec)
+                         ? "unknown" : muxedAudioSource.videoCodec;
+                 item.formatId = "";
+@@ -1859,6 +1876,7 @@
+         intent.putExtra(MediaDownloadService.EXTRA_DIRECT_URL, item.directUrl);
+         intent.putExtra(MediaDownloadService.EXTRA_DIRECT_AUDIO_URL, item.directAudioUrl);
+         intent.putExtra(MediaDownloadService.EXTRA_FORMAT_ID, item.formatId);
++        intent.putExtra(MediaDownloadService.EXTRA_MANIFEST, item.protocol != null && (item.protocol.contains("m3u8") || item.protocol.contains("dash")));
+         intent.putExtra(MediaDownloadService.EXTRA_MEDIA_TYPE,
+                 item.type == MediaFormatItem.TYPE_AUDIO
+                         ? MediaDownloadService.TYPE_AUDIO : MediaDownloadService.TYPE_VIDEO);
+--- a/app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java
+@@ -73,6 +73,7 @@
+     public static final String EXTRA_OUTPUT_EXT = "output_ext";
+     public static final String EXTRA_TITLE = "title";
+     public static final String EXTRA_ESTIMATED_SIZE = "estimated_size";
++    public static final String EXTRA_MANIFEST = "manifest_source";
+     public static final String EXTRA_CAPTURED_DIRECT = "captured_direct";
+     public static final String EXTRA_VIDEO_CODEC = "video_codec";
+     public static final String EXTRA_AUDIO_CODEC = "audio_codec";
+@@ -291,7 +292,7 @@
+             task.processId = "satlink-service-retry-" + task.taskId + "-" + System.currentTimeMillis();
+             YoutubeDLRequest retry = buildRequest(task, workDir);
+             retry.addOption("--extractor-args",
+-                    "youtube:player_client=android,web;player_skip=webpage");
++                    "youtube:player_client=android_vr");
+             YoutubeDL.getInstance().execute(retry, task.processId, progressCallback(task));
+         }
+     }
+@@ -403,8 +404,7 @@
+         if (engineReady.get()) return;
+         synchronized (engineReady) {
+             if (engineReady.get()) return;
+-            YoutubeDL.getInstance().init(getApplicationContext());
+-            FFmpeg.getInstance().init(getApplicationContext());
++            EngineBootstrap.initialize(getApplicationContext());
+             engineReady.set(true);
+         }
+     }
+@@ -415,7 +415,7 @@
+             // Generic direct files and paired HTTPS streams can use captured info. Manifest
+             // protocols still need the generic extractor to parse their segment lists.
+             String path = Uri.parse(task.directUrl).getPath();
+-            boolean manifest = path != null && (path.toLowerCase(Locale.US).endsWith(".m3u8")
++            boolean manifest = task.manifest || path != null && (path.toLowerCase(Locale.US).endsWith(".m3u8")
+                     || path.toLowerCase(Locale.US).endsWith(".mpd"));
+             if (manifest) {
+                 request = new YoutubeDLRequest(task.directUrl);
+@@ -440,6 +440,7 @@
+         request.addOption("--newline");
+         request.addOption("--ignore-config");
+         request.addOption("--geo-bypass");
++        request.addOption("--legacy-server-connect");
+         request.addOption("--continue");
+         request.addOption("--part");
+         request.addOption("--socket-timeout", "30");
+@@ -486,7 +487,7 @@
+             boolean transportStream = "ts".equals(output) || "mpegts".equals(output);
+ 
+             if (!TextUtils.isEmpty(task.formatId)) {
+-                if (task.hasAudio) {
++                if (task.hasAudio || task.formatId.contains("+") || task.formatId.contains("/")) {
+                     request.addOption("-f", task.formatId);
+                 } else {
+                     String preferredAudio = webm ? "webm" : "m4a";
+@@ -1009,6 +1010,7 @@
+         int audioQuality;
+         boolean hasAudio;
+         boolean capturedDirect;
++        boolean manifest;
+         String videoCodec;
+         String audioCodec;
+         long estimatedSize;
+@@ -1057,6 +1059,7 @@
+             task.audioQuality = intent.getIntExtra(EXTRA_AUDIO_QUALITY, 320);
+             task.hasAudio = intent.getBooleanExtra(EXTRA_HAS_AUDIO, false);
+             task.capturedDirect = intent.getBooleanExtra(EXTRA_CAPTURED_DIRECT, false);
++            task.manifest = intent.getBooleanExtra(EXTRA_MANIFEST, false);
+             task.videoCodec = intent.getStringExtra(EXTRA_VIDEO_CODEC);
+             task.audioCodec = intent.getStringExtra(EXTRA_AUDIO_CODEC);
+             task.estimatedSize = intent.getLongExtra(EXTRA_ESTIMATED_SIZE, 0L);
+@@ -1082,6 +1085,7 @@
+             intent.putExtra(EXTRA_AUDIO_QUALITY, audioQuality);
+             intent.putExtra(EXTRA_HAS_AUDIO, hasAudio);
+             intent.putExtra(EXTRA_CAPTURED_DIRECT, capturedDirect);
++            intent.putExtra(EXTRA_MANIFEST, manifest);
+             intent.putExtra(EXTRA_VIDEO_CODEC, videoCodec);
+             intent.putExtra(EXTRA_AUDIO_CODEC, audioCodec);
+             intent.putExtra(EXTRA_ESTIMATED_SIZE, estimatedSize);
+--- /dev/null
++++ b/docs/history/TEST_REPORT_1.9.4.md
+@@ -0,0 +1,39 @@
++# تقرير فحص PRO 1.9.4 Reviewed Source
++
++التاريخ: 2026-10-03
++
++## المشكلة التي روجعت
++
++الصورة المقدمة تظهر فشل تحليل يوتيوب، ثم سبع بطاقات فيديو بلا أبعاد أو حجم، وصوتيات MP3 بعدد صفر. مراجعة المصدر وجدت أن مسار الالتقاط الاحتياطي يقبل روابط videoplayback دون بيانات جودة، وأن اختيار MP3 كان يعتمد على العثور على صوت منفصل فقط. كما أن خيار QuickJS كان اسم runtime دون مسار الملف الأصلي. الصورة لا تحتوي سجل المحرك، لذلك لا يمكن تأكيد سبب فشل المحرك نفسه من الصورة وحدها.
++
++## أخطاء إضافية مثبتة من مراجعة المصدر
++
++اختيار استجابة يوتيوب كان يعتمد على عدد الصيغ دون استبعاد صور المعاينة، والتحليل الفاشل لم يكن يعاد بعد اكتمال تحديث المحرك. بعض تحديثات الالتقاط كانت تمسح سبب الفشل برسالة عامة. صححت هذه المسارات، وأضافت المراجعة إلغاء التحليل القديم وحداً زمنياً لكل محاولة. هذه نتائج مراجعة المصدر؛ سبب فشل الفيديو المحدد على الهاتف يحتاج سجل تشغيل فعلي، ولم يدّع الفحص تأكيده.
++
++## فحوص نجحت
++
++- node tests/capture.test.cjs: إرسال مباشر وتلقائي، تجميع تغييرات DOM، رصد MKV وTS، الحفاظ على Referer، Content-Range بحجم 4 GiB، تنظيف التنقل، وتمرير بيانات الجودة من script إلى الالتقاط.
++- node tests/player_metadata.test.cjs: JSON اصطناعي للمشغّل يتضمن فيديو 360p بصوت، فيديو 1080p60 وصوت منفصل. تحقق الاختبار من الأبعاد والترميز والحجم الفعلي داخل البيانات، وعدم التعامل مع signatureCipher مشفر كرابط صالح، وعدم استعمال بيانات فيديو سابق.
++- الاختبار المتكامل للإضافة: سبعة طلبات أجزاء للفيديو نفسه صارت جودة واحدة 1080p60، مع إبقاء مصدر الصوت وحجم الفيديو الكلي، واستبعاد UMP. هذه بيانات اختبار وليست استخراجاً حياً للفيديو في الصورة.
++- python3 tests/format_rules_test.py: تشغيل دوال Java الفعلية للصيغ والبيانات، وفحص MKV وTS وAV1 و1080p60.
++- python3 tests/download_plan_test.py: تشغيل كود خطة التنزيل الفعلي وفحص رابط الفيديو والصوت المنفصلين، وبيانات الفيديو بصوت لاستخراج MP3، وصوت منفصل، ورفض blob، ومسار QuickJS الأصلي. تم استبدال Context وYoutubeDLRequest ببدائل اختبار صغيرة؛ لم ينفذ yt-dlp أو FFmpeg على أندرويد.
++- python3 tests/format_parser_test.py: تشغيل دالة parseFormats الكاملة من التطبيق ببدائل JSON للقراءة. التحقق من ترتيب 8K ثم 4K ثم 1080p، وصيغ AV1/MKV/TS، وربط الصوت المنفصل، وأربع جودات هدف MP3، واستخراج الصوت من فيديو بصوت، واستبعاد صور المعاينة والروابط الفارغة، وتفضيل الاستجابة ذات أعلى دقة.
++- اختبارات الالتقاط الإضافية: استرجاع طلب شبكة مجهول التبويب بصفحة مصدر مطابقة، ومنع خلط تبويبين من الموقع نفسه، ومنع ظهور طلب صفحة سابقة وموارد الأداء القديمة بعد التنقل.
++- تحليل بناء ملفات Java باستخدام JDK 17 نجح، وnode --check لجميع ملفات JavaScript نجح.
++- صحة XML ومطابقة مراجع R.id مع معرفات التخطيط نجحت.
++
++## حدود التحقق
++
++أعيدت محاولة ./gradlew :app:assembleDebug. توقفت قبل تجميع أندرويد بسبب Network is unreachable عند تنزيل Gradle 8.11.1. لا يوجد APK جديد في هذه الحزمة.
++
++لم يحصل بناء كامل أو تحقق من أنواع Android/GeckoView أو تجربة على هاتف أو استخراج حي من يوتيوب أو تنزيل/دمج فعلي بواسطة المحرك. الاختبارات المنطقية لا تعادل اختبار التطبيق على الهاتف، ولا تثبت أن كل فيديو متاح سيحمّل في ظروف الشبكة المختلفة.
++
++تبقى القيمة الدقيقة للحجم متاحة عندما يرسلها المصدر أو بيانات المشغّل. القيمة المستنتجة من مدة وبتريت تظهر بعلامة ≈. لا يولد التطبيق حجماً أو دقة وهميين.
++
++## مصادر القرارات التقنية
++
++- دليل yt-dlp الرسمي لمحركات JavaScript وEJS: https://github.com/yt-dlp/yt-dlp/wiki/EJS
++- مصدر YoutubeDLRequest الرسمي يتيح قائمة روابط فارغة، المستخدمة مع --load-info-json: https://github.com/yausername/youtubedl-android/blob/master/library/src/main/java/com/yausername/youtubedl_android/YoutubeDLRequest.kt
++- وثائق مكتبة أندرويد بشأن استخراج المكتبات الأصلية وتهيئة FFmpeg: https://github.com/yausername/youtubedl-android
++
++ملف CHANGES.patch يوضح تعديلات المصدر عن المشروع المرفق الأصلي.
+--- /dev/null
++++ b/tests/bundled_engine_test.py
+@@ -0,0 +1,39 @@
++"""Exercise production installer with the exact transferred SL.Tube binary."""
++from pathlib import Path
++import re, subprocess, tempfile, zipfile
++root=Path(__file__).resolve().parents[1]
++s=(root/'app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java').read_text()
++s=re.sub(r'^package .*;\n','',s,flags=re.M)
++header='\n'.join(re.findall(r'^import .*;$',s,re.M))
++s=re.sub(r'^import .*;\n','',s,flags=re.M)
++test='''
++class BundledEngineTest {
++ static void check(boolean b,String message){if(!b)throw new AssertionError(message);}
++ public static void main(String[] args)throws Exception{
++  File bundle=new File(args[0]);Path root=Files.createTempDirectory("satlink-installer-test");File target=root.resolve("yt-dlp").toFile();
++  try {
++   check(BundledEngineInstaller.install(target,new FileInputStream(bundle),"",()->"2026.08.19"),"Fresh install not performed");
++   check(Files.mismatch(bundle.toPath(),target.toPath())==-1,"Fresh installation bytes differ");
++   Files.writeString(target.toPath(),"newer engine");
++   check(!BundledEngineInstaller.install(target,new FileInputStream(bundle),"2026.09.30",()->{throw new AssertionError("Downgrade attempted");}),"Newer engine overwritten");
++   check(Files.readString(target.toPath()).equals("newer engine"),"Newer engine changed");
++   Files.writeString(target.toPath(),"old engine");
++   try {BundledEngineInstaller.install(target,new FileInputStream(bundle),"2025.01.01",()->"invalid");throw new AssertionError("Bad engine verification accepted");}catch(IOException expected){}
++   check(Files.readString(target.toPath()).equals("old engine"),"Failed engine did not roll back");
++   try {BundledEngineInstaller.install(target,new ByteArrayInputStream(new byte[]{1,2,3}),"2025.01.01",()->"2026.08.19");throw new AssertionError("Corrupt binary accepted");}catch(IOException expected){}
++   check(Files.readString(target.toPath()).equals("old engine"),"Corrupt bundle damaged engine");
++   check(BundledEngineInstaller.install(target,new FileInputStream(bundle),"2025.01.01",()->"2026.08.19"),"Upgrade missing");
++   check(!BundledEngineInstaller.needsUpgrade("2026.08.19.232658"),"Same-day nightly downgraded");
++   check(Files.list(root).count()==1,"Temporary files left behind");
++   System.out.println("PASS bundled engine: exact SL.Tube bytes, SHA-256, fresh install, upgrade, no downgrade, validation failure rollback, corrupt-file rejection, staging cleanup");
++  }finally{try(var files=Files.list(root)){for(Path p:files.toList())Files.deleteIfExists(p);}Files.delete(root);}
++ }
++}
++'''
++with tempfile.TemporaryDirectory() as tmp:
++ p=Path(tmp)/'BundledEngineTest.java';p.write_text(header+test+s)
++ subprocess.run(['java',str(p),str(root/'app/src/main/res/raw/ytdlp')],check=True)
++subprocess.run(['python3',str(root/'app/src/main/res/raw/ytdlp'),'--version'],check=True)
++with zipfile.ZipFile(root/'app/src/main/res/raw/ytdlp') as z:
++ assert {'yt_dlp_ejs/yt/solver/core.min.js','yt_dlp_ejs/yt/solver/lib.min.js'}<=set(z.namelist())
++ print('PASS engine execution --version and bundled EJS solver files (host Python, not Android)')
+--- a/tests/download_plan_test.py
++++ b/tests/download_plan_test.py
+@@ -47,7 +47,7 @@
+   try {
+    Context context=new Context();context.info.nativeLibraryDir=temp.toString();
+    YoutubeDLRequest request=new YoutubeDLRequest();EngineRuntimeOptions.apply(context,request);
+-   check(request.options.isEmpty(),"Missing runtime must not be advertised as a PATH command");
++   check(!request.options.containsKey("--js-runtimes"),"Missing runtime must not be advertised as a PATH command");
+    File executable=temp.resolve("libqjs.so").toFile();executable.createNewFile();executable.setExecutable(true);
+    request=new YoutubeDLRequest();EngineRuntimeOptions.apply(context,request);
+    check(request.options.get("--js-runtimes").equals("quickjs:"+executable.getAbsolutePath()),"QuickJS must use extracted binary path");
+--- /dev/null
++++ b/tests/download_request_test.py
+@@ -0,0 +1,63 @@
++"""Run the actual download request builder and task intent persistence with small API substitutes."""
++from pathlib import Path
++import re,subprocess,tempfile
++root=Path(__file__).resolve().parents[1];base=root/'app/src/main/java/com/satlink/geckoviewtest'
++s=(base/'MediaDownloadService.java').read_text()
++constants='\n'.join(re.findall(r'^    public static final (?:String|int) (?:EXTRA_\w+|TYPE_\w+|STATE_QUEUED) = .*?;',s,re.M))
++builder=s[s.index('    private YoutubeDLRequest buildRequest'):s.index('    private void pauseTask')]
++model=s[s.index('    private static final class TaskState'):s.rfind('\n}')]
++parts=[]
++for name in ['CapturedDownloadPlan.java','EngineRuntimeOptions.java']:
++ p=(base/name).read_text();p=re.sub(r'^package .*;\n|^import .*;\n','',p,flags=re.M);parts.append(p)
++source='''import java.util.*;import java.util.concurrent.atomic.AtomicBoolean;import java.io.*;import java.nio.file.*;import java.nio.charset.StandardCharsets;import java.net.*;
++class DownloadRequestIntegrationTest {
++ public static void main(String[] args)throws Exception{MediaDownloadService.test();}
++}
++class Context {ApplicationInfo getApplicationInfo(){return new ApplicationInfo();}}
++class ApplicationInfo {String nativeLibraryDir="/no-native-test-binary";}
++class Service extends Context {Context getApplicationContext(){return this;}}
++class TextUtils {static boolean isEmpty(String value){return value==null||value.isEmpty();}}
++class Uri {final URI uri;Uri(String s){uri=URI.create(s);}static Uri parse(String s){return new Uri(s);}String getPath(){return uri.getPath();}}
++class JSONObject {JSONObject(Map<String,Object> map){} public String toString(){return "{}";}}
++class YoutubeDLRequest {final List<String> urls;final Map<String,String> options=new LinkedHashMap<>();
++ YoutubeDLRequest(String url){urls=List.of(url);}YoutubeDLRequest(List<String> urls){this.urls=urls;}
++ void addOption(String name){options.put(name,"");}void addOption(String name,String value){options.put(name,value);}}
++class Intent {final Map<String,Object> values=new HashMap<>();Intent(Service s,Class<?> c){}void setAction(String a){}void putExtra(String k,Object v){values.put(k,v);}String getStringExtra(String k){return (String)values.get(k);}int getIntExtra(String k,int d){return values.containsKey(k)?(Integer)values.get(k):d;}long getLongExtra(String k,long d){return values.containsKey(k)?(Long)values.get(k):d;}boolean getBooleanExtra(String k,boolean d){return values.containsKey(k)?(Boolean)values.get(k):d;}}
++class MediaDownloadService extends Service {
++'''+constants+builder+model+'''
++ static boolean isYouTubeLike(String url){return url!=null&&url.contains("youtube.com");}
++ static boolean isPinterestLike(String url){return false;}
++ static boolean isYouTubeTask(TaskState task){return isYouTubeLike(task.sourceUrl);}
++ static boolean isPinterestTask(TaskState task){return false;}
++ static void check(boolean value,String message){if(!value)throw new AssertionError(message);}
++ static void test()throws Exception {
++  MediaDownloadService service=new MediaDownloadService();Path root=Files.createTempDirectory("request-test");
++  try {
++   TaskState task=new TaskState();task.taskId="id";task.sourceUrl="https://youtube.com/watch?v=id";task.directUrl="https://cdn.test/videoplayback?sig=signed";task.directAudioUrl="";task.outputExt="mp4";task.formatId="137+140";task.mediaType=TYPE_VIDEO;task.userAgent="BrowserUA";task.cookieHeader="SID=test";
++   var request=service.buildRequest(task,root.toFile());
++   check(request.urls.equals(List.of(task.sourceUrl)),"Analysis format downloads must reopen page");
++   check(request.options.get("-f").equals("137+140"),"Exact audio/video pair was modified");
++   check(request.options.get("--remote-components").equals("ejs:github"),"SL.Tube EJS setup missing");
++   check(request.options.get("--user-agent").equals("BrowserUA"),"Browser session UA lost");
++   task.capturedDirect=true;task.manifest=true;task.directUrl="https://cdn.test/manifest?sig=token";task.formatId="bestvideo[height=2160]+bestaudio/best[height=2160]";
++   var restored=TaskState.fromIntent(task.toIntent(service,"resume"));
++   check(restored.manifest && restored.capturedDirect,"Manifest flag not retained across pause/resume");
++   request=service.buildRequest(restored,root.toFile());
++   check(request.urls.equals(List.of(task.directUrl)),"Signed master URL with no extension was lost");
++   check(!request.options.containsKey("--load-info-json"),"Manifest incorrectly treated as one HTTP file");
++   check(request.options.get("-f").equals(task.formatId),"Selected HLS resolution was modified");
++   task.mediaType=TYPE_AUDIO;task.outputExt="mp3";task.audioQuality=320;task.formatId="";
++   request=service.buildRequest(task,root.toFile());
++   check(request.options.get("--audio-format").equals("mp3") && request.options.get("--audio-quality").equals("320K"),"HLS MP3 extraction options wrong");
++   task.manifest=false;task.mediaType=TYPE_VIDEO;task.directUrl="https://cdn.test/file.mkv";task.outputExt="mkv";task.formatId="";task.hasAudio=true;
++   request=service.buildRequest(task,root.toFile());
++   check(request.options.containsKey("--load-info-json"),"Direct MKV did not use captured plan");
++   check(request.options.get("--merge-output-format").equals("mkv"),"MKV target lost");
++   System.out.println("PASS production download requests: exact video+audio selector, original page refresh, session UA, EJS, signed HLS master without extension, selected 4K, pause/resume persistence, MP3 extraction, MKV plan");
++  } finally {try(var files=Files.list(root)){for(Path p:files.toList())Files.delete(p);}Files.delete(root);}
++ }
++}
++'''+''.join(parts)
++with tempfile.TemporaryDirectory() as tmp:
++ p=Path(tmp)/'DownloadRequestIntegrationTest.java';p.write_text(source)
++ subprocess.run(['java',str(p)],check=True)
+--- a/tests/format_parser_test.py
++++ b/tests/format_parser_test.py
+@@ -16,6 +16,7 @@
+   static final Object NULL=new Object(); final Map<String,Object> data=new LinkedHashMap<>();
+   JSONObject put(String k,Object v){data.put(k,v);return this;}
+   Object opt(String k){return data.get(k);}
++  boolean optBoolean(String k,boolean fallback){Object v=data.get(k);return v instanceof Boolean?(Boolean)v:fallback;}
+   String optString(String k){return optString(k,"");}
+   String optString(String k,String fallback){Object v=data.get(k);return v==null||v==NULL?fallback:String.valueOf(v);}
+   JSONArray optJSONArray(String k){Object v=data.get(k);return v instanceof JSONArray?(JSONArray)v:null;}
+@@ -44,12 +45,18 @@
+   check(parsed.videos.get(0).height==4320,"Highest available resolution is not first");
+   check(parsed.videos.get(0).videoCodec.equals("AV1"),"8K AV1 was filtered out");
+   check(parsed.videos.get(0).directAudioUrl.equals("https://cdn.test/audio.m4a"),"Separate audio was not paired");
++  check(parsed.videos.get(0).formatId.equals("4320+140"),"Exact paired audio selector missing");
++  check(parsed.videos.stream().filter(v->v.height==2160).findFirst().get().ext.equals("mkv"),"Incompatible WebM + AAC needs MKV");
+   check(parsed.audios.size()==4,"MP3 options missing");
+   check(parsed.audios.get(0).audioQualityKbps==320,"MP3 conversion targets are not ordered");
+   var progressive=parser.parseFormats(new JSONObject().put("duration",60).put("formats",new JSONArray().put(video("18","mp4","avc1",360,true))));
+   check(progressive.audios.size()==4,"Progressive video with sound must provide MP3 extraction");
+   var onlyImages=parser.parseFormats(new JSONObject().put("formats",new JSONArray().put(video("sb","mhtml","images",9000,false))));
+   check(onlyImages.videos.isEmpty() && onlyImages.audios.isEmpty(),"Images must not count as downloadable media");
++  var estimated=parser.parseFormats(new JSONObject().put("formats",new JSONArray().put(video("approx","mp4","avc1",720,true).put("filesize",0).put("filesize_approx",200000))));
++  check(estimated.videos.get(0).sizeEstimated,"filesize_approx must not be presented as exact");
++  var protectedRows=parser.parseFormats(new JSONObject().put("formats",new JSONArray().put(video("drm","mp4","avc1",2160,true).put("has_drm",true))));
++  check(protectedRows.videos.isEmpty(),"Protected rows must not be download options");
+   List<FormatSelectionPolicy.Format> previewOnly=List.of(new FormatSelectionPolicy.Format("https://cdn.test/sb","mhtml","images","none",9000));
+   check(!FormatSelectionPolicy.score(previewOnly).hasMedia(),"Storyboard-only extraction reported success");
+   var low=FormatSelectionPolicy.score(List.of(new FormatSelectionPolicy.Format("https://cdn.test/low","mp4","avc1","mp4a",360)));
+--- /dev/null
++++ b/tests/hls.test.cjs
+@@ -0,0 +1,47 @@
++const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
++const assets=path.join(__dirname,'../app/src/main/assets/media_capture');
++const fixture=`#EXTM3U
++#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="Main",URI="sound.m3u8"
++#EXT-X-STREAM-INF:BANDWIDTH=900000,RESOLUTION=640x360,CODECS="avc1.4d,mp4a.40.2",FRAME-RATE=30
++low/index.m3u8?sig=low
++#EXT-X-STREAM-INF:BANDWIDTH=6000000,RESOLUTION=1920x1080,CODECS="avc1.64",AUDIO="audio",FRAME-RATE=60
++../high/playlist?sig=high
++#EXT-X-STREAM-INF:BANDWIDTH=15000000,RESOLUTION=3840x2160,CODECS="hvc1.1,mp4a.40.2",FRAME-RATE=60
++https://cdn.test/4k.m3u8?sig=signed
++`;
++const context=vm.createContext({URL,Map,Set,Date,Number,Array,Promise,AbortController,
++ timers:new Map(),sequence:0,setTimeout(fn,delay){const id=++context.sequence;context.timers.set(id,{fn,delay});return id;},clearTimeout(id){context.timers.delete(id);}});
++vm.runInContext(fs.readFileSync(path.join(assets,'hls_metadata.js'),'utf8'),context);
++const rows=context.SatLinkHls.parse(fixture,'https://cdn.test/root/master.m3u8');
++assert.equal(rows.length,3);assert.equal(rows[1].url,'https://cdn.test/high/playlist?sig=high');
++assert.equal(rows[2].height,2160);assert.equal(rows[2].fps,60);assert(rows[1].hasAudio);
++assert(rows[2].formatSelector.includes('[height=2160]'));
++assert.equal(context.SatLinkHls.parse('#EXTM3U\n#EXTINF:10,\nchunk1.ts\n#EXTINF:10,\nchunk2.ts','https://cdn.test/master').length,0,'segments must not become video qualities');
++assert.equal(context.SatLinkHls.parse('#EXTM3U\n#EXT-X-STREAM-INF:RESOLUTION=999x999\njavascript:bad','https://cdn.test/master').length,0);
++const event=()=>({listeners:[],addListener(fn){this.listeners.push(fn);}});
++const messages=event(),updated=event(),removed=event(),sent=[],pending=[];
++context.fetch=(url,options)=>new Promise(resolve=>pending.push({url,options,resolve}));
++context.browser={runtime:{onMessage:messages,async sendNativeMessage(host,data){sent.push(data);}},cookies:{async getAll(){return[];}},
++ webRequest:{onBeforeRequest:event(),onBeforeSendHeaders:event(),onHeadersReceived:event()},tabs:{onUpdated:updated,onRemoved:removed}};
++vm.runInContext(fs.readFileSync(path.join(assets,'media_metadata.js'),'utf8'),context);
++vm.runInContext(fs.readFileSync(path.join(assets,'background.js'),'utf8'),context);
++async function tick(){for(const [id,t] of [...context.timers])if(t.delay===100){context.timers.delete(id);await t.fn();}for(let i=0;i<30;i++)await Promise.resolve();}
++async function snapshot(pageUrl,items){await messages.listeners[0]({action:'pageSnapshot',isTopFrame:true,pageUrl,items},{tab:{id:1},frameId:0});await tick();}
++(async()=>{
++ const master='https://cdn.test/root/master.m3u8';
++ await snapshot('https://page.test/watch',[{url:master,type:'video',mime:'application/vnd.apple.mpegurl'}]);
++ assert.equal(pending.length,1);assert.equal(pending[0].options.credentials,'include');
++ pending.shift().resolve({ok:true,url:master,headers:{get(){return '';}},async text(){return fixture;}});
++ for(let i=0;i<30;i++)await Promise.resolve();await tick();
++ const items=sent.at(-1).items;
++ assert.equal(items.length,3,'master placeholder replaced by three actual variants');
++ assert(items.every(i=>i.masterUrl===master && i.referer==='https://page.test/watch'));
++ assert.equal(pending.length,0,'extension fetch must not recursively fetch every variant');
++ await snapshot('https://page.test/next',[{url:'https://cdn.test/next.m3u8',type:'video'}]);
++ assert.equal(pending.length,1);const stale=pending.shift();
++ await snapshot('https://page.test/third',[]);
++ stale.resolve({ok:true,url:stale.url,headers:{get(){return ''; }},async text(){return fixture;}});
++ for(let i=0;i<30;i++)await Promise.resolve();await tick();
++ assert.equal(sent.at(-1).items.length,0,'old playlist completion cannot enter a new page');
++ console.log('PASS HLS: 360/1080p60/4K, relative signed URLs, separate audio groups, no segment cards, exact selectors, credentials, bounded fetch, no recursion, navigation isolation');
++})().catch(error=>{console.error(error);process.exitCode=1;});
+Binary addition: app/src/main/res/raw/ytdlp; exact SL.Tube 2026.08.19 engine, SHA-256 1fa6733c37ea6fb51c99ad8fe785e7b7e5f3246c9b980230329d4fb72ed8d4d6

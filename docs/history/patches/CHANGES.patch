@@ -1,0 +1,2590 @@
+--- /dev/null
++++ b/README_AR.md
+@@ -0,0 +1,67 @@
++# SatLink Browser PRO 1.9.4 — مشروع المصدر المعدّل
++
++تطبيق أندرويد للتصفح والتقاط روابط الفيديو وتنزيل الفيديو والصوت باستخدام GeckoView وyt-dlp وFFmpeg.
++
++## إصلاحات مراجعة 1.9.4
++
++- اختيار استجابة المحرك حسب أعلى دقة فيديو قابلة للتنزيل، واستبعاد صور المعاينة والروابط الفارغة من الاختيار.
++- ترتيب قائمة الفيديو من أعلى دقة إلى الأدنى، مع صوت منفصل أو مصدر فيديو بصوت لاستخراج MP3.
++- إعادة التحليل تلقائياً بعد تحديث المحرك إذا فشل التحليل السابق، وإلغاء التحليل القديم عند إغلاق اللوحة أو التنقل.
++- حد 45 ثانية لكل محاولة تحليل، وإظهار سبب الفشل بدلاً من استبداله برسالة عامة.
++- التقاط طلبات الشبكة مجهولة التبويب فقط إذا تطابقت صفحة المصدر أو رابط الإطار؛ عنوان الموقع وحده لا يكفي.
++- استبعاد موارد الأداء السابقة عند الانتقال بين الفيديوهات دون إعادة تحميل الصفحة.
++
++## إصلاحات الالتقاط المحفوظة
++
++- قراءة الدقة والحجم والفريمات والترميز من JSON الخاص بالمشغّل، بدلاً من الاكتفاء بالروابط المجردة.
++- إثراء طلبات المتصفح ببيانات الجودة المطابقة لـitag مع الحفاظ على الحجم الكلي والترميز.
++- دمج طلبات أجزاء الفيديو المتكررة، وتفضيل الرابط الذي استعمله المتصفح فعلياً على رابط أولي من بيانات الصفحة.
++- عدم عرض طلبات UMP/SABR كبطاقات MP4، وعدم اختراع أبعاد للجودات التي لا يعلنها المصدر.
++- إتاحة MP3 من مصدر صوت منفصل أو من فيديو بصوت، دون اختراع رابط صوت آخر.
++- تعيين مسار ملف QuickJS الأصلي libqjs.so عند وجوده بدلاً من اسم qjs غير الموجود بالضرورة في PATH، وإتاحة تنزيل مكونات EJS المطابقة للمحرك.
++- تنزيل المصادر الملتقطة فعلياً عبر بيانات yt-dlp المحلية، بما فيها دمج الصوت المنفصل، بدلاً من إجبارها على إعادة تحليل صفحة فشلت سابقاً. المصادر الأولية ليوتيوب تبقى على مسار التحليل المعتاد لتجديد التوقيع.
++- تمييز الحجم التقديري بعلامة ≈، وإزالة التخمين H.264/H.265 ووعد دمج الصوت عند عدم وجود مسار صوت مؤكد.
++- تحديث الرقم الظاهر في الواجهة من PRO 1.8.7 إلى PRO 1.9.4.
++
++## التعديلات السابقة المحفوظة
++
++- إرسال الالتقاط من بداية الصفحة وعند ظهور روابط جديدة، دون انتظار ضغطة ثانية.
++- جدولة إرسال نتائج الشبكة كل 100 ملي ثانية تقريباً عند وجود تغييرات؛ حركة HLS المستمرة لا تؤجل الإرسال.
++- إظهار الروابط المباشرة قبل اكتمال قراءة الجودات، وتقليل مهلة بدء التحليل الاحتياطية من 5.5 ثوانٍ إلى 0.8 ثانية.
++- إعلان جاهزية المحرك قبل إجراء تحديث yt-dlp التلقائي. التحديث اليومي ما زال مفعلاً.
++- مهلة اتصال تحليل الجودات 25 ثانية وإعادة محاولة المستخرج مرتان. إعدادات إعادة محاولة التنزيل بقيت كما هي.
++- MKV وTS المكتشفتان فعلياً تظهران ضمن قائمة الفيديو. أزيل قسم الصيغ الإضافية وخيارات تحويل MKV/TS المصطنعة.
++- إصلاح رصد امتدادات روابط الشبكة التي لا تحتوي معاملات، وإضافة التعرف على Matroska.
++- إبقاء بيانات Referer والحجم والدقة عند إثراء نتائج الشبكة، وقراءة الحجم الإجمالي من Content-Range للطلبات الجزئية.
++- عدم خلط طلبات مجهولة التبويب مع الصفحة الحالية، ومسح الالتقاط السابق عند التنقل.
++- منع تكرار التحليل ضمن طلب التقاط واحد وتجاهل نتائج التحليل القديم بعد إغلاق اللوحة أو تغيير الصفحة.
++- تقليل الفحوص الثقيلة المتكررة عند تغيّر الصفحة، وحفظ آخر 1000 رابط داخل كل إطار.
++- استبعاد أجزاء M4S، واستبعاد TS الجزئية عندما يوجد رابط قائمة تشغيل؛ رابط TS مستقل يبقى فيديو.
++- دعم AV1 داخل MP4 وتصحيح قراءة 1080p60 حتى لا تصبح الدقة 108060.
++- حفظ ملفات جلسة مستقلة عند تغيّر الكوكيز حتى لا تستبدل جلسة تنزيل منتظر بجلسة صفحة أخرى.
++- إبقاء بطاقات التحكم بالتنزيل الذي بدأ عند وصول تحديثات الالتقاط أو اكتمال تحليل الجودات.
++
++## البناء
++
++1. افتح هذا المجلد في Android Studio، وجهّز JDK 17 وAndroid SDK 36.
++2. اسمح بتنزيل Gradle واعتماديات المشروع من مستودعاتها.
++3. على ويندوز: `gradlew.bat :app:assembleDebug`.
++4. على لينكس/macOS: `chmod +x gradlew` ثم `./gradlew :app:assembleDebug`.
++5. ينتج ملف التجربة: `app/build/outputs/apk/debug/app-debug.apk`.
++
++رقم الإصدار 194، واسم الإصدار PRO 1.9.4 Reviewed Source. النسخة التجريبية لا تستبدل نسخة موقعة بمفتاح مختلف؛ لبناء تحديث تثبيت مباشر يلزم مفتاح توقيع النسخة الأصلية.
++
++## الفحص
++
++- `node tests/capture.test.cjs`
++- `node tests/player_metadata.test.cjs`
++- `python3 tests/format_rules_test.py` (يتطلب JDK 17)
++- `python3 tests/download_plan_test.py` (يتطلب JDK 17)
++- `python3 tests/format_parser_test.py` (يتطلب JDK 17)
++- `java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/*.java`
++
++راجع TEST_REPORT_AR.md لنتائج الاختبارات وحدودها. ملف CHANGES.patch يوضح فروق المصدر عن الملف المرفق.
++
++## الاستخدام
++
++افتح صفحة الفيديو وشغله عند الحاجة ثم اضغط زر الالتقاط. تظهر الروابط المتاحة أولاً، ثم الجودات بعد اكتمال التحليل. سرعة ظهور الرابط تعتمد أيضاً على وقت إنشاء الموقع للرابط واستجابة الشبكة. المحتوى المشفّر بنظام DRM لا يصبح قابلاً للتنزيل بمجرد تحسين الالتقاط.
+--- /dev/null
++++ b/TEST_REPORT_AR.md
+@@ -0,0 +1,39 @@
++# تقرير فحص PRO 1.9.4 Reviewed Source
++
++التاريخ: 2026-10-03
++
++## المشكلة التي روجعت
++
++الصورة المقدمة تظهر فشل تحليل يوتيوب، ثم سبع بطاقات فيديو بلا أبعاد أو حجم، وصوتيات MP3 بعدد صفر. مراجعة المصدر وجدت أن مسار الالتقاط الاحتياطي يقبل روابط videoplayback دون بيانات جودة، وأن اختيار MP3 كان يعتمد على العثور على صوت منفصل فقط. كما أن خيار QuickJS كان اسم runtime دون مسار الملف الأصلي. الصورة لا تحتوي سجل المحرك، لذلك لا يمكن تأكيد سبب فشل المحرك نفسه من الصورة وحدها.
++
++## أخطاء إضافية مثبتة من مراجعة المصدر
++
++اختيار استجابة يوتيوب كان يعتمد على عدد الصيغ دون استبعاد صور المعاينة، والتحليل الفاشل لم يكن يعاد بعد اكتمال تحديث المحرك. بعض تحديثات الالتقاط كانت تمسح سبب الفشل برسالة عامة. صححت هذه المسارات، وأضافت المراجعة إلغاء التحليل القديم وحداً زمنياً لكل محاولة. هذه نتائج مراجعة المصدر؛ سبب فشل الفيديو المحدد على الهاتف يحتاج سجل تشغيل فعلي، ولم يدّع الفحص تأكيده.
++
++## فحوص نجحت
++
++- node tests/capture.test.cjs: إرسال مباشر وتلقائي، تجميع تغييرات DOM، رصد MKV وTS، الحفاظ على Referer، Content-Range بحجم 4 GiB، تنظيف التنقل، وتمرير بيانات الجودة من script إلى الالتقاط.
++- node tests/player_metadata.test.cjs: JSON اصطناعي للمشغّل يتضمن فيديو 360p بصوت، فيديو 1080p60 وصوت منفصل. تحقق الاختبار من الأبعاد والترميز والحجم الفعلي داخل البيانات، وعدم التعامل مع signatureCipher مشفر كرابط صالح، وعدم استعمال بيانات فيديو سابق.
++- الاختبار المتكامل للإضافة: سبعة طلبات أجزاء للفيديو نفسه صارت جودة واحدة 1080p60، مع إبقاء مصدر الصوت وحجم الفيديو الكلي، واستبعاد UMP. هذه بيانات اختبار وليست استخراجاً حياً للفيديو في الصورة.
++- python3 tests/format_rules_test.py: تشغيل دوال Java الفعلية للصيغ والبيانات، وفحص MKV وTS وAV1 و1080p60.
++- python3 tests/download_plan_test.py: تشغيل كود خطة التنزيل الفعلي وفحص رابط الفيديو والصوت المنفصلين، وبيانات الفيديو بصوت لاستخراج MP3، وصوت منفصل، ورفض blob، ومسار QuickJS الأصلي. تم استبدال Context وYoutubeDLRequest ببدائل اختبار صغيرة؛ لم ينفذ yt-dlp أو FFmpeg على أندرويد.
++- python3 tests/format_parser_test.py: تشغيل دالة parseFormats الكاملة من التطبيق ببدائل JSON للقراءة. التحقق من ترتيب 8K ثم 4K ثم 1080p، وصيغ AV1/MKV/TS، وربط الصوت المنفصل، وأربع جودات هدف MP3، واستخراج الصوت من فيديو بصوت، واستبعاد صور المعاينة والروابط الفارغة، وتفضيل الاستجابة ذات أعلى دقة.
++- اختبارات الالتقاط الإضافية: استرجاع طلب شبكة مجهول التبويب بصفحة مصدر مطابقة، ومنع خلط تبويبين من الموقع نفسه، ومنع ظهور طلب صفحة سابقة وموارد الأداء القديمة بعد التنقل.
++- تحليل بناء ملفات Java باستخدام JDK 17 نجح، وnode --check لجميع ملفات JavaScript نجح.
++- صحة XML ومطابقة مراجع R.id مع معرفات التخطيط نجحت.
++
++## حدود التحقق
++
++أعيدت محاولة ./gradlew :app:assembleDebug. توقفت قبل تجميع أندرويد بسبب Network is unreachable عند تنزيل Gradle 8.11.1. لا يوجد APK جديد في هذه الحزمة.
++
++لم يحصل بناء كامل أو تحقق من أنواع Android/GeckoView أو تجربة على هاتف أو استخراج حي من يوتيوب أو تنزيل/دمج فعلي بواسطة المحرك. الاختبارات المنطقية لا تعادل اختبار التطبيق على الهاتف، ولا تثبت أن كل فيديو متاح سيحمّل في ظروف الشبكة المختلفة.
++
++تبقى القيمة الدقيقة للحجم متاحة عندما يرسلها المصدر أو بيانات المشغّل. القيمة المستنتجة من مدة وبتريت تظهر بعلامة ≈. لا يولد التطبيق حجماً أو دقة وهميين.
++
++## مصادر القرارات التقنية
++
++- دليل yt-dlp الرسمي لمحركات JavaScript وEJS: https://github.com/yt-dlp/yt-dlp/wiki/EJS
++- مصدر YoutubeDLRequest الرسمي يتيح قائمة روابط فارغة، المستخدمة مع --load-info-json: https://github.com/yausername/youtubedl-android/blob/master/library/src/main/java/com/yausername/youtubedl_android/YoutubeDLRequest.kt
++- وثائق مكتبة أندرويد بشأن استخراج المكتبات الأصلية وتهيئة FFmpeg: https://github.com/yausername/youtubedl-android
++
++ملف CHANGES.patch يوضح تعديلات المصدر عن المشروع المرفق الأصلي.
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -10,8 +10,8 @@
+         applicationId 'com.satlink.geckoviewtest'
+         minSdk 26
+         targetSdk 36
+-        versionCode 191
+-        versionName 'PRO 1.9.1 RESTORED'
++        versionCode 194
++        versionName 'PRO 1.9.4 Reviewed Source'
+ 
+         ndk {
+             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
+--- a/app/src/main/assets/media_capture/background.js
++++ b/app/src/main/assets/media_capture/background.js
+@@ -1,8 +1,8 @@
+ const networkByTab = new Map();
++const unattributedNetwork = new Map();
+ const frameSnapshotsByTab = new Map();
+ const topSnapshotByTab = new Map();
+ const flushTimers = new Map();
+-const globalNetwork = new Map();
+ const MAX_PER_TAB = 1500;
+ const MAX_AGE_MS = 30 * 60 * 1000;
+ 
+@@ -21,22 +21,21 @@
+ function inferType(url, mime = '') {
+   const text = `${decodedParam(url, 'mime')} ${mime} ${url}`.toLowerCase();
+   if (/audio\//.test(text) || /\.(mp3|m4a|aac|ogg|opus|wav|flac)(?:$|[?#])/.test(text)) return 'audio';
+-  if (/video\//.test(text) || /(mpegurl|dash\+xml|mp2t)/.test(text) ||
++  if (/video\//.test(text) || /(mpegurl|dash\+xml|mp2t|matroska)/.test(text) ||
+       /\.(mp4|webm|mkv|mov|m4v|m3u8|mpd|m4s|ts)(?:$|[?#])/.test(text)) return 'video';
+   return 'unknown';
+ }
+ 
+ function isMediaRequest(url, mime = '') {
+-  const text = `${url} ${mime} ${decodedParam(url, 'mime')}`.toLowerCase();
+-  return /(videoplayback|googlevideo|manifest|playlist|master\.m3u8|index\.m3u8|\.m3u8|\.mpd|\.m4s|\.mp4|\.webm|\.m4a|\.aac|\.opus|\.ts)(?:$|[?#/&])/i.test(text) ||
+-    /(video|audio)\//.test(text) || /(mpegurl|dash\+xml|mp2t)/.test(text);
++  return inferType(url, mime) !== 'unknown' ||
++    /(videoplayback|manifest|playlist)(?:$|[?#/&])/i.test(url);
+ }
+ 
+ function mediaItem(url, mime = '', source = 'webRequest', size = 0, headers = {}) {
+   return {
+     url,
+     mime: decodedParam(url, 'mime') || mime || '',
+-    type: inferType(url, mime),
++    type: SatLinkMedia.typeOf(url, mime),
+     source,
+     duration: numericParam(url, 'dur', 'duration'),
+     size: size || numericParam(url, 'clen', 'contentLength', 'content_length'),
+@@ -49,19 +48,25 @@
+     referer: headers.referer || '',
+     origin: headers.origin || '',
+     userAgent: headers.userAgent || '',
+-    capturedAt: Date.now()
++    capturedAt: Date.now(),
++    documentUrl: headers.documentUrl || "",
++    initiator: headers.initiator || ""
+   };
+ }
+ 
+ function remember(tabId, item) {
+   if (!item?.url) return;
+-  let map = tabId == null || tabId < 0 ? globalNetwork : networkByTab.get(tabId);
++  const unattributed=tabId==null || tabId<0;
++  let map = unattributed ? unattributedNetwork : networkByTab.get(tabId);
+   if (!map && tabId >= 0) {
+     map = new Map();
+     networkByTab.set(tabId, map);
+   }
+-  const previous = map.get(item.url) || {};
+-  map.set(item.url, { ...previous, ...item, capturedAt: Date.now() });
++  const key = SatLinkMedia.key(item);
++  map.set(key, SatLinkMedia.merge(map.get(key), {...item, capturedAt: Date.now()}));
++  if(unattributed) {
++    for(const id of topSnapshotByTab.keys()) scheduleFlush(id);
++  } else scheduleFlush(tabId);
+   if (map.size > MAX_PER_TAB) {
+     const entries = [...map.entries()].sort((a, b) => (a[1].capturedAt || 0) - (b[1].capturedAt || 0));
+     for (let i = 0; i < entries.length - MAX_PER_TAB; i++) map.delete(entries[i][0]);
+@@ -77,8 +82,8 @@
+ 
+ async function cookiesForMany(urls) {
+   const merged = new Map();
+-  for (const url of urls) {
+-    for (const cookie of await cookiesFor(url)) {
++  for (const batch of await Promise.all(urls.map(cookiesFor))) {
++    for (const cookie of batch) {
+       const key = `${cookie.domain || ''}|${cookie.path || '/'}|${cookie.name || ''}`;
+       merged.set(key, cookie);
+     }
+@@ -88,11 +93,23 @@
+ 
+ function scheduleFlush(tabId) {
+   const old = flushTimers.get(tabId);
+-  if (old) clearTimeout(old);
++  if (old) return; // Throttle: continuous HLS traffic must not postpone delivery.
+   flushTimers.set(tabId, setTimeout(() => {
+     flushTimers.delete(tabId);
+     flushCapture(tabId).catch(() => {});
+-  }, 450));
++  }, 100));
++}
++
++function sameDocument(first,second) {
++  try { const a=new URL(first),b=new URL(second);a.hash='';b.hash='';return a.href===b.href; } catch(_){return false;}
++}
++function belongsToSnapshot(item,top,frames) {
++  const pages=[top.pageUrl,...Array.from(frames?.values()||[]).map(frame=>frame.pageUrl)].filter(Boolean);
++  const provenance=[item.documentUrl,item.initiator,item.referer].filter(Boolean);
++  if(provenance.some(source=>pages.some(page=>sameDocument(source,page)))) return true;
++  // An origin alone cannot identify a page or survive navigation safely.
++  const key=SatLinkMedia.key(item);
++  return Array.from(frames?.values()||[]).some(frame=>(frame.items||[]).some(raw=>raw.url && SatLinkMedia.key(raw)===key));
+ }
+ 
+ async function flushCapture(tabId) {
+@@ -101,6 +118,8 @@
+ 
+   const now = Date.now();
+   const merged = new Map();
++  const metadataByItag = new Map();
++  const activeVideoId = SatLinkMedia.query(top.pageUrl, "v");
+   const frames = frameSnapshotsByTab.get(tabId);
+   let duration = Number(top.duration) || 0;
+ 
+@@ -109,31 +128,31 @@
+       if (now - (snapshot.capturedAt || now) > MAX_AGE_MS) continue;
+       duration = Math.max(duration, Number(snapshot.duration) || 0);
+       for (const raw of Array.isArray(snapshot.items) ? snapshot.items : []) {
++        if (raw?.videoId && activeVideoId && raw.videoId !== activeVideoId) continue;
++        if (raw?.itag && raw.metadataSource === "player-json") metadataByItag.set(String(raw.itag), raw);
+         if (!raw?.url) continue;
+         const item = { ...raw };
+         item.frameUrl = item.frameUrl || snapshot.pageUrl || '';
+         item.referer = item.referer || snapshot.pageUrl || '';
+         item.capturedAt = item.capturedAt || snapshot.capturedAt || now;
+-        merged.set(item.url, item);
++        merged.set(SatLinkMedia.key(item), SatLinkMedia.merge(merged.get(SatLinkMedia.key(item)), item));
+       }
+     }
+   }
+ 
+   const network = networkByTab.get(tabId);
+-  if (network) {
+-    for (const [url, item] of network) {
+-      if (now - (item.capturedAt || now) <= MAX_AGE_MS) merged.set(url, item);
+-    }
+-  }
+-
+-  let pageHost = '';
+-  try { pageHost = new URL(top.pageUrl).hostname; } catch (_) {}
+-  for (const [url, item] of globalNetwork) {
+-    if (now - (item.capturedAt || now) > MAX_AGE_MS) continue;
+-    let host = '';
+-    try { host = new URL(url).hostname; } catch (_) {}
+-    if (host === pageHost || /googlevideo\.com$/i.test(host) || String(item.referer || '').includes(pageHost)) {
+-      merged.set(url, item);
++  const allNetwork=[...Array.from(network?.values()||[])];
++  for(const [key,item] of unattributedNetwork) {
++    if(now-(item.capturedAt||now)>MAX_AGE_MS) {unattributedNetwork.delete(key);continue;}
++    if(belongsToSnapshot(item,top,frames)) allNetwork.push(item);
++  }
++  {
++    for (const item of allNetwork) {
++      if (now - (item.capturedAt || now) > MAX_AGE_MS || item.type === "transport") continue;
++      const metadata = metadataByItag.get(String(item.itag || '')) || {};
++      const enriched = SatLinkMedia.merge(item, {...metadata, url: SatLinkMedia.fullStreamUrl(item.url), resolvedFromNetwork: true});
++      const key = SatLinkMedia.key(enriched);
++      merged.set(key, SatLinkMedia.merge(enriched, merged.get(key) || {}));
+     }
+   }
+ 
+@@ -144,6 +163,7 @@
+     }
+   }
+   const cookies = await cookiesForMany([...new Set(cookieUrls)]);
++  if (topSnapshotByTab.get(tabId) !== top) { scheduleFlush(tabId); return; }
+   try {
+     await browser.runtime.sendNativeMessage('satlink_capture', {
+       action: 'captureResult',
+@@ -151,8 +171,11 @@
+       title: top.title || '',
+       userAgent: top.userAgent || '',
+       duration,
+-      items: Array.from(merged.values()).slice(-1500),
+-      cookies
++      items: Array.from(merged.values())
++        .sort((a, b) => Number(!!b.resolvedFromNetwork) - Number(!!a.resolvedFromNetwork))
++        .slice(0, 1500),
++      cookies,
++      playerFormats: Array.from(metadataByItag.values())
+     });
+   } catch (_) {}
+ }
+@@ -160,7 +183,7 @@
+ try {
+   browser.webRequest.onBeforeSendHeaders.addListener(details => {
+     if (!details?.url) return;
+-    const headers = {};
++    const headers = {documentUrl:details.documentUrl||"",initiator:details.originUrl||details.initiator||""};
+     for (const header of details.requestHeaders || []) {
+       const name = String(header.name || '').toLowerCase();
+       if (name === 'referer') headers.referer = header.value || '';
+@@ -174,7 +197,7 @@
+ 
+   browser.webRequest.onBeforeRequest.addListener(details => {
+     if (details?.url && isMediaRequest(details.url)) {
+-      remember(details.tabId, mediaItem(details.url, '', `webRequest:${details.type || ''}`));
++      remember(details.tabId, mediaItem(details.url, '', `webRequest:${details.type || ''}`,0,{documentUrl:details.documentUrl||"",initiator:details.originUrl||details.initiator||""}));
+     }
+   }, { urls: ['<all_urls>'] });
+ 
+@@ -182,15 +205,27 @@
+     if (!details?.url) return;
+     let mime = '';
+     let size = 0;
++    let rangeTotal = 0;
+     for (const header of details.responseHeaders || []) {
+       const name = String(header.name || '').toLowerCase();
+       if (name === 'content-type') mime = String(header.value || '').split(';')[0].trim();
+       if (name === 'content-length') size = Number(header.value) || 0;
++      if (name === 'content-range') {
++        const match = String(header.value || '').match(/\/(\d+)$/);
++        if (match) rangeTotal = Number(match[1]) || 0;
++      }
+     }
+     if (isMediaRequest(details.url, mime)) {
+-      remember(details.tabId, mediaItem(details.url, mime, `headers:${details.type || ''}`, size));
++      remember(details.tabId, mediaItem(details.url, mime, `headers:${details.type || ''}`, rangeTotal || size,{documentUrl:details.documentUrl||"",initiator:details.originUrl||details.initiator||""}));
+     }
+   }, { urls: ['<all_urls>'] }, ['responseHeaders']);
++
++  browser.tabs.onUpdated.addListener((tabId, change) => {
++    if (change.status !== 'loading' && !change.url) return;
++    networkByTab.delete(tabId);
++    frameSnapshotsByTab.delete(tabId);
++    topSnapshotByTab.delete(tabId);
++  });
+ 
+   browser.tabs.onRemoved.addListener(tabId => {
+     networkByTab.delete(tabId);
+@@ -238,6 +273,11 @@
+     capturedAt: Date.now(),
+     isTopFrame
+   };
++  const oldTop = topSnapshotByTab.get(tabId);
++  if (isTopFrame && oldTop && oldTop.pageUrl !== snapshot.pageUrl) {
++    frames.clear();
++    networkByTab.delete(tabId);
++  }
+   frames.set(frameId, snapshot);
+   if (isTopFrame) topSnapshotByTab.set(tabId, snapshot);
+   scheduleFlush(tabId);
+--- a/app/src/main/assets/media_capture/capture.js
++++ b/app/src/main/assets/media_capture/capture.js
+@@ -1,67 +1,48 @@
+ (() => {
+   const found = new Map();
++  let scannedScripts = new WeakMap();
++  let sendTimer = null;
++  let scanTimer = null;
++  let currentPage = location.href;
++  let navigationCutoff = 0;
++  let navigationPending = false;
++  let lastPayload = '';
++  function scheduleSend() {
++    if (sendTimer !== null) return;
++    sendTimer = setTimeout(() => { sendTimer = null; send(false); }, 100);
++  }
++  function scheduleScan() {
++    if (scanTimer !== null) return;
++    scanTimer = setTimeout(() => { scanTimer = null; scan(); }, 100);
++  }
+   const mediaExt = /\.(mp4|webm|mkv|mov|m4v|mp3|m4a|aac|ogg|opus|wav|flac|m3u8|mpd|m4s|ts)(?:$|[?#])/i;
+ 
+   function absolute(url) {
++    if (typeof url !== 'string' || !url.trim()) return null;
+     try { return new URL(url, document.baseURI).href; } catch (_) { return null; }
+-  }
+-
+-  function decodedParam(url, key) {
+-    try {
+-      const value = new URL(url, document.baseURI).searchParams.get(key);
+-      return value ? decodeURIComponent(value) : '';
+-    } catch (_) { return ''; }
+-  }
+-
+-  function numericParam(url, ...keys) {
+-    for (const key of keys) {
+-      const raw = decodedParam(url, key);
+-      const n = Number(raw);
+-      if (Number.isFinite(n) && n > 0) return n;
+-    }
+-    return 0;
+-  }
+-
+-  function guessType(url, mime) {
+-    const queryMime = decodedParam(url, 'mime');
+-    const text = `${queryMime} ${mime || ''} ${url || ''}`.toLowerCase();
+-    if (/audio\//.test(text) || /\.(mp3|m4a|aac|ogg|opus|wav|flac)(?:$|[?#])/.test(text)) return 'audio';
+-    if (/video\//.test(text) || /\.(mp4|webm|mkv|mov|m4v|m3u8|mpd|m4s|ts)(?:$|[?#])/.test(text)) return 'video';
+-    return 'unknown';
+-  }
+-
+-  function mediaMeta(url, mime, source) {
+-    const queryMime = decodedParam(url, 'mime');
+-    return {
+-      url,
+-      mime: queryMime || mime || '',
+-      type: guessType(url, queryMime || mime),
+-      source: source || '',
+-      duration: numericParam(url, 'dur', 'duration'),
+-      size: numericParam(url, 'clen', 'contentLength', 'content_length'),
+-      bitrate: numericParam(url, 'bitrate', 'abr', 'tbr'),
+-      fps: numericParam(url, 'fps'),
+-      width: numericParam(url, 'width'),
+-      height: numericParam(url, 'height'),
+-      qualityLabel: decodedParam(url, 'quality_label') || decodedParam(url, 'quality'),
+-      itag: decodedParam(url, 'itag'),
+-      frameUrl: location.href
+-    };
+   }
+ 
+   function add(url, mime = '', source = '') {
+     const full = absolute(url);
+     if (!full || !/^https?:/i.test(full)) return;
+-    const queryMime = decodedParam(full, 'mime');
+-    if (!mediaExt.test(full) && !/^(video|audio)\//i.test(mime) &&
++    const queryMime = SatLinkMedia.query(full, 'mime');
++    if (!mediaExt.test(full) && !/(mpegurl|dash\+xml|mp2t|matroska)/i.test(mime) && !/^(video|audio)\//i.test(mime) &&
+         !/^(video|audio)\//i.test(queryMime) &&
+         !/(videoplayback|manifest|playlist|master|stream|\.m4s(?:$|[?#]))/i.test(full)) return;
+-    found.set(full, mediaMeta(full, mime, source));
++    const next = { ...SatLinkMedia.urlMetadata(full, mime), source, frameUrl: location.href };
++    const previous = found.get(full);
++    if (previous && (!mime || previous.mime === next.mime)) return;
++    found.set(full, SatLinkMedia.merge(previous, next));
++    if (found.size > 1000) found.delete(found.keys().next().value);
++    scheduleSend();
+   }
+ 
+   function addPageCandidate(url, source = 'iframe') {
+     const full = absolute(url);
+     if (!full || !/^https?:/i.test(full)) return;
++    if (found.has(`page:${full}`)) return;
++    if (found.size >= 1000) found.delete(found.keys().next().value);
++    scheduleSend();
+     found.set(`page:${full}`, {
+       url: full,
+       mime: 'text/html',
+@@ -86,7 +67,17 @@
+       const scripts = document.scripts || [];
+       for (const script of scripts) {
+         const text = String(script.textContent || '');
+-        if (!text || text.length > 4_000_000) continue;
++        if (!text || text.length > 4_000_000 || scannedScripts.get(script) === text) continue;
++        scannedScripts.set(script, text);
++        for (const item of SatLinkMedia.formatsFromText(text, location.href)) {
++          const key = item.url || `metadata:${item.itag}`;
++          const enriched = SatLinkMedia.merge(found.get(key), item);
++          if (JSON.stringify(found.get(key)) !== JSON.stringify(enriched)) {
++            found.set(key, enriched);
++            if (found.size > 1000) found.delete(found.keys().next().value);
++            scheduleSend();
++          }
++        }
+         const normalized = text.replace(/\\u0026/g, '&').replace(/\\\//g, '/');
+         const matches = normalized.match(/https?:\/\/[^"'<>\\\s]+/g) || [];
+         for (const raw of matches.slice(0, 500)) {
+@@ -98,6 +89,15 @@
+   }
+ 
+   function scan() {
++    if (currentPage !== location.href) {
++      currentPage = location.href;
++      if(!navigationPending) navigationCutoff = typeof performance.now === "function" ? performance.now() : 0;
++      navigationPending = false;
++      found.clear();
++      scannedScripts = new WeakMap();
++      lastPayload = '';
++      sendSession();
++    }
+     document.querySelectorAll('iframe[src], embed[src], object[data]').forEach(el =>
+       addPageCandidate(el.src || el.data, el.tagName.toLowerCase()));
+ 
+@@ -109,7 +109,9 @@
+ 
+     document.querySelectorAll('a[href]').forEach(a => add(a.href, '', 'link'));
+     try {
+-      performance.getEntriesByType('resource').forEach(r => add(r.name, '', `performance:${r.initiatorType || ''}`));
++      performance.getEntriesByType('resource').forEach(r => {
++        if(!navigationCutoff || !r.startTime || r.startTime >= navigationCutoff) add(r.name, '', `performance:${r.initiatorType || ''}`);
++      });
+     } catch (_) {}
+     scanInlinePlayerData();
+   }
+@@ -133,7 +135,7 @@
+     }).catch(() => {});
+   }
+ 
+-  function send() {
++  function send(force = true) {
+     scan();
+     const payload = {
+       action: 'pageSnapshot',
+@@ -144,6 +146,9 @@
+       isTopFrame: window.top === window,
+       items: Array.from(found.values()).slice(-1000)
+     };
++    const fingerprint = JSON.stringify(payload);
++    if (!force && fingerprint === lastPayload) return;
++    lastPayload = fingerprint;
+     browser.runtime.sendMessage(payload).catch(() => {
+       browser.runtime.sendNativeMessage('satlink_capture', {
+         ...payload,
+@@ -174,7 +179,9 @@
+ 
+   try {
+     const performanceObserver = new PerformanceObserver(list => {
+-      list.getEntries().forEach(entry => add(entry.name, '', `observer:${entry.initiatorType || ''}`));
++      list.getEntries().forEach(entry => {
++        if(!navigationCutoff || !entry.startTime || entry.startTime >= navigationCutoff) add(entry.name, '', `observer:${entry.initiatorType || ''}`);
++      });
+     });
+     performanceObserver.observe({ type: 'resource', buffered: true });
+   } catch (_) {}
+@@ -188,7 +195,7 @@
+   } catch (_) {}
+ 
+   try {
+-    const mutationObserver = new MutationObserver(() => scan());
++    const mutationObserver = new MutationObserver(scheduleScan);
+     mutationObserver.observe(document.documentElement || document, {
+       childList: true,
+       subtree: true,
+@@ -197,9 +204,21 @@
+     });
+   } catch (_) {}
+ 
+-  scan();
+-  setTimeout(sendSession, 900);
+-  setTimeout(scan, 1800);
++  function navigationStarting() {
++    navigationPending = true;
++    navigationCutoff = typeof performance.now === 'function' ? performance.now() : 0;
++    scheduleScan();
++  }
++  window.addEventListener('popstate', navigationStarting, { passive: true });
++  document.addEventListener('yt-navigate-start', navigationStarting, { passive: true });
++  document.addEventListener('yt-navigate-finish', () => send(), { passive: true });
++  send();
++  sendSession();
++  document.addEventListener('DOMContentLoaded', () => send(), { once: true });
++  for (const event of ['loadedmetadata', 'play', 'durationchange']) {
++    document.addEventListener(event, scheduleSend, true);
++  }
++  setInterval(() => { if (!document.hidden) { scan(); scheduleSend(); } }, 3000);
+   window.addEventListener('pageshow', sendSession, { passive: true });
+   document.addEventListener('visibilitychange', () => {
+     if (!document.hidden) sendSession();
+--- a/app/src/main/assets/media_capture/manifest.json
++++ b/app/src/main/assets/media_capture/manifest.json
+@@ -1,7 +1,7 @@
+ {
+   "manifest_version": 2,
+   "name": "SatLink Media Capture",
+-  "version": "1.3",
++  "version": "1.5",
+   "description": "Captures top-page and iframe media while preserving the active browser session.",
+   "browser_specific_settings": {
+     "gecko": {
+@@ -10,6 +10,7 @@
+   },
+   "background": {
+     "scripts": [
++      "media_metadata.js",
+       "background.js"
+     ]
+   },
+@@ -19,6 +20,7 @@
+         "<all_urls>"
+       ],
+       "js": [
++        "media_metadata.js",
+         "capture.js"
+       ],
+       "run_at": "document_start",
+--- /dev/null
++++ b/app/src/main/assets/media_capture/media_metadata.js
+@@ -0,0 +1,119 @@
++// Shared passive metadata parser. Does not evaluate page JavaScript or decipher signatures.
++(function(root) {
++  function query(url, key) {
++    try { return new URL(url).searchParams.get(key) || ''; } catch (_) { return ''; }
++  }
++  function positive(value) { const n=Number(value); return Number.isFinite(n) && n>0?n:0; }
++  function typeOf(url, mime='') {
++    const text=(query(url,'mime')+' '+mime).toLowerCase();
++    if (text.includes('yt-ump') || text.includes('sabr')) return 'transport';
++    if (/audio\//.test(text) || /\.(mp3|m4a|aac|ogg|opus|wav|flac)(?:$|[?#])/i.test(url)) return 'audio';
++    if (/video\//.test(text) || /(mpegurl|dash\+xml|mp2t|matroska)/.test(text) ||
++      /\.(mp4|webm|mkv|mov|m4v|m3u8|mpd|ts)(?:$|[?#])/i.test(url)) return 'video';
++    return 'unknown';
++  }
++  function urlMetadata(url, mime='') {
++    return {url, mime:query(url,'mime')||mime, type:typeOf(url,mime), itag:query(url,'itag'),
++      duration:positive(query(url,'dur')||query(url,'duration')),
++      size:positive(query(url,'clen')||query(url,'contentLength')),
++      bitrate:positive(query(url,'bitrate')), fps:positive(query(url,'fps')),
++      width:positive(query(url,'width')),height:positive(query(url,'height')),
++      qualityLabel:query(url,'quality_label')||query(url,'quality')};
++  }
++  function merge(previous={}, incoming={}) {
++    const item={...previous,...incoming};
++    for (const [key,value] of Object.entries(previous)) {
++      if ((item[key]==='' || item[key]==null || item[key]===0) && value) item[key]=value;
++    }
++    if (previous.mime?.includes('codecs=') && !incoming.mime?.includes('codecs=')) item.mime=previous.mime;
++    if (incoming.type==='transport') item.type='transport';
++    else if ((incoming.type==='unknown' || !incoming.type) && previous.type) item.type=previous.type;
++    // Inferred guesses never overwrite explicit player facts.
++    if (previous.metadataSource==='player-json' && incoming.metadataSource!=='player-json') {
++      for(const key of ['mime','type','width','height','fps','bitrate','size','duration','qualityLabel','hasAudio','audioCodec','videoCodec']) {
++        if(previous[key]!=null && previous[key]!=='') item[key]=previous[key];
++      }
++    }
++    return item;
++  }
++  function fullStreamUrl(url) {
++    try {
++      const u=new URL(url);
++      if (!/(^|\.)googlevideo\.com$/i.test(u.hostname)) return url;
++      const signed=(u.searchParams.get('sparams')||'')+','+(u.searchParams.get('lsparams')||'');
++      for(const name of ['range','rn','rbuf']) {
++        if (!signed.split(',').includes(name)) u.searchParams.delete(name);
++      }
++      return u.href;
++    } catch (_) { return url; }
++  }
++  function key(item) {
++    try {
++      const u=new URL(item.url);
++      for(const name of ['range','rn','rbuf']) u.searchParams.delete(name);
++      return u.href;
++    } catch (_) { return 'metadata:'+item.itag; }
++  }
++  function objectAt(text,start) {
++    let depth=0, quoted=false, escaped=false;
++    for(let i=start;i<text.length;i++) {
++      const c=text[i];
++      if(quoted) { if(escaped) escaped=false; else if(c==='\\') escaped=true; else if(c==='"') quoted=false; continue; }
++      if(c==='"') quoted=true;
++      else if(c==='{') depth++;
++      else if(c==='}' && --depth===0) { try { return JSON.parse(text.slice(start,i+1)); } catch (_) { return null; } }
++    }
++    return null;
++  }
++  function formatsFromText(text,pageUrl) {
++    const roots=[];
++    try { roots.push(JSON.parse(text)); } catch (_) {}
++    const assignment=/["']?ytInitialPlayerResponse["']?\s*(?:=|:)\s*(\{)/g;
++    let match;
++    while((match=assignment.exec(text)) && roots.length<8) {
++      const obj=objectAt(text,assignment.lastIndex-1); if(obj) roots.push(obj);
++    }
++    const formats=[]; let visited=0;
++    const activeId=query(pageUrl,'v') || (()=>{try{return new URL(pageUrl).pathname.match(/\/(?:shorts|embed)\/([^/?]+)/)?.[1]||'';}catch(_){return '';}})();
++    function walk(obj,depth=0) {
++      if(!obj || typeof obj!=='object' || depth>10 || ++visited>5000) return;
++      if(obj.streamingData) {
++        if(activeId && obj.videoDetails?.videoId && obj.videoDetails.videoId!==activeId) return;
++        const data=obj.streamingData;
++        for(const f of [...(data.formats||[]),...(data.adaptiveFormats||[])]) {
++          if(!f || !f.itag || !f.mimeType) continue;
++          let url=f.url||'';
++          // An encrypted signatureCipher is metadata, never a downloadable URL.
++          if(!url && (f.signatureCipher||f.cipher)) {
++            const params=new URLSearchParams(f.signatureCipher||f.cipher);
++            if(!params.get('s')) {
++              url=params.get('url')||'';
++              if(url && params.get('sig')) { try { const u=new URL(url);u.searchParams.set(params.get('sp')||'signature',params.get('sig'));url=u.href;}catch(_){url='';} }
++            }
++          }
++          if(url && !/^https?:\/\//i.test(url)) continue;
++          const mime=f.mimeType, audioOnly=mime.startsWith('audio/');
++          const codecs=mime.match(/codecs="([^"]+)"/)?.[1]||'';
++          const hasAudio=audioOnly || !!f.audioQuality || !!f.audioChannels || /mp4a|opus|vorbis/.test(codecs);
++          formats.push({url,mime,type:audioOnly?'audio':'video',itag:String(f.itag),
++            duration:positive(f.approxDurationMs)/1000 || positive(obj.videoDetails?.lengthSeconds),
++            size:positive(f.contentLength),bitrate:positive(f.bitrate||f.averageBitrate),
++            fps:positive(f.fps),width:positive(f.width),height:positive(f.height),
++            qualityLabel:f.qualityLabel||'',hasAudio,
++            videoCodec:audioOnly?'':codecs.split(',')[0].trim(),
++            audioCodec:hasAudio?(audioOnly?codecs:codecs.split(',').at(-1)?.trim()||''):'',
++            metadataSource:'player-json', videoId:obj.videoDetails?.videoId||'', source:'player-json', frameUrl:pageUrl});
++        }
++        for(const field of ['hlsManifestUrl','dashManifestUrl']) {
++          if(data[field]) formats.push({...urlMetadata(data[field]),source:'player-manifest',frameUrl:pageUrl});
++        }
++        return;
++      }
++      for(const value of Object.values(obj)) walk(value,depth+1);
++    }
++    roots.forEach(x=>walk(x)); return formats;
++  }
++  const api={query,positive,typeOf,urlMetadata,merge,key,fullStreamUrl,formatsFromText};
++  root.SatLinkMedia=api;
++  if(typeof module!=='undefined' && module.exports) module.exports=api;
++})(globalThis);
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/CapturedDownloadPlan.java
+@@ -0,0 +1,91 @@
++package com.satlink.geckoviewtest;
++
++import java.net.URI;
++import java.net.URLDecoder;
++import java.util.ArrayList;
++import java.util.LinkedHashMap;
++import java.util.List;
++import java.util.Map;
++
++/** Creates yt-dlp info data from actual browser streams; never runs FFmpeg directly. */
++final class CapturedDownloadPlan {
++    private CapturedDownloadPlan() { }
++    private static boolean empty(String value) { return value == null || value.isEmpty(); }
++
++    static Map<String, Object> create(String id, String title, String url, String audioUrl,
++            String formatId, String outputExt, String videoCodec, String audioCodec,
++            boolean hasAudio, boolean audioOnly, String userAgent, String referer) {
++        Map<String, String> headers = new LinkedHashMap<>();
++        if (!empty(userAgent)) headers.put("User-Agent", userAgent);
++        if (!empty(referer)) headers.put("Referer", referer);
++        List<Map<String, Object>> formats = new ArrayList<>();
++        formats.add(format(empty(formatId) ? "captured-video" : formatId, url,
++                audioOnly ? audioExtension(url) : videoExtension(url, outputExt),
++                audioOnly ? "none" : codec(videoCodec, "unknown"),
++                audioOnly || hasAudio ? codec(audioCodec, "unknown") : "none", headers));
++        if (!audioOnly && !hasAudio && !empty(audioUrl)) {
++            formats.add(format("captured-audio", audioUrl, audioExtension(audioUrl),
++                    "none", codec(audioCodec, "unknown"), headers));
++        }
++        Map<String, Object> root = new LinkedHashMap<>();
++        root.put("_type", "video"); root.put("id", id);
++        root.put("title", empty(title) ? "SatLink" : title);
++        root.put("extractor", "generic"); root.put("extractor_key", "Generic");
++        root.put("formats", formats);
++        return root;
++    }
++
++    private static Map<String, Object> format(String id, String url, String ext,
++            String vcodec, String acodec, Map<String, String> headers) {
++        URI uri = URI.create(url);
++        String scheme = uri.getScheme();
++        if (!("http".equals(scheme) || "https".equals(scheme)) || uri.getHost() == null)
++            throw new IllegalArgumentException("Captured media must have an HTTP URL");
++        String path = uri.getPath() == null ? "" : uri.getPath().toLowerCase();
++        Map<String, Object> format = new LinkedHashMap<>();
++        format.put("format_id", id); format.put("url", url);
++        format.put("ext", empty(ext) ? "mp4" : ext);
++        format.put("protocol", path.endsWith(".m3u8") ? "m3u8_native"
++                : path.endsWith(".mpd") ? "http_dash_segments" : scheme);
++        format.put("vcodec", vcodec); format.put("acodec", acodec);
++        format.put("http_headers", headers);
++        return format;
++    }
++
++    private static String videoExtension(String url, String outputExt) {
++        String path=URI.create(url).getPath();
++        if (path != null) {
++            for (String ext : new String[]{"mp4", "webm", "mkv", "ts", "mov", "m4v"}) {
++                if (path.toLowerCase().endsWith("."+ext)) return ext;
++            }
++        }
++        if (url.contains("video%2Fwebm") || url.contains("video/webm")) return "webm";
++        return "mp3".equals(outputExt) ? "mp4" : outputExt;
++    }
++
++    private static String audioExtension(String url) {
++        URI uri=URI.create(url);
++        String mime="";
++        for (String param : (uri.getRawQuery()==null ? "" : uri.getRawQuery()).split("&")) {
++            String[] pair=param.split("=",2);
++            if (pair.length==2 && pair[0].equals("mime")) {
++                try { mime=URLDecoder.decode(pair[1], "UTF-8"); }
++                catch (java.io.UnsupportedEncodingException ignored) { }
++            }
++        }
++        String path=uri.getPath()==null ? "" : uri.getPath().toLowerCase();
++        if(mime.contains("webm") || path.endsWith(".webm")) return "webm";
++        if(mime.contains("opus") || path.endsWith(".opus")) return "opus";
++        if(mime.contains("mpeg") || path.endsWith(".mp3")) return "mp3";
++        if(path.endsWith(".ogg")) return "ogg";
++        return "m4a";
++    }
++
++    private static String codec(String value, String fallback) {
++        if(empty(value)) return fallback;
++        if(value.equalsIgnoreCase("H.264")) return "avc1";
++        if(value.equalsIgnoreCase("H.265")) return "hevc";
++        if(value.equalsIgnoreCase("AAC")) return "mp4a.40.2";
++        return value.toLowerCase();
++    }
++}
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java
+@@ -0,0 +1,19 @@
++package com.satlink.geckoviewtest;
++
++import android.content.Context;
++import com.yausername.youtubedl_android.YoutubeDLRequest;
++import java.io.File;
++
++/** The packaged QuickJS binary is an extracted native executable, not a PATH command named qjs. */
++final class EngineRuntimeOptions {
++    private EngineRuntimeOptions() { }
++
++    static void apply(Context context, YoutubeDLRequest request) {
++        File quickJs = new File(context.getApplicationInfo().nativeLibraryDir, "libqjs.so");
++        if (quickJs.isFile() && quickJs.canExecute()) {
++            request.addOption("--js-runtimes", "quickjs:" + quickJs.getAbsolutePath());
++            // Allows yt-dlp to obtain matching challenge scripts when the engine updates.
++            request.addOption("--remote-components", "ejs:github");
++        }
++    }
++}
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java
+@@ -0,0 +1,43 @@
++package com.satlink.geckoviewtest;
++
++import java.util.List;
++import java.util.Locale;
++
++/** Scores downloadable media only. Storyboards do not make an extraction successful. */
++final class FormatSelectionPolicy {
++    private FormatSelectionPolicy() { }
++
++    static final class Format {
++        final String url, ext, videoCodec, audioCodec;
++        final int height;
++        Format(String url, String ext, String videoCodec, String audioCodec, int height) {
++            this.url=url;this.ext=ext;this.videoCodec=videoCodec;this.audioCodec=audioCodec;this.height=height;
++        }
++    }
++    static final class Score implements Comparable<Score> {
++        int videoCount, audioCount, maxHeight;
++        boolean hasMedia() { return videoCount>0 || audioCount>0; }
++        boolean hasVideoAndAudio() { return videoCount>0 && audioCount>0; }
++        @Override public int compareTo(Score other) {
++            int heights=Integer.compare(maxHeight,other.maxHeight);
++            if (heights!=0) return heights;
++            if (hasVideoAndAudio()!=other.hasVideoAndAudio()) return hasVideoAndAudio()?1:-1;
++            int videos=Integer.compare(videoCount,other.videoCount);
++            return videos!=0 ? videos : Integer.compare(audioCount,other.audioCount);
++        }
++    }
++    static Score score(List<Format> formats) {
++        Score score=new Score();
++        for (Format format:formats) {
++            if (format.url==null || !(format.url.startsWith("https://") || format.url.startsWith("http://"))) continue;
++            String ext=format.ext==null?"":format.ext.toLowerCase(Locale.ROOT);
++            if(ext.equals("mhtml") || ext.equals("jpg") || ext.equals("png") || ext.equals("webp")) continue;
++            boolean video=present(format.videoCodec) && !"images".equalsIgnoreCase(format.videoCodec);
++            boolean audio=present(format.audioCodec);
++            if(video) {score.videoCount++;score.maxHeight=Math.max(score.maxHeight,format.height);}
++            if(audio) score.audioCount++;
++        }
++        return score;
++    }
++    static boolean present(String codec) { return codec!=null && !codec.isEmpty() && !codec.equalsIgnoreCase("none"); }
++}
+--- a/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
+@@ -76,6 +76,9 @@
+ import java.util.Locale;
+ import java.util.Set;
+ import java.util.concurrent.ExecutorService;
++import java.util.concurrent.ScheduledExecutorService;
++import java.util.concurrent.ScheduledFuture;
++import java.util.concurrent.TimeUnit;
+ import java.util.concurrent.ConcurrentHashMap;
+ import java.util.concurrent.Executors;
+ import java.util.concurrent.atomic.AtomicBoolean;
+@@ -95,6 +98,12 @@
+     private static GeckoRuntime runtime;
+ 
+     private final ExecutorService worker = Executors.newSingleThreadExecutor();
++    private final ExecutorService engineUpdater = Executors.newSingleThreadExecutor();
++    private final ScheduledExecutorService analysisWatchdog = Executors.newSingleThreadScheduledExecutor();
++    private volatile String activeAnalysisProcess;
++    private volatile int engineRevision;
++    private String lastAnalysisError = "";
++    private JSONArray lastPlayerFormats;
+     private final AtomicBoolean engineReady = new AtomicBoolean(false);
+     private final AtomicBoolean engineFailed = new AtomicBoolean(false);
+     private final AtomicBoolean analyzing = new AtomicBoolean(false);
+@@ -125,10 +134,6 @@
+     private TextView audioCount;
+     private TextView videoArrow;
+     private TextView audioArrow;
+-    private LinearLayout extraResults;
+-    private ScrollView extraScroll;
+-    private TextView extraCount;
+-    private TextView extraArrow;
+ 
+     private View homeOverlay;
+     private View downloadsOverlay;
+@@ -160,10 +165,14 @@
+     private volatile String preferredPlayerPageUrl;
+     private volatile String latestUserAgent = "Mozilla/5.0 (Android 14; Mobile; rv:150.0) Gecko/150.0 Firefox/150.0";
+     private volatile String latestCookieFilePath;
++    private String latestCookieContents = "";
+     private volatile String latestCookieHeader;
+     private volatile String latestOrigin;
+     private double capturedDurationSeconds;
+-    private int captureRequestSerial;
++    private volatile int captureRequestSerial;
++    private int analyzedRequestSerial = -1;
++    private boolean detailedFormatsShown;
++    private long lastQuickRender;
+ 
+     private final Map<String, DownloadUiBinding> downloadBindings = new ConcurrentHashMap<>();
+     private BroadcastReceiver downloadReceiver;
+@@ -198,10 +207,6 @@
+         audioCount = findViewById(R.id.audioCount);
+         videoArrow = findViewById(R.id.videoArrow);
+         audioArrow = findViewById(R.id.audioArrow);
+-        extraResults = findViewById(R.id.extraResults);
+-        extraScroll = findViewById(R.id.extraScroll);
+-        extraCount = findViewById(R.id.extraCount);
+-        extraArrow = findViewById(R.id.extraArrow);
+         homeOverlay = findViewById(R.id.homeOverlay);
+         downloadsOverlay = findViewById(R.id.downloadsOverlay);
+         extensionsOverlay = findViewById(R.id.extensionsOverlay);
+@@ -225,7 +230,6 @@
+         headerExtensionsButton = findViewById(R.id.headerExtensionsButton);
+         LinearLayout videoHeader = findViewById(R.id.videoHeader);
+         LinearLayout audioHeader = findViewById(R.id.audioHeader);
+-        LinearLayout extraHeader = findViewById(R.id.extraHeader);
+ 
+         if (runtime == null) {
+             runtime = GeckoRuntime.create(getApplicationContext());
+@@ -249,7 +253,6 @@
+         closeCaptureButton.setOnClickListener(v -> closeCapturePanel());
+         videoHeader.setOnClickListener(v -> toggleVideoList());
+         audioHeader.setOnClickListener(v -> toggleAudioList());
+-        extraHeader.setOnClickListener(v -> toggleExtraList());
+ 
+         findViewById(R.id.homeGoButton).setOnClickListener(v -> loadFromHomeSearch());
+         findViewById(R.id.homeDownloadsButton).setOnClickListener(v -> showDownloadsScreen());
+@@ -481,28 +484,37 @@
+                 YoutubeDL.getInstance().init(getApplicationContext());
+                 FFmpeg.getInstance().init(getApplicationContext());
+ 
+-                // YouTube changes frequently. Refresh yt-dlp at most once every 24 hours.
+-                // Failure to update never blocks the bundled engine.
+-                long now = System.currentTimeMillis();
+-                long lastUpdate = getSharedPreferences("satlink_engine", MODE_PRIVATE)
+-                        .getLong("last_ytdlp_update", 0L);
+-                if (now - lastUpdate > 24L * 60L * 60L * 1000L) {
+-                    try {
+-                        YoutubeDL.getInstance().updateYoutubeDL(
+-                                getApplicationContext(), YoutubeDL.UpdateChannel._NIGHTLY);
+-                        getSharedPreferences("satlink_engine", MODE_PRIVATE)
+-                                .edit().putLong("last_ytdlp_update", now).apply();
+-                    } catch (Throwable updateError) {
+-                        Log.w(TAG, "yt-dlp update skipped; bundled engine will be used", updateError);
+-                    }
+-                }
+-
+                 engineReady.set(true);
+                 runOnUiThread(() -> {
+                     if (capturePanel.getVisibility() == View.VISIBLE &&
+                             !TextUtils.isEmpty(pendingPageUrl) && !analyzing.get()) {
+                         analyzePage(pendingPageUrl);
+                     }
++                });
++                engineUpdater.execute(() -> {
++                    // YouTube changes frequently. Refresh yt-dlp at most once every 24 hours.
++                    // Failure to update never blocks the bundled engine.
++                    long now = System.currentTimeMillis();
++                    long lastUpdate = getSharedPreferences("satlink_engine", MODE_PRIVATE)
++                            .getLong("last_ytdlp_update", 0L);
++                    if (now - lastUpdate > 24L * 60L * 60L * 1000L) {
++                        try {
++                            YoutubeDL.getInstance().updateYoutubeDL(
++                                    getApplicationContext(), YoutubeDL.UpdateChannel._NIGHTLY);
++                            engineRevision++;
++                            runOnUiThread(() -> {
++                                if (capturePanel.getVisibility() == View.VISIBLE && !detailedFormatsShown && !analyzing.get()) {
++                                    analyzedRequestSerial = -1;
++                                    if (!TextUtils.isEmpty(pendingPageUrl)) analyzePage(pendingPageUrl);
++                                }
++                            });
++                            getSharedPreferences("satlink_engine", MODE_PRIVATE)
++                                    .edit().putLong("last_ytdlp_update", now).apply();
++                        } catch (Throwable updateError) {
++                            Log.w(TAG, "yt-dlp update skipped; bundled engine will be used", updateError);
++                        }
++                    }
++
+                 });
+             } catch (Throwable error) {
+                 engineFailed.set(true);
+@@ -543,10 +555,17 @@
+         String currentUrl = normalizePageUrl(addressBar.getText().toString().trim());
+         if (!TextUtils.isEmpty(currentUrl)) pendingPageUrl = currentUrl;
+ 
++        stopActiveAnalysis();
+         final int requestSerial = ++captureRequestSerial;
++        lastAnalysisError = "";
++        detailedFormatsShown = false;
++        lastQuickRender = 0;
++        if (lastCapturedItems != null) showCapturedFallback(lastCapturedItems);
+         boolean extensionRequested = requestScanFromAllFrames();
+-        captureButton.postDelayed(this::requestScanFromAllFrames, 2000L);
+-        captureButton.postDelayed(this::requestScanFromAllFrames, 5000L);
++        captureButton.postDelayed(() -> {
++            if (requestSerial == captureRequestSerial && capturePanel.getVisibility() == View.VISIBLE)
++                requestScanFromAllFrames();
++        }, 600L);
+ 
+         if (engineFailed.get()) {
+             analysisProgress.setVisibility(View.GONE);
+@@ -567,11 +586,9 @@
+         // Give the extension a brief moment to return browser cookies, the exact User-Agent and
+         // media requests. This prevents starting a second cookie-less YouTube request first.
+         captureButton.postDelayed(() -> {
+-            if (requestSerial != captureRequestSerial || analyzing.get()) return;
+-            if (videoResults.getChildCount() > 0 || audioResults.getChildCount() > 0
+-                    || extraResults.getChildCount() > 0) return;
++            if (requestSerial != captureRequestSerial || capturePanel.getVisibility() != View.VISIBLE || analyzing.get()) return;
+             if (!TextUtils.isEmpty(pendingPageUrl)) analyzePage(pendingPageUrl);
+-        }, 5500L);
++        }, 800L);
+     }
+ 
+     private boolean requestScanFromAllFrames() {
+@@ -618,7 +635,12 @@
+                 latestOrigin = uri.getScheme() + "://" + uri.getHost();
+         } catch (Throwable ignored) {}
+         JSONArray cookies = json.optJSONArray("cookies");
+-        if (cookies == null || cookies.length() == 0) return;
++        if (cookies == null) return;
++        if (cookies.length() == 0) {
++            latestCookieHeader = "";
++            latestCookieFilePath = "";
++            return;
++        }
+         StringBuilder header = new StringBuilder();
+         StringBuilder netscape = new StringBuilder("# Netscape HTTP Cookie File\n");
+         for (int i = 0; i < cookies.length(); i++) {
+@@ -633,25 +655,32 @@
+             String path = c.optString("path", "/");
+             boolean secure = c.optBoolean("secure", false);
+             long expiry = (long)c.optDouble("expirationDate", 0);
+-            netscape.append(domain).append('\t').append(domain.startsWith(".") ? "TRUE" : "FALSE")
+-                    .append('\t').append(path).append('\t').append(secure ? "TRUE" : "FALSE")
+-                    .append('\t').append(expiry).append('\t').append(name).append('\t').append(value).append('\n');
++            netscape.append(cleanCookieField(domain)).append('\t').append(domain.startsWith(".") ? "TRUE" : "FALSE")
++                    .append('\t').append(cleanCookieField(path)).append('\t').append(secure ? "TRUE" : "FALSE")
++                    .append('\t').append(expiry).append('\t').append(cleanCookieField(name)).append('\t').append(cleanCookieField(value)).append('\n');
+         }
+         latestCookieHeader = header.toString();
+         try {
+-            File f = new File(getCacheDir(), "satlink_browser_cookies.txt");
++            if (netscape.toString().equals(latestCookieContents)
++                    && !TextUtils.isEmpty(latestCookieFilePath) && new File(latestCookieFilePath).isFile()) return;
++            File f = File.createTempFile("satlink_cookies_", ".txt", getCacheDir());
+             try (FileOutputStream out = new FileOutputStream(f, false)) {
+                 out.write(netscape.toString().getBytes(StandardCharsets.UTF_8));
+             }
+             latestCookieFilePath = f.getAbsolutePath();
++            latestCookieContents = netscape.toString();
+         } catch (Throwable error) { Log.w(TAG, "Cookie file creation failed", error); }
+     }
+ 
+     private void onCaptureResult(JSONObject json) {
+         runOnUiThread(() -> {
++            String incomingPage = normalizePageUrl(json.optString("pageUrl", ""));
++            String activePage = normalizePageUrl(addressBar.getText().toString().trim());
++            if (!TextUtils.isEmpty(activePage) && !activePage.equals(incomingPage)) return;
+             pendingPageUrl = normalizePageUrl(json.optString("pageUrl", addressBar.getText().toString().trim()));
+             pendingPageTitle = json.optString("title", "");
+             lastCapturedItems = json.optJSONArray("items");
++            lastPlayerFormats = json.optJSONArray("playerFormats");
+             capturedDurationSeconds = numberToDouble(json.opt("duration"));
+             if (capturedDurationSeconds <= 0 && lastCapturedItems != null) {
+                 for (int i = 0; i < lastCapturedItems.length(); i++) {
+@@ -667,8 +696,12 @@
+             if (!TextUtils.isEmpty(pageUserAgent)) latestUserAgent = pageUserAgent;
+             updateSessionData(json);
+ 
+-            if (!TextUtils.isEmpty(pendingPageTitle)) {
+-                captureTitle.setText(pendingPageTitle);
++            if (capturePanel.getVisibility() != View.VISIBLE) return;
++            if (!TextUtils.isEmpty(pendingPageTitle)) captureTitle.setText(pendingPageTitle);
++            long now = android.os.SystemClock.elapsedRealtime();
++            if (!detailedFormatsShown && now - lastQuickRender >= 500) {
++                showCapturedFallback(lastCapturedItems);
++                lastQuickRender = now;
+             }
+ 
+             if (engineReady.get()) {
+@@ -706,6 +739,8 @@
+ 
+     private void onSessionUpdate(JSONObject json) {
+         if (json == null) return;
++        if (!normalizePageUrl(addressBar.getText().toString().trim())
++                .equals(normalizePageUrl(json.optString("pageUrl", "")))) return;
+         String pageUserAgent = json.optString("userAgent", "");
+         if (!TextUtils.isEmpty(pageUserAgent)) latestUserAgent = pageUserAgent;
+         updateSessionData(json);
+@@ -713,11 +748,15 @@
+ 
+     private void analyzePage(String pageUrl) {
+         final String normalizedPageUrl = normalizePageUrl(pageUrl);
+-        if (TextUtils.isEmpty(normalizedPageUrl) || !engineReady.get() || analyzing.getAndSet(true)) {
++        if (isFinishing() || isDestroyed() || TextUtils.isEmpty(normalizedPageUrl) || !engineReady.get() || capturePanel.getVisibility() != View.VISIBLE
++                || analyzedRequestSerial == captureRequestSerial || analyzing.getAndSet(true)) {
+             return;
+         }
+ 
+-        resetFormatLists();
++        final int analysisSerial = captureRequestSerial;
++        final int revisionAtStart = engineRevision;
++        lastAnalysisError = "";
++        analyzedRequestSerial = analysisSerial;
+         analysisProgress.setVisibility(View.VISIBLE);
+         captureStatus.setText("جاري قراءة الدقة والحجم والفريمات والصوتيات...");
+ 
+@@ -732,10 +771,19 @@
+                 }
+ 
+                 FormatCollection collection = parseFormats(root);
+-                runOnUiThread(() -> showAnalyzedFormats(collection));
++                if (collection.videos.isEmpty() && collection.audios.isEmpty())
++                    throw new IllegalStateException("المحرك لم يرجع صيغ فيديو أو صوت قابلة للتنزيل");
++                runOnUiThread(() -> {
++                    if (analysisSerial == captureRequestSerial && capturePanel.getVisibility() == View.VISIBLE) {
++                        showAnalyzedFormats(collection);
++                        detailedFormatsShown = !collection.videos.isEmpty() || !collection.audios.isEmpty();
++                    }
++                });
+             } catch (Throwable error) {
+                 Log.e(TAG, "Format analysis failed", error);
+                 runOnUiThread(() -> {
++                    if (analysisSerial != captureRequestSerial || capturePanel.getVisibility() != View.VISIBLE) return;
++                    lastAnalysisError = friendlyAnalysisError(error) + "\n" + safeMessage(error);
+                     if (looksLikeYouTubeThrottle(error)) {
+                         captureStatus.setText("يوتيوب وضع حظراً مؤقتاً على الطلبات. عرض الروابط المباشرة الملتقطة من المشغّل.");
+                     } else {
+@@ -746,7 +794,18 @@
+                 });
+             } finally {
+                 analyzing.set(false);
+-                runOnUiThread(() -> analysisProgress.setVisibility(View.GONE));
++                runOnUiThread(() -> {
++                    if (analysisSerial == captureRequestSerial) {
++                        analysisProgress.setVisibility(View.GONE);
++                        if (engineRevision != revisionAtStart && !detailedFormatsShown
++                                && capturePanel.getVisibility() == View.VISIBLE) {
++                            analyzedRequestSerial = -1;
++                            analyzePage(pendingPageUrl);
++                        }
++                    }
++                    else if (capturePanel.getVisibility() == View.VISIBLE && !TextUtils.isEmpty(pendingPageUrl))
++                        analyzePage(pendingPageUrl);
++                });
+             }
+         });
+     }
+@@ -756,85 +815,126 @@
+      * Analyze YouTube independently from all other sites.
+      * Recent YouTube A/B tests can make android_vr return only itag 18 (360p).
+      * Try the current default clients first and keep the response exposing the
+-     * largest format list. Other websites never enter this method.
++     * highest downloadable resolution. Other websites never enter this method.
+      */
++    private FormatSelectionPolicy.Score extractionScore(JSONObject root) {
++        List<FormatSelectionPolicy.Format> formats = new ArrayList<>();
++        JSONArray raw = root.optJSONArray("formats");
++        if (raw == null) { raw = new JSONArray(); raw.put(root); }
++        for (int i=0; i<raw.length(); i++) {
++            JSONObject format=raw.optJSONObject(i);
++            if(format==null) continue;
++            formats.add(new FormatSelectionPolicy.Format(format.optString("url"),format.optString("ext"),
++                    format.optString("vcodec","none"),format.optString("acodec","none"),numberToInt(format.opt("height"))));
++        }
++        return FormatSelectionPolicy.score(formats);
++    }
++
+     private JSONObject executeYouTubeAnalysis(String pageUrl) throws Exception {
+-        String[] clientAttempts = new String[]{
+-                "youtube:player_client=default,-android_sdkless",
+-                "youtube:player_client=android_vr,default,-android_sdkless",
+-                "youtube:player_client=android,default,-android_sdkless"
+-        };
+-
++        // Let the installed engine choose current clients first. Try the VR fallback only
++        // if the normal response is incomplete compared with the player's declared metadata.
++        String[] clients = {"", "youtube:player_client=android_vr"};
+         JSONObject best = null;
+-        int bestCount = -1;
++        FormatSelectionPolicy.Score bestScore = new FormatSelectionPolicy.Score();
+         Throwable lastError = null;
+-
+-        for (String extractorArgs : clientAttempts) {
++        final int serialAtStart=captureRequestSerial;
++        List<JSONObject> audioFallbacks=new ArrayList<>();
++        int expectedHeight=0;
++        JSONArray declared=lastPlayerFormats;
++        if(declared!=null) for(int i=0;i<declared.length();i++) {
++            JSONObject format=declared.optJSONObject(i);
++            if(format!=null) expectedHeight=Math.max(expectedHeight,numberToInt(format.opt("height")));
++        }
++        for (String client : clients) {
++            if(serialAtStart!=captureRequestSerial || Thread.currentThread().isInterrupted())
++                throw new InterruptedException("تم إلغاء تحليل الصفحة السابقة");
+             try {
+-                JSONObject candidate = executeAnalysisWithYouTubeClients(pageUrl, extractorArgs);
+-                JSONArray candidateFormats = candidate.optJSONArray("formats");
+-                int count = candidateFormats == null ? 0 : candidateFormats.length();
+-                if (count > bestCount) {
+-                    best = candidate;
+-                    bestCount = count;
++                JSONObject candidate=executeAnalysisWithYouTubeClients(pageUrl,client);
++                FormatSelectionPolicy.Score score=extractionScore(candidate);
++                JSONArray candidateFormats=candidate.optJSONArray("formats");
++                if(candidateFormats!=null) for(int i=0;i<candidateFormats.length();i++) {
++                    JSONObject format=candidateFormats.optJSONObject(i);
++                    if(format!=null && "none".equalsIgnoreCase(format.optString("vcodec","none"))
++                            && FormatSelectionPolicy.present(format.optString("acodec","none"))
++                            && format.optString("url","").startsWith("http")) audioFallbacks.add(format);
+                 }
+-                // A real adaptive-format response normally contains far more than the
+-                // single 360p progressive stream. No need to make extra requests once found.
+-                if (count >= 6) break;
+-            } catch (Throwable error) {
+-                lastError = error;
+-                Log.w(TAG, "YouTube client attempt failed: " + extractorArgs, error);
+-            }
+-        }
+-
+-        if (best != null && bestCount > 0) return best;
+-        if (lastError instanceof Exception) throw (Exception) lastError;
+-        throw new IllegalStateException("YouTube did not return downloadable formats", lastError);
++                if(score.hasMedia() && (best==null || score.compareTo(bestScore)>0)) {
++                    best=candidate;bestScore=score;
++                }
++                if(score.hasVideoAndAudio() && score.videoCount>=3 && score.maxHeight>=expectedHeight) break;
++            } catch(Throwable error) { lastError=error; Log.w(TAG,"YouTube analysis attempt failed",error); }
++        }
++        if(best!=null) {
++            if(bestScore.audioCount==0 && !audioFallbacks.isEmpty()) {
++                JSONArray formats=best.optJSONArray("formats");
++                if(formats==null) {formats=new JSONArray();formats.put(new JSONObject(best.toString()));}
++                for(JSONObject audio:audioFallbacks) formats.put(audio);
++                best.put("formats",formats);
++            }
++            return best;
++        }
++        if(lastError instanceof Exception) throw (Exception)lastError;
++        throw new IllegalStateException("لم يرجع يوتيوب فيديو أو صوتاً قابلاً للتنزيل",lastError);
++    }
++
++    private void stopActiveAnalysis() {
++        final String process=activeAnalysisProcess;
++        if (TextUtils.isEmpty(process) || analysisWatchdog.isShutdown()) return;
++        analysisWatchdog.execute(() -> {
++            try { YoutubeDL.getInstance().destroyProcessById(process); }
++            catch(Throwable error) { Log.w(TAG,"Analysis cancellation failed",error); }
++        });
++    }
++
++    private YoutubeDLResponse runAnalysisRequest(YoutubeDLRequest request, String processId) throws Exception {
++        activeAnalysisProcess=processId;
++        ScheduledFuture<?> timeout=analysisWatchdog.schedule(() -> {
++            try { YoutubeDL.getInstance().destroyProcessById(processId); }
++            catch(Throwable error) { Log.w(TAG,"Analysis timeout cancellation failed",error); }
++        },45L,TimeUnit.SECONDS);
++        try {
++            return YoutubeDL.getInstance().execute(request,processId,
++                    new Function3<Float,Long,String,Unit>() {
++                        @Override public Unit invoke(Float progress,Long eta,String line) { return Unit.INSTANCE; }
++                    });
++        } finally {
++            timeout.cancel(false);
++            if(processId.equals(activeAnalysisProcess)) activeAnalysisProcess=null;
++        }
+     }
+ 
+     private JSONObject executeAnalysisWithYouTubeClients(String pageUrl, String extractorArgs) throws Exception {
+         YoutubeDLRequest request = new YoutubeDLRequest(pageUrl);
+         request.addOption("--dump-single-json");
++        request.addOption("--format", "bestvideo+bestaudio/best/bestvideo/bestaudio");
+         request.addOption("--skip-download");
+         request.addOption("--no-playlist");
+-        request.addOption("--no-warnings");
+         request.addOption("--ignore-config");
+         request.addOption("--geo-bypass");
+-        request.addOption("--socket-timeout", "35");
+-        request.addOption("--retries", "5");
+-        request.addOption("--extractor-retries", "5");
+-        request.addOption("--sleep-requests", "1");
+-        request.addOption("--js-runtimes", "quickjs");
++        request.addOption("--socket-timeout", "25");
++        request.addOption("--retries", "1");
++        request.addOption("--extractor-retries", "2");
++        EngineRuntimeOptions.apply(getApplicationContext(), request);
+         applySessionOptions(request, pageUrl);
+-        request.addOption("--extractor-args", extractorArgs);
++        if (!TextUtils.isEmpty(extractorArgs)) request.addOption("--extractor-args", extractorArgs);
+ 
+         String processId = "satlink-youtube-analysis-" + System.currentTimeMillis();
+-        YoutubeDLResponse response = YoutubeDL.getInstance().execute(
+-                request,
+-                processId,
+-                new Function3<Float, Long, String, Unit>() {
+-                    @Override
+-                    public Unit invoke(Float progress, Long eta, String line) {
+-                        return Unit.INSTANCE;
+-                    }
+-                }
+-        );
++        YoutubeDLResponse response = runAnalysisRequest(request, processId);
+         return parseResponseJson(response.getOut());
+     }
+ 
+     private JSONObject executeAnalysis(String pageUrl, boolean skipYouTubeWebpage) throws Exception {
+         YoutubeDLRequest request = new YoutubeDLRequest(pageUrl);
+         request.addOption("--dump-single-json");
++        request.addOption("--format", "bestvideo+bestaudio/best/bestvideo/bestaudio");
+         request.addOption("--skip-download");
+         request.addOption("--no-playlist");
+-        request.addOption("--no-warnings");
+         request.addOption("--ignore-config");
+         request.addOption("--geo-bypass");
+-        request.addOption("--socket-timeout", "35");
+-        request.addOption("--retries", "5");
+-        request.addOption("--extractor-retries", "5");
+-        request.addOption("--sleep-requests", "1");
+-        request.addOption("--js-runtimes", "quickjs");
++        request.addOption("--socket-timeout", "25");
++        request.addOption("--retries", "1");
++        request.addOption("--extractor-retries", "2");
++        EngineRuntimeOptions.apply(getApplicationContext(), request);
+         applySessionOptions(request, pageUrl);
+ 
+         if (isYouTubeUrl(pageUrl)) {
+@@ -848,16 +948,7 @@
+         }
+ 
+         String processId = "satlink-analysis-" + System.currentTimeMillis();
+-        YoutubeDLResponse response = YoutubeDL.getInstance().execute(
+-                request,
+-                processId,
+-                new Function3<Float, Long, String, Unit>() {
+-                    @Override
+-                    public Unit invoke(Float progress, Long eta, String line) {
+-                        return Unit.INSTANCE;
+-                    }
+-                }
+-        );
++        YoutubeDLResponse response = runAnalysisRequest(request, processId);
+         String output = response.getOut();
+         try {
+             return parseResponseJson(output);
+@@ -946,9 +1037,14 @@
+     private boolean rejectCapturedItem(JSONObject item) {
+         if (item == null) return true;
+         String type = item.optString("type", "");
+-        if ("page".equals(type)) return true;
++        if ("page".equals(type) || "transport".equals(type)) return true;
+         String url = item.optString("url", "");
+         if (TextUtils.isEmpty(url)) return true;
++
++        String mediaPath = Uri.parse(url).getPath();
++        if (mediaPath != null && mediaPath.toLowerCase(Locale.US).endsWith(".m4s")) return true;
++        if (mediaPath != null && mediaPath.toLowerCase(Locale.US).endsWith(".ts")
++                && !TextUtils.isEmpty(strongestManifestUrl(lastCapturedItems))) return true;
+ 
+         boolean strictSite = isPornhubUrl(pendingPageUrl) || isEgyBestUrl(pendingPageUrl);
+         if (!strictSite) return false;
+@@ -965,7 +1061,7 @@
+         if (query >= 0) clean = clean.substring(0, query);
+         int hash = clean.indexOf('#');
+         if (hash >= 0) clean = clean.substring(0, hash);
+-        if (clean.endsWith(".m4s") || clean.endsWith(".ts")) return true;
++        if (clean.endsWith(".m4s")) return true;
+         if (lower.contains("index-v1-a1") || lower.contains("index-a1")
+                 || lower.contains("/segment") || lower.contains("segment-")
+                 || lower.contains("/chunk") || lower.contains("chunk-")
+@@ -1041,7 +1137,9 @@
+ 
+         JSONArray formats = root.optJSONArray("formats");
+         if (formats == null) {
+-            return result;
++            if (TextUtils.isEmpty(root.optString("url", ""))) return result;
++            formats = new JSONArray();
++            formats.put(root);
+         }
+ 
+         Set<String> videoKeys = new HashSet<>();
+@@ -1055,6 +1153,10 @@
+             }
+ 
+             String formatId = format.optString("format_id", "");
++            String mediaUrl = format.optString("url", "");
++            String mediaExt = format.optString("ext", "").toLowerCase(Locale.US);
++            if (!(mediaUrl.startsWith("http://") || mediaUrl.startsWith("https://"))
++                    || mediaExt.matches("mhtml|jpg|png|webp")) continue;
+             String url = format.optString("url", "");
+             String ext = format.optString("ext", "");
+             String vcodec = format.optString("vcodec", "none");
+@@ -1066,7 +1168,7 @@
+             double abr = numberToDouble(format.opt("abr"));
+             long size = firstPositiveLong(format.opt("filesize"), format.opt("filesize_approx"));
+ 
+-            if (!"none".equalsIgnoreCase(vcodec) && (height > 0 || width > 0)) {
++            if (!TextUtils.isEmpty(vcodec) && !"none".equalsIgnoreCase(vcodec)) {
+                 MediaFormatItem item = new MediaFormatItem();
+                 item.type = MediaFormatItem.TYPE_VIDEO;
+                 item.sourceUrl = result.sourceUrl;
+@@ -1078,6 +1180,7 @@
+                 item.fps = fps;
+                 item.bitrate = tbr;
+                 item.sizeBytes = size > 0 ? size : estimateSize(result.durationSeconds, tbr);
++                item.sizeEstimated = size <= 0 && item.sizeBytes > 0;
+                 item.videoCodec = shortCodec(vcodec);
+                 item.audioCodec = shortCodec(acodec);
+                 item.hasAudio = !"none".equalsIgnoreCase(acodec) && !TextUtils.isEmpty(acodec);
+@@ -1100,6 +1203,7 @@
+                 item.ext = ext;
+                 item.bitrate = abr > 0 ? abr : tbr;
+                 item.sizeBytes = size > 0 ? size : estimateSize(result.durationSeconds, abr > 0 ? abr : tbr);
++                item.sizeEstimated = size <= 0 && item.sizeBytes > 0;
+                 item.audioCodec = shortCodec(acodec);
+                 item.sampleRate = numberToInt(format.opt("asr"));
+                 item.channels = numberToInt(format.opt("audio_channels"));
+@@ -1129,7 +1233,8 @@
+         for (MediaFormatItem item : result.videos) {
+             String key = item.ext + "|" + item.videoCodec + "|" + item.height + "|" + Math.round(item.fps);
+             MediaFormatItem previous = cleanVideos.get(key);
+-            if (previous == null || (!previous.hasAudio && item.hasAudio) || item.bitrate > previous.bitrate) {
++            if (previous == null || (!previous.hasAudio && item.hasAudio)
++                    || (previous.hasAudio == item.hasAudio && item.bitrate > previous.bitrate)) {
+                 cleanVideos.put(key, item);
+             }
+         }
+@@ -1145,8 +1250,15 @@
+                     video.audioCodec = bestAudio.audioCodec;
+                     if (video.sizeBytes > 0 && bestAudio.sizeBytes > 0) {
+                         video.sizeBytes += bestAudio.sizeBytes;
++                        video.sizeEstimated |= bestAudio.sizeEstimated;
+                     }
+                 }
++            }
++        }
++
++        if (sourceAudios.isEmpty()) {
++            for (MediaFormatItem video : result.videos) {
++                if (video.hasAudio) { sourceAudios.add(video); break; }
+             }
+         }
+ 
+@@ -1171,6 +1283,7 @@
+                 item.note = "تحويل أفضل صوت متاح إلى MP3";
+                 if (result.durationSeconds > 0) {
+                     item.sizeBytes = Math.round(result.durationSeconds * quality * 1000d / 8d);
++                    item.sizeEstimated = true;
+                 }
+                 result.audios.add(item);
+             }
+@@ -1179,64 +1292,15 @@
+         return result;
+     }
+ 
+-    private List<MediaFormatItem> buildExtraFormats(List<MediaFormatItem> videos) {
+-        List<MediaFormatItem> extras = new ArrayList<>();
+-        Set<Integer> usedHeights = new HashSet<>();
+-        for (MediaFormatItem source : videos) {
+-            if (source == null || source.height <= 0 || !usedHeights.add(source.height)) continue;
+-
+-            // MKV is created by yt-dlp itself using the bundled FFmpeg environment. This avoids
+-            // launching libffmpeg.so directly, which is not a standalone Android executable.
+-            extras.add(cloneVideoForOutput(source, "mkv",
+-                    "حاوية MKV تحفظ الفيديو وتدمج أفضل صوت تلقائياً"));
+-
+-            // TS is only offered when the website really exposes an HLS/MPEG-TS stream with audio.
+-            // We do not fabricate TS from DASH/WEBM because that caused native linker failures.
+-            if (isNativeTransportStreamSource(source)) {
+-                extras.add(cloneVideoForOutput(source, "ts",
+-                        "MPEG-TS أصلي من بث HLS الخاص بالموقع"));
+-            }
+-            if (usedHeights.size() >= 4) break;
+-        }
+-        return extras;
+-    }
+-
+-    private static boolean isNativeTransportStreamSource(MediaFormatItem item) {
+-        if (item == null || !item.hasAudio) return false;
+-        String protocol = item.protocol == null ? "" : item.protocol.toLowerCase(Locale.US);
+-        String ext = item.ext == null ? "" : item.ext.toLowerCase(Locale.US);
+-        String codec = item.videoCodec == null ? "" : item.videoCodec.toLowerCase(Locale.US);
+-        boolean hls = protocol.contains("m3u8") || protocol.contains("hls")
+-                || "ts".equals(ext) || "mpegts".equals(ext);
+-        boolean compatibleVideo = codec.contains("h.264") || codec.contains("h264")
+-                || codec.contains("avc") || codec.contains("h.265")
+-                || codec.contains("h265") || codec.contains("hevc");
+-        return hls && compatibleVideo;
+-    }
+-
+-    private static MediaFormatItem cloneVideoForOutput(MediaFormatItem source, String outputExt, String note) {
+-        MediaFormatItem item = new MediaFormatItem();
+-        item.type = MediaFormatItem.TYPE_VIDEO;
+-        item.sourceUrl = source.sourceUrl;
+-        item.directUrl = source.directUrl;
+-        item.directAudioUrl = source.directAudioUrl;
+-        item.formatId = source.formatId;
+-        item.ext = outputExt;
+-        item.videoCodec = source.videoCodec;
+-        item.audioCodec = source.audioCodec;
+-        item.note = note;
+-        item.dynamicRange = source.dynamicRange;
+-        item.protocol = source.protocol;
+-        item.width = source.width;
+-        item.height = source.height;
+-        item.fps = source.fps;
+-        item.bitrate = source.bitrate;
+-        item.sizeBytes = source.sizeBytes;
+-        item.hasAudio = source.hasAudio;
+-        return item;
++    private boolean hasStartedCaptureDownload() {
++        for (DownloadUiBinding binding : downloadBindings.values()) {
++            if (!TextUtils.isEmpty(binding.state)) return true;
++        }
++        return false;
+     }
+ 
+     private void showAnalyzedFormats(FormatCollection collection) {
++        if (hasStartedCaptureDownload()) return;
+         resetFormatLists();
+ 
+         if (!TextUtils.isEmpty(collection.title)) {
+@@ -1249,12 +1313,7 @@
+         for (MediaFormatItem item : collection.audios) {
+             audioResults.addView(createFormatCard(item));
+         }
+-        List<MediaFormatItem> extraFormats = buildExtraFormats(collection.videos);
+-        for (MediaFormatItem item : extraFormats) {
+-            extraResults.addView(createFormatCard(item));
+-        }
+-
+-        updateCounts(collection.videos.size(), collection.audios.size(), extraFormats.size());
++        updateCounts(collection.videos.size(), collection.audios.size());
+ 
+         if (collection.videos.isEmpty() && collection.audios.isEmpty()) {
+             captureStatus.setText("لم تظهر جودات مفصلة؛ عرض الروابط المباشرة التي التقطها المتصفح.");
+@@ -1271,14 +1330,17 @@
+     }
+ 
+     private void showCapturedFallback(JSONArray items) {
++        if (hasStartedCaptureDownload()) return;
+         resetFormatLists();
+         if (items == null || items.length() == 0) {
+-            updateCounts(0, 0, 0);
+-            captureStatus.setText("لم يتم العثور على فيديو أو صوت. شغّل المقطع عدة ثوانٍ ثم أعد الالتقاط.");
++            updateCounts(0, 0);
++            captureStatus.setText(TextUtils.isEmpty(lastAnalysisError)
++                    ? "جاري البحث عن بيانات الفيديو والصوت..." : lastAnalysisError);
+             return;
+         }
+ 
+         String bestAudioUrl = "";
++        boolean bestAudioCapturedDirect = false;
+         String bestAudioExt = "";
+         String bestAudioCodec = "";
+         double bestAudioBitrate = 0;
+@@ -1294,7 +1356,7 @@
+         for (int i = 0; i < items.length(); i++) {
+             JSONObject json = items.optJSONObject(i);
+             if (json == null || rejectCapturedItem(json)
+-                    || !"audio".equals(json.optString("type"))) continue;
++                    || !isCapturedAudio(json)) continue;
+             String url = json.optString("url", "");
+             if (TextUtils.isEmpty(url)) continue;
+             double bitrate = normalizedBitrateKbps(numberToDouble(json.opt("bitrate")));
+@@ -1309,6 +1371,7 @@
+                     : (mime.contains("mp4a") || mime.contains("aac") ? "AAC" : "");
+             if (TextUtils.isEmpty(bestAudioUrl) || score > currentScore) {
+                 bestAudioUrl = url;
++                bestAudioCapturedDirect = json.optBoolean("resolvedFromNetwork") || !isYouTubeUrl(pendingPageUrl);
+                 bestAudioBitrate = bitrate;
+                 bestAudioSize = size;
+                 bestAudioExt = detectedAudioExt;
+@@ -1344,7 +1407,7 @@
+         for (int i = 0; i < items.length(); i++) {
+             JSONObject json = items.optJSONObject(i);
+             if (json == null || rejectCapturedItem(json)
+-                    || "audio".equals(json.optString("type"))) continue;
++                    || isCapturedAudio(json)) continue;
+ 
+             String url = json.optString("url", "");
+             if (TextUtils.isEmpty(url)) continue;
+@@ -1353,16 +1416,21 @@
+             String lowerUrl = url.toLowerCase(Locale.US);
+             String mime = json.optString("mime", "").toLowerCase(Locale.US);
+             boolean modernVideo = "mp4".equals(detectedExt) || "webm".equals(detectedExt)
++                    || "mkv".equals(detectedExt) || "ts".equals(detectedExt)
++                    || "mov".equals(detectedExt) || "m4v".equals(detectedExt)
++                    || mime.startsWith("video/") || mime.contains("matroska")
+                     || mime.contains("video/mp4") || mime.contains("video/webm")
+                     || lowerUrl.contains("videoplayback") || lowerUrl.contains(".m3u8")
+                     || lowerUrl.contains(".mpd") || lowerUrl.contains(".m4s") || lowerUrl.contains(".ts")
+                     || mime.contains("mpegurl") || mime.contains("dash+xml") || mime.contains("mp2t");
+-            if (!modernVideo) continue;
++            if (!modernVideo || (!"video".equals(json.optString("type")) && !mime.startsWith("video/")
++                    && TextUtils.isEmpty(detectedExt) && TextUtils.isEmpty(json.optString("itag")))) continue;
+ 
+             String itag = json.optString("itag", "");
+ 
+             MediaFormatItem item = new MediaFormatItem();
+             item.directUrl = url;
++            item.capturedDirect = json.optBoolean("resolvedFromNetwork") || !isYouTubeUrl(pendingPageUrl);
+             String capturedReferer = json.optString("referer", "");
+             if (TextUtils.isEmpty(capturedReferer)) capturedReferer = json.optString("frameUrl", "");
+             if (TextUtils.isEmpty(capturedReferer)) capturedReferer = preferredPlayerPageUrl;
+@@ -1370,7 +1438,9 @@
+             item.formatId = TextUtils.isEmpty(itag) ? "" : itag;
+             // YouTube itag lets yt-dlp reopen the original page and download through its managed
+             // FFmpeg environment instead of executing temporary videoplayback links directly.
+-            item.ext = ("webm".equals(detectedExt) || mime.contains("webm")) ? "webm" : "mp4";
++            item.ext = "mkv".equals(detectedExt) || mime.contains("matroska") ? "mkv"
++                    : "ts".equals(detectedExt) || mime.contains("mp2t") ? "ts"
++                    : "webm".equals(detectedExt) || mime.contains("webm") ? "webm" : "mp4";
+             item.note = "رابط فيديو ملتقط من جلسة المتصفح";
+             item.protocol = Uri.parse(url).getScheme();
+             item.type = MediaFormatItem.TYPE_VIDEO;
+@@ -1381,15 +1451,25 @@
+             item.sizeBytes = numberToLong(json.opt("size"));
+             String qualityLabel = json.optString("qualityLabel", "");
+             applyCapturedFormatMetadata(item, itag, mime, qualityLabel);
++            if (!TextUtils.isEmpty(json.optString("videoCodec"))) item.videoCodec = shortCodec(json.optString("videoCodec"));
++            if (!TextUtils.isEmpty(json.optString("audioCodec"))) item.audioCodec = shortCodec(json.optString("audioCodec"));
++            if (json.has("hasAudio")) item.hasAudio = json.optBoolean("hasAudio");
++            // YouTube transport endpoints without format facts are not selectable MP4 qualities.
++            if (isYouTubeUrl(pendingPageUrl) && item.height <= 0 && item.width <= 0
++                    && !json.optBoolean("resolvedFromNetwork") && TextUtils.isEmpty(itag)) continue;
+             String formatKey = !TextUtils.isEmpty(itag) ? "itag:" + itag
+                     : item.ext + "|" + item.videoCodec + "|" + item.height
+-                    + "|" + Math.round(item.fps) + "|" + qualityLabel;
++                    + "|" + Math.round(item.fps) + "|" + qualityLabel
++                    + ((item.height > 0 || item.width > 0) ? "" : "|" + canonicalCaptureUrl(url));
+             if (!seen.add(formatKey)) continue;
+ 
+             double duration = numberToDouble(json.opt("duration"));
+             if (duration <= 0) duration = capturedDurationSeconds;
+             capturedDurationSeconds = Math.max(capturedDurationSeconds, duration);
+-            if (item.sizeBytes <= 0) item.sizeBytes = estimateSize(duration, item.bitrate);
++            if (item.sizeBytes <= 0) {
++                item.sizeBytes = estimateSize(duration, item.bitrate);
++                item.sizeEstimated = item.sizeBytes > 0;
++            }
+ 
+             if (!item.hasAudio && !TextUtils.isEmpty(bestAudioUrl)) {
+                 String pairedAudioUrl = bestAudioUrl;
+@@ -1432,6 +1512,18 @@
+         }
+ 
+         int audioTotal = 0;
++        MediaFormatItem muxedAudioSource = null;
++        // A progressive file carries audio too; it does not require a separate audio network request.
++        if (TextUtils.isEmpty(bestAudioUrl)) {
++            for (MediaFormatItem video : capturedVideos) {
++                if (!video.hasAudio) continue;
++                bestAudioUrl = video.directUrl;
++                bestAudioCapturedDirect = video.capturedDirect;
++                muxedAudioSource = video;
++                bestAudioCodec = video.audioCodec;
++                break;
++            }
++        }
+         if (!TextUtils.isEmpty(bestAudioUrl)) {
+             int[] mp3Qualities = new int[]{320, 256, 192, 128};
+             for (int quality : mp3Qualities) {
+@@ -1440,7 +1532,11 @@
+                 item.sourceUrl = TextUtils.isEmpty(preferredPlayerPageUrl)
+                         ? pendingPageUrl : preferredPlayerPageUrl;
+                 item.directUrl = bestAudioUrl;
+-                item.formatId = "bestaudio/best";
++                item.capturedDirect = bestAudioCapturedDirect;
++                item.hasAudio = true;
++                if (muxedAudioSource != null) item.videoCodec = TextUtils.isEmpty(muxedAudioSource.videoCodec)
++                        ? "unknown" : muxedAudioSource.videoCodec;
++                item.formatId = "";
+                 item.ext = "mp3";
+                 item.bitrate = quality;
+                 item.audioQualityKbps = quality;
+@@ -1448,27 +1544,14 @@
+                 item.note = "تحويل أفضل صوت ملتقط إلى MP3";
+                 if (capturedDurationSeconds > 0) {
+                     item.sizeBytes = estimateSize(capturedDurationSeconds, quality);
++                    item.sizeEstimated = true;
+                 }
+                 audioResults.addView(createFormatCard(item));
+                 audioTotal++;
+             }
+         }
+ 
+-        List<MediaFormatItem> fallbackExtras = new ArrayList<>();
+-        if (!capturedVideos.isEmpty()) {
+-            MediaFormatItem source = capturedVideos.get(0);
+-            MediaFormatItem mkv = cloneVideoForOutput(source, "mkv",
+-                    "حفظ الفيديو والصوت الملتقطين داخل MKV");
+-            fallbackExtras.add(mkv);
+-
+-            if (isNativeTransportStreamSource(source)) {
+-                fallbackExtras.add(cloneVideoForOutput(source, "ts",
+-                        "MPEG-TS أصلي من بث HLS الخاص بالموقع"));
+-            }
+-            for (MediaFormatItem extra : fallbackExtras) extraResults.addView(createFormatCard(extra));
+-        }
+-
+-        updateCounts(videoTotal, audioTotal, fallbackExtras.size());
++        updateCounts(videoTotal, audioTotal);
+         if (videoTotal > 0) {
+             captureStatus.setText("تم التقاط الفيديو من جلسة المتصفح. اختر الجودة المطلوبة.");
+             openVideoList();
+@@ -1476,8 +1559,20 @@
+             captureStatus.setText("ظهر الصوت فقط. شغّل الفيديو عدة ثوانٍ ثم أعد الالتقاط لإظهار الفيديو.");
+             openAudioList();
+         } else {
+-            captureStatus.setText("لم يظهر رابط بصيغة حديثة قابلة للتنزيل.");
+-        }
++            captureStatus.setText(TextUtils.isEmpty(lastAnalysisError)
++                    ? "جاري استخراج الجودات؛ لم يصل رابط فيديو أو صوت بعد." : lastAnalysisError);
++        }
++    }
++
++    private static boolean isCapturedAudio(JSONObject item) {
++        String mime = item.optString("mime", "").toLowerCase(Locale.US);
++        if ("audio".equals(item.optString("type")) || mime.startsWith("audio/")) return true;
++        return item.optString("itag", "").matches("139|140|141|249|250|251|256|258|599|600");
++    }
++
++    private static String canonicalCaptureUrl(String url) {
++        return url.replaceAll("([?&])(range|rn|rbuf)=[^&#]*", "$1")
++                .replace("?&", "?").replace("&&", "&");
+     }
+ 
+     private static double normalizedBitrateKbps(double value) {
+@@ -1492,10 +1587,10 @@
+         else if (lowerMime.contains("vp9") || lowerMime.contains("vp09")) item.videoCodec = "VP9";
+         else if (lowerMime.contains("hvc1") || lowerMime.contains("hev1") || lowerMime.contains("hevc")) item.videoCodec = "H.265";
+         else if (lowerMime.contains("avc1") || lowerMime.contains("h264")) item.videoCodec = "H.264";
+-        else item.videoCodec = "webm".equalsIgnoreCase(item.ext) ? "VP9/AV1" : "H.264/H.265";
++        else item.videoCodec = "";
+ 
+         if (item.height <= 0 && !TextUtils.isEmpty(qualityLabel) && qualityLabel.matches(".*\\d+p.*")) {
+-            String digits = qualityLabel.replaceAll("[^0-9]", "");
++            String digits = qualityLabel.replaceFirst(".*?(\\d+)p.*", "$1");
+             try { item.height = Integer.parseInt(digits); } catch (Exception ignored) { }
+         }
+ 
+@@ -1673,8 +1768,8 @@
+         parts.add(quality);
+         if (item.fps > 0) parts.add(formatNumber(item.fps) + "fps");
+         if (!TextUtils.isEmpty(item.ext)) parts.add(item.ext.toUpperCase(Locale.US));
+-        if (item.sizeBytes > 0) parts.add(formatBytes(item.sizeBytes));
+-        else parts.add("الحجم غير معروف");
++        if (item.sizeBytes > 0) parts.add((item.sizeEstimated ? "≈ " : "") + formatBytes(item.sizeBytes));
++        else parts.add("الحجم لم يرسله المصدر");
+         return TextUtils.join("  •  ", parts);
+     }
+ 
+@@ -1686,7 +1781,8 @@
+         if (!TextUtils.isEmpty(item.dynamicRange) && !"SDR".equalsIgnoreCase(item.dynamicRange)) {
+             parts.add(item.dynamicRange);
+         }
+-        if (!item.hasAudio) parts.add("سيتم دمج أفضل صوت تلقائياً");
++        if (!item.hasAudio && !TextUtils.isEmpty(item.directAudioUrl)) parts.add("دمج الصوت الملتقط تلقائياً");
++        else if (!item.hasAudio) parts.add("فيديو بدون مسار صوت مؤكد");
+         if (parts.isEmpty()) parts.add("جودة فيديو ملتقطة");
+         return TextUtils.join("  •  ", parts);
+     }
+@@ -1699,8 +1795,8 @@
+             parts.add("MP3");
+         }
+         if (item.bitrate > 0) parts.add(formatNumber(item.bitrate) + " kbps");
+-        if (item.sizeBytes > 0) parts.add(formatBytes(item.sizeBytes));
+-        else parts.add("الحجم غير معروف");
++        if (item.sizeBytes > 0) parts.add((item.sizeEstimated ? "≈ " : "") + formatBytes(item.sizeBytes));
++        else parts.add("الحجم لم يرسله المصدر");
+         return TextUtils.join("  •  ", parts);
+     }
+ 
+@@ -1768,6 +1864,9 @@
+                         ? MediaDownloadService.TYPE_AUDIO : MediaDownloadService.TYPE_VIDEO);
+         intent.putExtra(MediaDownloadService.EXTRA_AUDIO_QUALITY, item.audioQualityKbps);
+         intent.putExtra(MediaDownloadService.EXTRA_HAS_AUDIO, item.hasAudio);
++        intent.putExtra(MediaDownloadService.EXTRA_CAPTURED_DIRECT, item.capturedDirect);
++        intent.putExtra(MediaDownloadService.EXTRA_VIDEO_CODEC, item.videoCodec);
++        intent.putExtra(MediaDownloadService.EXTRA_AUDIO_CODEC, item.audioCodec);
+         intent.putExtra(MediaDownloadService.EXTRA_OUTPUT_EXT,
+                 item.type == MediaFormatItem.TYPE_AUDIO ? "mp3" :
+                         (TextUtils.isEmpty(item.ext) ? "mp4" : item.ext));
+@@ -1892,20 +1991,16 @@
+         downloadBindings.clear();
+         videoResults.removeAllViews();
+         audioResults.removeAllViews();
+-        extraResults.removeAllViews();
+         videoScroll.setVisibility(View.GONE);
+         audioScroll.setVisibility(View.GONE);
+-        extraScroll.setVisibility(View.GONE);
+         videoArrow.setText("⌄");
+         audioArrow.setText("⌄");
+-        extraArrow.setText("⌄");
+-        updateCounts(0, 0, 0);
+-    }
+-
+-    private void updateCounts(int videos, int audios, int extras) {
++        updateCounts(0, 0);
++    }
++
++    private void updateCounts(int videos, int audios) {
+         videoCount.setText(videos + " جودة");
+         audioCount.setText(audios + " جودة");
+-        extraCount.setText(extras + " صيغة");
+     }
+ 
+     private void toggleVideoList() {
+@@ -1926,48 +2021,29 @@
+         }
+     }
+ 
+-    private void toggleExtraList() {
+-        if (extraScroll.getVisibility() == View.VISIBLE) {
+-            extraScroll.setVisibility(View.GONE);
+-            extraArrow.setText("⌄");
+-        } else {
+-            openExtraList();
+-        }
+-    }
+-
+     private void openVideoList() {
+         audioScroll.setVisibility(View.GONE);
+-        extraScroll.setVisibility(View.GONE);
+         audioArrow.setText("⌄");
+-        extraArrow.setText("⌄");
+         videoScroll.setVisibility(View.VISIBLE);
+         videoArrow.setText("⌃");
+     }
+ 
+     private void openAudioList() {
+         videoScroll.setVisibility(View.GONE);
+-        extraScroll.setVisibility(View.GONE);
+         videoArrow.setText("⌄");
+-        extraArrow.setText("⌄");
+         audioScroll.setVisibility(View.VISIBLE);
+         audioArrow.setText("⌃");
+-    }
+-
+-    private void openExtraList() {
+-        videoScroll.setVisibility(View.GONE);
+-        audioScroll.setVisibility(View.GONE);
+-        videoArrow.setText("⌄");
+-        audioArrow.setText("⌄");
+-        extraScroll.setVisibility(View.VISIBLE);
+-        extraArrow.setText("⌃");
+     }
+ 
+     private static boolean isSupportedModernVideo(MediaFormatItem item) {
+         if (item == null || TextUtils.isEmpty(item.ext) || TextUtils.isEmpty(item.videoCodec)) return false;
+         String ext = item.ext.toLowerCase(Locale.US);
+         String codec = item.videoCodec.toUpperCase(Locale.US);
++        if ("mkv".equals(ext) || "ts".equals(ext) || "mpegts".equals(ext)
++                || "mov".equals(ext) || "m4v".equals(ext)) return true;
+         if ("mp4".equals(ext)) {
+-            return "H.264".equalsIgnoreCase(codec) || "H.265".equalsIgnoreCase(codec);
++            return "H.264".equalsIgnoreCase(codec) || "H.265".equalsIgnoreCase(codec)
++                    || "AV1".equalsIgnoreCase(codec) || codec.contains("VP9");
+         }
+         if ("webm".equals(ext)) {
+             return "VP9".equalsIgnoreCase(codec) || "AV1".equalsIgnoreCase(codec);
+@@ -1985,6 +2061,8 @@
+ 
+     private void closeCapturePanel() {
+         capturePanel.setVisibility(View.GONE);
++        captureRequestSerial++;
++        stopActiveAnalysis();
+     }
+ 
+     private String normalizePageUrl(String url) {
+@@ -3024,7 +3102,11 @@
+             try { unregisterReceiver(downloadReceiver); } catch (Exception ignored) { }
+         }
+         if (session != null) session.close();
++        captureRequestSerial++;
+         worker.shutdownNow();
++        engineUpdater.shutdownNow();
++        stopActiveAnalysis();
++        analysisWatchdog.shutdown();
+         super.onDestroy();
+     }
+     private static String cleanCookieField(String value) {
+@@ -3198,6 +3280,15 @@
+                                      List<GeckoSession.PermissionDelegate.ContentPermission> perms,
+                                      Boolean hasUserGesture) {
+             if (url != null) {
++                if (!normalizePageUrl(url).equals(pendingPageUrl)) {
++                    closeCapturePanel();
++                    lastCapturedItems = null;
++                    lastPlayerFormats = null;
++                    capturedDurationSeconds = 0;
++                    preferredPlayerPageUrl = "";
++                    latestCookieHeader = "";
++                    latestCookieFilePath = "";
++                }
+                 addressBar.setText(url);
+             updateFavoriteButtonState();
+                 pendingPageUrl = normalizePageUrl(url);
+@@ -3286,6 +3377,8 @@
+         double bitrate;
+         int audioQualityKbps;
+         long sizeBytes;
++        boolean sizeEstimated;
++        boolean capturedDirect;
+         boolean hasAudio;
+     }
+ 
+--- a/app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java
+@@ -29,6 +29,9 @@
+ import java.io.OutputStream;
+ import java.util.ArrayList;
+ import java.util.List;
++import java.util.Collections;
++import java.nio.charset.StandardCharsets;
++import org.json.JSONObject;
+ import java.util.Locale;
+ import java.util.Map;
+ import java.util.concurrent.ConcurrentHashMap;
+@@ -70,6 +73,9 @@
+     public static final String EXTRA_OUTPUT_EXT = "output_ext";
+     public static final String EXTRA_TITLE = "title";
+     public static final String EXTRA_ESTIMATED_SIZE = "estimated_size";
++    public static final String EXTRA_CAPTURED_DIRECT = "captured_direct";
++    public static final String EXTRA_VIDEO_CODEC = "video_codec";
++    public static final String EXTRA_AUDIO_CODEC = "audio_codec";
+     public static final String EXTRA_COOKIE_FILE = "cookie_file";
+     public static final String EXTRA_COOKIE_HEADER = "cookie_header";
+     public static final String EXTRA_USER_AGENT = "user_agent";
+@@ -274,7 +280,7 @@
+             YoutubeDL.getInstance().execute(
+                     buildRequest(task, workDir), task.processId, progressCallback(task));
+         } catch (Throwable firstError) {
+-            if (!isYouTubeTask(task) || !looksLikeThrottle(firstError)
++            if (task.capturedDirect || !isYouTubeTask(task) || !looksLikeThrottle(firstError)
+                     || task.cancelled || task.paused) {
+                 if (firstError instanceof Exception) throw (Exception) firstError;
+                 throw new Exception(firstError);
+@@ -323,6 +329,7 @@
+ 
+     private YoutubeDLRequest buildDirectRequest(TaskState task, File workDir) {
+         YoutubeDLRequest request = new YoutubeDLRequest(task.directUrl);
++        EngineRuntimeOptions.apply(getApplicationContext(), request);
+         request.addOption("--no-mtime");
+         request.addOption("--newline");
+         request.addOption("--ignore-config");
+@@ -402,8 +409,32 @@
+         }
+     }
+ 
+-    private YoutubeDLRequest buildRequest(TaskState task, File workDir) {
+-        YoutubeDLRequest request = new YoutubeDLRequest(task.downloadUrl());
++    private YoutubeDLRequest buildRequest(TaskState task, File workDir) throws Exception {
++        YoutubeDLRequest request;
++        if (task.capturedDirect && !TextUtils.isEmpty(task.directUrl)) {
++            // Generic direct files and paired HTTPS streams can use captured info. Manifest
++            // protocols still need the generic extractor to parse their segment lists.
++            String path = Uri.parse(task.directUrl).getPath();
++            boolean manifest = path != null && (path.toLowerCase(Locale.US).endsWith(".m3u8")
++                    || path.toLowerCase(Locale.US).endsWith(".mpd"));
++            if (manifest) {
++                request = new YoutubeDLRequest(task.directUrl);
++            } else {
++                Map<String, Object> info = CapturedDownloadPlan.create(task.taskId, task.title,
++                        task.directUrl, task.directAudioUrl, task.formatId, task.outputExt,
++                        task.videoCodec, task.audioCodec, task.hasAudio,
++                        task.mediaType == TYPE_AUDIO && TextUtils.isEmpty(task.videoCodec),
++                        task.userAgent, task.sourceUrl);
++                File infoFile = new File(workDir, "captured-info.json");
++                try (FileOutputStream out = new FileOutputStream(infoFile)) {
++                    out.write(new JSONObject(info).toString().getBytes(StandardCharsets.UTF_8));
++                }
++                request = new YoutubeDLRequest(Collections.<String>emptyList());
++                request.addOption("--load-info-json", infoFile.getAbsolutePath());
++            }
++        } else {
++            request = new YoutubeDLRequest(task.downloadUrl());
++        }
+         request.addOption("--no-playlist");
+         request.addOption("--no-mtime");
+         request.addOption("--newline");
+@@ -424,7 +455,7 @@
+                 : "%(title).180B [%(format_id)s].%(ext)s";
+         request.addOption("-o", new File(workDir, outputTemplate).getAbsolutePath());
+ 
+-        request.addOption("--js-runtimes", "quickjs");
++        EngineRuntimeOptions.apply(getApplicationContext(), request);
+         request.addOption("--extractor-retries", "5");
+         if (!TextUtils.isEmpty(task.sourceUrl)) {
+             request.addOption("--referer", task.sourceUrl);
+@@ -977,6 +1008,9 @@
+         int mediaType;
+         int audioQuality;
+         boolean hasAudio;
++        boolean capturedDirect;
++        String videoCodec;
++        String audioCodec;
+         long estimatedSize;
+         String cookieFile;
+         String cookieHeader;
+@@ -998,6 +1032,7 @@
+         final AtomicBoolean executing = new AtomicBoolean(false);
+ 
+         String downloadUrl() {
++            if (capturedDirect && !TextUtils.isEmpty(directUrl)) return directUrl;
+             // When a yt-dlp format id exists, always re-open the original page URL.
+             // Direct videoplayback URLs from YouTube are temporary and often expire before download starts.
+             if (!TextUtils.isEmpty(sourceUrl)
+@@ -1021,6 +1056,9 @@
+             task.mediaType = intent.getIntExtra(EXTRA_MEDIA_TYPE, TYPE_VIDEO);
+             task.audioQuality = intent.getIntExtra(EXTRA_AUDIO_QUALITY, 320);
+             task.hasAudio = intent.getBooleanExtra(EXTRA_HAS_AUDIO, false);
++            task.capturedDirect = intent.getBooleanExtra(EXTRA_CAPTURED_DIRECT, false);
++            task.videoCodec = intent.getStringExtra(EXTRA_VIDEO_CODEC);
++            task.audioCodec = intent.getStringExtra(EXTRA_AUDIO_CODEC);
+             task.estimatedSize = intent.getLongExtra(EXTRA_ESTIMATED_SIZE, 0L);
+             task.cookieFile = intent.getStringExtra(EXTRA_COOKIE_FILE);
+             task.cookieHeader = intent.getStringExtra(EXTRA_COOKIE_HEADER);
+@@ -1043,6 +1081,9 @@
+             intent.putExtra(EXTRA_MEDIA_TYPE, mediaType);
+             intent.putExtra(EXTRA_AUDIO_QUALITY, audioQuality);
+             intent.putExtra(EXTRA_HAS_AUDIO, hasAudio);
++            intent.putExtra(EXTRA_CAPTURED_DIRECT, capturedDirect);
++            intent.putExtra(EXTRA_VIDEO_CODEC, videoCodec);
++            intent.putExtra(EXTRA_AUDIO_CODEC, audioCodec);
+             intent.putExtra(EXTRA_ESTIMATED_SIZE, estimatedSize);
+             intent.putExtra(EXTRA_COOKIE_FILE, cookieFile);
+             intent.putExtra(EXTRA_COOKIE_HEADER, cookieHeader);
+--- a/app/src/main/res/layout/activity_main.xml
++++ b/app/src/main/res/layout/activity_main.xml
+@@ -46,7 +46,7 @@
+                 android:background="@drawable/pro_badge_background"
+                 android:paddingHorizontal="7dp"
+                 android:paddingVertical="3dp"
+-                android:text="PRO 1.8.7"
++                android:text="PRO 1.9.3"
+                 android:textColor="#FF4B9F"
+                 android:textSize="10sp"
+                 android:textStyle="bold" />
+@@ -757,35 +757,6 @@
+             </ScrollView>
+ 
+             <LinearLayout
+-                android:id="@+id/extraHeader"
+-                android:layout_width="match_parent"
+-                android:layout_height="54dp"
+-                android:layout_marginTop="8dp"
+-                android:background="@drawable/video_header_background"
+-                android:clickable="true"
+-                android:focusable="true"
+-                android:gravity="center_vertical"
+-                android:layoutDirection="rtl"
+-                android:orientation="horizontal"
+-                android:paddingHorizontal="14dp">
+-                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="◇  صيغ إضافية MKV / TS" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold" />
+-                <TextView android:id="@+id/extraCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 صيغة" android:textColor="#D5CBD8" android:textSize="11sp" />
+-                <TextView android:id="@+id/extraArrow" android:layout_width="34dp" android:layout_height="wrap_content" android:gravity="center" android:text="⌄" android:textColor="#FF7AC0" android:textSize="24sp" />
+-            </LinearLayout>
+-
+-            <ScrollView
+-                android:id="@+id/extraScroll"
+-                android:layout_width="match_parent"
+-                android:layout_height="0dp"
+-                android:layout_weight="1"
+-                android:clipToPadding="false"
+-                android:fillViewport="false"
+-                android:overScrollMode="never"
+-                android:visibility="gone">
+-                <LinearLayout android:id="@+id/extraResults" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingTop="9dp" android:paddingBottom="3dp" />
+-            </ScrollView>
+-
+-            <LinearLayout
+                 android:id="@+id/audioHeader"
+                 android:layout_width="match_parent"
+                 android:layout_height="54dp"
+--- /dev/null
++++ b/docs/history/README_AR.txt
+@@ -0,0 +1,7 @@
++SatLink Browser PRO 1.7 STABLE
++
++- المتصفح يعمل بجلسة GeckoView الطبيعية بدون تصدير أو حقن كوكيز.
++- زر الالتقاط الوحيد هو الزر الدائري أسفل الوسط.
++- تنزيل الملفات العادية منفصل عن التقاط الفيديو.
++- رسائل المحرك الخام مخفية ويظهر للمستخدم شرح عربي مختصر.
++- الثيم والأيقونة والواجهة محفوظة بدون تغيير.
+--- /dev/null
++++ b/docs/history/RESTORE_NOTE_AR.txt
+@@ -0,0 +1,8 @@
++SatLink Browser PRO 1.9.1 RESTORED
++
++- تم الاعتماد على كود الإضافات الأصلي من النسخة 1.8.7 التي كان فتح إعدادات uBlock يعمل فيها.
++- لم يتم إضافة Popup تجريبي أو نافذة معلومات بديلة.
++- زر إعدادات الإضافة يفتح optionsPageUrl مباشرة مثل النسخة الأصلية.
++- تحديث yt-dlp التلقائي كل 24 ساعة موجود كما كان داخل initializeDownloadEngine.
++- تمت إضافة android:extractNativeLibs=true فقط لتجهيز ملفات yt-dlp/FFmpeg الأصلية.
++- لم يتم تغيير التحميل أو المتصفح أو واجهة الإضافات.
+--- /dev/null
++++ b/docs/history/UPDATE_1_7_3_FAVORITES_AR.txt
+@@ -0,0 +1,13 @@
++SatLink Browser PRO 1.7.3 - Favorites
++
++الإضافات:
++- زر ♡+ لإضافة الصفحة الحالية أو حذفها من المفضلات.
++- زر ♥ مستقل لعرض قائمة المفضلات.
++- حفظ المفضلات محلياً بعد إغلاق التطبيق وإعادة التشغيل.
++- منع تكرار الرابط نفسه.
++- بحث فوري داخل المفضلات.
++- فتح أو حذف أي صفحة محفوظة.
++- تحديث حالة زر القلب تلقائياً عند الانتقال بين الصفحات.
++
++ملاحظة الفحص:
++تم فحص XML بنجاح. تعذر تنفيذ Gradle الكامل داخل بيئة الإنشاء لأن Gradle 8.11.1 يحتاج التنزيل من الإنترنت، والاتصال الخارجي غير متاح في البيئة الحالية.
+--- /dev/null
++++ b/docs/history/UPDATE_1_7_4_YOUTUBE_FORMAT_FIX_AR.txt
+@@ -0,0 +1,7 @@
++SatLink Browser PRO 1.7.4 - YouTube Format Details Fix
++
++- إصلاح تحليل يوتيوب من رابط صفحة المشاهدة الأصلي.
++- منع إرسال رابط videoplayback المؤقت إلى yt-dlp.
++- استعادة عرض الدقة وFPS والترميز والحجم والصوتيات.
++- الإبقاء على التقاط manifest للمواقع الأخرى.
++- تحسين عملاء استخراج يوتيوب الاحتياطيين.
+--- /dev/null
++++ b/docs/history/UPDATE_1_7_STABLE_AR.txt
+@@ -0,0 +1,8 @@
++SatLink Browser PRO 1.7 STABLE CLEAN
++
++- جلسة GeckoView طبيعية بالكامل.
++- لا تصدير ولا حقن ولا تمرير Cookies إلى محرك التحميل.
++- زر الالتقاط الوحيد في أسفل الوسط.
++- تنزيل الملفات العادية مستقل عن التقاط الفيديو.
++- إخفاء رسائل yt-dlp الخام وإظهار رسائل عربية قصيرة.
++- الحفاظ على الثيم والأيقونة والواجهة الحالية.
+--- /dev/null
++++ b/docs/history/UPDATE_1_8_3_CLEAN_CAPTURE_AR.txt
+@@ -0,0 +1,11 @@
++SatLink Browser PRO 1.8.3 - Clean Capture Core
++
++- تم البناء فوق نسخة المستخدم الأصلية 1.7.4.
++- لم يتغير مسار تحليل YouTube: رابط صفحة المشاهدة الأصلي فقط.
++- إصلاح خطأ JavaScript كان يوقف capture.js بسبب تكرار اسم observer.
++- تجميع نتائج الصفحة الرئيسية وكل iframe قبل إرسالها للتطبيق.
++- منع iframe الإعلاني من استبدال رابط الصفحة الرئيسية.
++- EgyBest: اختيار صفحة مشغل حقيقية ثم HLS/DASH كحل احتياطي.
++- Pornhub: تحليل صفحة المشاهدة الأصلية ومنع fragments مثل index-v1-a1 وm4s وts.
++- تمرير Cookies وUser-Agent وReferer إلى التحليل والتنزيل.
++- فلترة الإعلانات خاصة بمساري EgyBest/Pornhub فقط وليست فلترة عامة.
+--- /dev/null
++++ b/docs/history/UPDATE_1_8_5_PINTEREST_STABLE_AR.txt
+@@ -0,0 +1,9 @@
++SatLink Browser PRO 1.8.5 — Pinterest Stable
++
++- تثبيت تنزيل Pinterest ومنع رجوع النسبة للخلف.
++- استخدام اتصال واحد لمقاطع Pinterest بدل 8 أجزاء متزامنة.
++- إلغاء http-chunk-size لموقع Pinterest.
++- إعادة فتح رابط المنشور الأصلي لتجديد رابط CDN المؤقت.
++- إرسال Referer وOrigin وUser-Agent والكوكيز.
++- زيادة محاولات أجزاء Pinterest والانتظار بين المحاولات.
++- بقية المواقع بقيت على الإعدادات السريعة السابقة.
+--- /dev/null
++++ b/docs/history/UPDATE_1_8_6_FLOATING_CATCHER_REFRESH_AR.txt
+@@ -0,0 +1,13 @@
++SatLink Browser PRO 1.8.6
++
++التغييرات:
++- إضافة زر إنعاش واضح بجانب زر الرجوع وشريط العنوان.
++- إضافة السحب من أعلى صفحة الويب للأسفل ثم الإفلات لإنعاش الصفحة.
++- إظهار أداة التقاط مستقلة عائمة داخل صفحة المتصفح.
++- يمكن سحب زر الالتقاط العائم إلى أي مكان داخل صفحة الويب.
++- الضغط على زر الالتقاط يفتح لوحة الفيديو والصوت والجودات.
++- الإبقاء على أداة الالتقاط الوسطية الحالية بدون حذفها.
++- الإبقاء على إصلاح Pinterest واتصال واحد له فقط.
++
++ملاحظة البناء:
++تعذر إنشاء APK داخل البيئة لأن Gradle Wrapper يحتاج تنزيل Gradle 8.11.1 من الإنترنت. افتح المشروع في Android Studio واترك المزامنة تكتمل ثم Build APK(s).
+--- /dev/null
++++ b/docs/history/UPDATE_1_8_7_YOUTUBE_ONLY_FORMAT_READER_AR.txt
+@@ -0,0 +1,4 @@
++تعديل محدود لقارئ يوتيوب فقط:
++- لم يتم تغيير المتصفح أو الواجهة أو الالتقاط أو تنزيلات بقية المواقع.
++- يوتيوب يجرب عملاء yt-dlp الحاليين ويختار الاستجابة التي تحتوي أكبر عدد من الصيغ.
++- تمت معالجة حالة android_vr التي قد تعيد 360p فقط.
+--- /dev/null
++++ b/tests/ValidateJava.java
+@@ -0,0 +1,23 @@
++import java.nio.file.*;
++import java.util.*;
++import javax.tools.*;
++import com.sun.source.util.JavacTask;
++// Syntax check only: Android SDK/dependency type checks require Gradle.
++class ValidateJava {
++    public static void main(String[] args) throws Exception {
++        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
++        if (compiler == null) throw new IllegalStateException("JDK 17 required");
++        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
++        try (StandardJavaFileManager manager = compiler.getStandardFileManager(diagnostics, null, null)) {
++            var files = manager.getJavaFileObjectsFromStrings(Arrays.asList(args));
++            JavacTask task = (JavacTask) compiler.getTask(null, manager, diagnostics,
++                    List.of("-proc:none"), null, files);
++            task.parse();
++            for (var diagnostic : diagnostics.getDiagnostics()) {
++                if (diagnostic.getKind() == Diagnostic.Kind.ERROR)
++                    throw new IllegalStateException(diagnostic.toString());
++            }
++        }
++        System.out.println("PASS Java syntax (not Android compilation)");
++    }
++}
+--- /dev/null
++++ b/tests/capture.test.cjs
+@@ -0,0 +1,104 @@
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const vm = require('node:vm');
++const path = require('node:path');
++const assets = path.join(__dirname, '../app/src/main/assets/media_capture');
++function event() { const listeners = []; return { listeners, addListener(fn) { listeners.push(fn); } }; }
++function harness(extra) {
++  let sequence = 0;
++  const timers = new Map();
++  const context = vm.createContext({ URL, URLSearchParams, Map, Set, WeakMap, Date, Number, Array, Promise,
++    setTimeout(fn, delay) { const id = ++sequence; timers.set(id, {fn, delay}); return id; },
++    clearTimeout(id) { timers.delete(id); }, setInterval() {}, ...extra });
++  return { context, timers, async tick() {
++    const pending = [...timers.values()]; timers.clear();
++    for (const timer of pending) await timer.fn();
++    for (let i=0;i<20;i++) await Promise.resolve();
++  }};
++}
++async function backgroundTests() {
++  const sent = [], request = event(), beforeHeaders = event(), response = event();
++  const messages = event(), updated = event(), removed = event();
++  const h = harness({browser: {
++    cookies: {async getAll() { return []; }}, runtime: {onMessage: messages,
++      async sendNativeMessage(host, payload) { sent.push(payload); }},
++    webRequest: {onBeforeRequest: request, onBeforeSendHeaders: beforeHeaders, onHeadersReceived: response},
++    tabs: {onUpdated: updated, onRemoved: removed}
++  }});
++  vm.runInContext(fs.readFileSync(path.join(assets,'media_metadata.js'),'utf8'), h.context);
++  vm.runInContext(fs.readFileSync(path.join(assets,'background.js'),'utf8'), h.context);
++  const snapshot = {action:'pageSnapshot',pageUrl:'https://page.test/watch',isTopFrame:true,items:[]};
++  await messages.listeners[0](snapshot,{tab:{id:1},frameId:0});
++  const firstTimer = [...h.timers.keys()][0];
++  for (let i=0;i<100;i++) request.listeners[0]({url:`https://cdn.test/clip${i}.ts`,tabId:1,type:'media'});
++  assert.equal([...h.timers.keys()][0], firstTimer, 'HLS traffic cannot starve flush timer');
++  assert.equal(h.timers.size, 1);
++  await h.tick();
++  assert.equal(sent.at(-1).items.length,100);
++  const url='https://cdn.test/movie.mkv?token=123';
++  beforeHeaders.listeners[0]({url,tabId:1,type:'media',requestHeaders:[{name:'Referer',value:'https://page.test/watch'}]});
++  response.listeners[0]({url,tabId:1,type:'media',responseHeaders:[{name:'Content-Type',value:'video/x-matroska'},{name:'Content-Length',value:'1048576'},{name:'Content-Range',value:'bytes 0-1048575/4294967296'}]});
++  await h.tick();
++  const item=sent.at(-1).items.find(x=>x.url===url);
++  assert.equal(item.type,'video'); assert.equal(item.size,4294967296);
++  assert.equal(item.referer,'https://page.test/watch','response metadata preserves request headers');
++  request.listeners[0]({url:'https://googlevideo.com/other.mp4',tabId:-1,type:'media'});
++  await h.tick();
++  assert(!sent.at(-1).items.some(x=>x.url.includes('other.mp4')));
++  request.listeners[0]({url:'https://cdn.test/worker.mp4',tabId:-1,type:'media',documentUrl:snapshot.pageUrl});
++  await h.tick();
++  assert(sent.at(-1).items.some(x=>x.url.includes('worker.mp4')),'worker request with exact document is recovered');
++  await messages.listeners[0]({...snapshot,pageUrl:'https://page.test/second'},{tab:{id:2},frameId:0});
++  request.listeners[0]({url:'https://cdn.test/ambiguous.mp4',tabId:-1,type:'media',originUrl:'https://page.test/'});
++  await h.tick();
++  assert(sent.slice(-2).every(x=>!x.items.some(i=>i.url.includes('ambiguous.mp4'))),'same-origin tabs cannot share unidentified worker traffic');
++  request.listeners[0]({url:'https://cdn.test/stale.mp4',tabId:-1,type:'media',documentUrl:'https://page.test/old'});
++  await h.tick();
++  assert(sent.slice(-2).every(x=>!x.items.some(i=>i.url.includes('stale.mp4'))),'another page on same origin does not match');
++  removed.listeners[0](2);
++  updated.listeners[0](1,{status:'loading'});
++  await messages.listeners[0]({...snapshot,pageUrl:'https://page.test/next'},{tab:{id:1},frameId:0});
++  await h.tick(); assert.equal(sent.at(-1).items.length,0,'navigation clears old requests');
++  request.listeners[0]({url:'https://cdn.test/live.ts',tabId:1,type:'media'});
++  removed.listeners[0](1); assert.equal(h.timers.size,0);
++  console.log('PASS background: MKV/TS, 4GiB sizes, headers, bounded flush, tab isolation, navigation cleanup');
++}
++async function contentTests() {
++  const sent=[], portMessage=event(), handlers={}; let observer, entries=[];
++  let queryCount=0;
++  const links=[{href:'https://cdn.test/movie.mkv?mime=video%2Fx-matroska'}, {href:'https://cdn.test/movie.ts'}];
++  const document={baseURI:'https://page.test/watch',title:'Test',hidden:false,scripts:[],
++    documentElement:{},querySelectorAll(selector) { queryCount++; return selector==='a[href]'?links:[]; },
++    addEventListener(name,fn) { handlers[name]=fn; }};
++  const window={addEventListener(){},fetch:async()=>({url:'',headers:{get(){return '';}}})};window.top=window;
++  const h=harness({document,window,location:{href:'https://page.test/watch'},navigator:{userAgent:'Test'},
++    MutationObserver: class { constructor(cb) { observer=cb; } observe() {} },
++    PerformanceObserver:class { constructor(cb) { this.cb=cb; } observe() {} },
++    performance:{now(){return 100;},getEntriesByType(){return entries;}},
++    browser:{runtime:{async sendMessage(payload){sent.push(payload);},connectNative(){return {onMessage:portMessage};},async sendNativeMessage(){}}}
++  });
++  vm.runInContext(fs.readFileSync(path.join(assets,'media_metadata.js'),'utf8'),h.context);
++  vm.runInContext(fs.readFileSync(path.join(assets,'capture.js'),'utf8'),h.context);
++  assert.equal(sent[0].action,'pageSnapshot','initial snapshot has no 900ms wait');
++  assert.equal(sent[0].items.length,2); assert(sent[0].items.every(x=>x.type==='video'));
++  await h.tick();
++  const baseline=queryCount;
++  for(let i=0;i<100;i++) observer();
++  assert.equal(queryCount,baseline,'mutation bursts do not run synchronous full-page scans');
++  await h.tick(); assert(queryCount-baseline<10);
++  entries=[{name:'https://cdn.test/live.m3u8',initiatorType:'fetch'}];
++  observer(); await h.tick(); await h.tick();
++  assert(sent.at(-1).items.some(x=>x.url.includes('live.m3u8')),'new discoveries are delivered automatically');
++  const before=sent.length;
++  portMessage.listeners[0]({action:'scanMedia'});
++  assert.equal(sent.length,before+1,'manual scan returns even if unchanged');
++  vm.runInContext("location.href='https://page.test/next'",h.context); links.length=0;entries=[{name:'https://cdn.test/old.mp4',startTime:50,initiatorType:'fetch'}];
++  portMessage.listeners[0]({action:'scanMedia'});assert.equal(sent.at(-1).items.length,0);
++  document.scripts=[{textContent:'var ytInitialPlayerResponse = '+JSON.stringify({videoDetails:{videoId:'current'},streamingData:{adaptiveFormats:[{itag:137,url:'https://cdn.test/videoplayback?itag=137',mimeType:'video/mp4; codecs="avc1"',height:1080,width:1920,contentLength:'90000000'}]}})+';'}];
++  vm.runInContext("location.href='https://m.youtube.com/watch?v=current'",h.context);
++  portMessage.listeners[0]({action:'scanMedia'});
++  const format=sent.at(-1).items.find(x=>x.itag==='137');
++  assert(format && format.height===1080 && format.size===90000000,'Content scanner forwards complete player metadata');
++  console.log('PASS content: immediate snapshot, automatic discovery, coalesced mutations, forced scan, SPA cleanup');
++}
++(async()=>{await backgroundTests();await contentTests();})().catch(e=>{console.error(e);process.exitCode=1;});
+--- /dev/null
++++ b/tests/download_plan_test.py
+@@ -0,0 +1,66 @@
++"""Run the actual download-plan and runtime-option code under a JDK with tiny API stubs."""
++from pathlib import Path
++import tempfile, subprocess, re
++root=Path(__file__).resolve().parents[1]
++base=root/'app/src/main/java/com/satlink/geckoviewtest'
++parts=[]
++imports={'import java.util.*;','import java.io.*;','import java.nio.file.*;'}
++for filename in ['CapturedDownloadPlan.java','EngineRuntimeOptions.java']:
++    s=(base/filename).read_text()
++    imports.update(re.findall(r'^import java\..*;$',s,re.M))
++    s=re.sub(r'^package .*;\n|^import .*;\n','',s,flags=re.M)
++    parts.append(s)
++source='\n'.join(sorted(imports))+'\n'+ '\n'.join(parts)+'''
++class Context {
++ final ApplicationInfo info=new ApplicationInfo();
++ ApplicationInfo getApplicationInfo(){return info;}
++}
++class ApplicationInfo {String nativeLibraryDir;}
++class YoutubeDLRequest {
++ final Map<String,String> options=new LinkedHashMap<>();
++ void addOption(String name,String value){options.put(name,value);}
++}
++class DownloadPlanTest {
++ static void check(boolean condition,String message){if(!condition) throw new AssertionError(message);}
++ @SuppressWarnings("unchecked")
++ public static void main(String[] args) throws Exception {
++  String video="https://r1.googlevideo.com/videoplayback?itag=137&mime=video%2Fmp4&sig=signed";
++  String audio="https://r1.googlevideo.com/videoplayback?itag=140&mime=audio%2Fmp4&sig=signed";
++  var root=CapturedDownloadPlan.create("id","Title",video,audio,"137","mp4","H.264","AAC",false,false,"UA","https://youtube.com/watch?v=id");
++  var formats=(List<Map<String,Object>>)root.get("formats");
++  check(formats.size()==2,"Adaptive source must contain both streams");
++  check(formats.get(0).get("format_id").equals("137"),"Preserve selected video format");
++  check(formats.get(0).get("url").equals(video),"Do not replace signed video URL with failed page extraction");
++  check(formats.get(0).get("acodec").equals("none"),"Video-only stream is not muxed audio");
++  check(formats.get(1).get("ext").equals("m4a"),"Compatible captured audio extension");
++  check(formats.get(1).get("vcodec").equals("none"),"Audio-only stream must not become video");
++  root=CapturedDownloadPlan.create("id","Title","https://cdn.test/movie.mp4","","","mp3","H.264","AAC",true,false,"","");
++  formats=(List<Map<String,Object>>)root.get("formats");
++  check(formats.size()==1,"Progressive file needs no invented second audio URL");
++  check(formats.get(0).get("ext").equals("mp4"),"MP3 extraction input remains MP4");
++  check(formats.get(0).get("acodec").equals("mp4a.40.2"),"Progressive audio is available to extraction");
++  root=CapturedDownloadPlan.create("id","Title",audio,"","","mp3","","AAC",true,true,"","");
++  formats=(List<Map<String,Object>>)root.get("formats");
++  check(formats.get(0).get("vcodec").equals("none"),"Captured audio remains audio");
++  try {CapturedDownloadPlan.create("id","Title","blob:unsafe","","","mp4","","",false,false,"","");throw new AssertionError("blob accepted");} catch(IllegalArgumentException expected){}
++  Path temp=Files.createTempDirectory("runtime-test-");
++  try {
++   Context context=new Context();context.info.nativeLibraryDir=temp.toString();
++   YoutubeDLRequest request=new YoutubeDLRequest();EngineRuntimeOptions.apply(context,request);
++   check(request.options.isEmpty(),"Missing runtime must not be advertised as a PATH command");
++   File executable=temp.resolve("libqjs.so").toFile();executable.createNewFile();executable.setExecutable(true);
++   request=new YoutubeDLRequest();EngineRuntimeOptions.apply(context,request);
++   check(request.options.get("--js-runtimes").equals("quickjs:"+executable.getAbsolutePath()),"QuickJS must use extracted binary path");
++   check(request.options.get("--remote-components").equals("ejs:github"),"Updated engine can request matching challenge scripts");
++   executable.delete();
++  } finally {Files.delete(temp);}
++  System.out.println("PASS download plans: adaptive merge, direct audio, progressive MP3 input, signed URLs, native QuickJS path");
++ }
++}
++'''
++main_at=source.index('class DownloadPlanTest {')
++header_end=max(match.end() for match in re.finditer(r'^import .*;',source,re.M))
++source=source[:header_end]+'\n'+source[main_at:]+'\n'+source[header_end:main_at]
++with tempfile.TemporaryDirectory() as tmp:
++    target=Path(tmp)/'DownloadPlanTest.java';target.write_text(source)
++    subprocess.run(['java',str(target)],check=True)
+--- /dev/null
++++ b/tests/format_parser_test.py
+@@ -0,0 +1,64 @@
++"""Execute the complete production format parser with small read-only JSON API substitutes."""
++from pathlib import Path
++import re, subprocess, tempfile
++root=Path(__file__).resolve().parents[1]
++base=root/'app/src/main/java/com/satlink/geckoviewtest'
++s=(base/'MainActivity.java').read_text()
++parser=s[s.index('    private FormatCollection parseFormats'):s.index('    private boolean hasStartedCaptureDownload')]
++policy=s[s.index('    private static boolean isSupportedModernVideo'):s.index('    private GradientDrawable roundedBackground')]
++models=s[s.index('    private static final class FormatCollection'):s.index('    private static String formatBytes')]
++selection=(base/'FormatSelectionPolicy.java').read_text();selection=re.sub(r'^package .*;\n|^import .*;\n','',selection,flags=re.M)
++source='''import java.util.*;
++class FormatParserTest {
++ String pendingPageTitle="Title", pendingPageUrl="https://youtube.com/watch?v=current";
++ static class TextUtils {static boolean isEmpty(String s){return s==null||s.isEmpty();}}
++ static class JSONObject {
++  static final Object NULL=new Object(); final Map<String,Object> data=new LinkedHashMap<>();
++  JSONObject put(String k,Object v){data.put(k,v);return this;}
++  Object opt(String k){return data.get(k);}
++  String optString(String k){return optString(k,"");}
++  String optString(String k,String fallback){Object v=data.get(k);return v==null||v==NULL?fallback:String.valueOf(v);}
++  JSONArray optJSONArray(String k){Object v=data.get(k);return v instanceof JSONArray?(JSONArray)v:null;}
++ }
++ static class JSONArray {
++  final List<Object> data=new ArrayList<>();
++  JSONArray put(Object v){data.add(v);return this;} int length(){return data.size();}
++  JSONObject optJSONObject(int i){Object v=i<data.size()?data.get(i):null;return v instanceof JSONObject?(JSONObject)v:null;}
++ }
++'''+parser+policy+models+'''
++ static void check(boolean condition,String message){if(!condition)throw new AssertionError(message);}
++ static JSONObject video(String id,String ext,String codec,int height,boolean audio){return new JSONObject().put("format_id",id).put("url","https://cdn.test/"+id+"."+ext).put("ext",ext).put("vcodec",codec).put("acodec",audio?"mp4a.40.2":"none").put("height",height).put("width",height*16/9).put("fps",60).put("tbr",3000).put("filesize",1000000);}
++ public static void main(String[] args){
++  FormatParserTest parser=new FormatParserTest(); JSONArray formats=new JSONArray();
++  formats.put(video("360","mp4","avc1",360,true));
++  formats.put(video("1080","mp4","avc1",1080,false));
++  formats.put(video("2160","webm","vp9",2160,false));
++  formats.put(video("4320","mp4","av01",4320,false));
++  formats.put(video("mkv","mkv","hevc",720,true));
++  formats.put(video("ts","ts","avc1",480,true));
++  formats.put(new JSONObject().put("format_id","140").put("url","https://cdn.test/audio.m4a").put("ext","m4a").put("vcodec","none").put("acodec","mp4a.40.2").put("abr",128).put("filesize",10000));
++  formats.put(video("sb","mhtml","images",9000,false));
++  formats.put(new JSONObject().put("format_id","fake").put("vcodec","avc1").put("ext","mp4").put("height",10000));
++  var parsed=parser.parseFormats(new JSONObject().put("title","Fixture").put("duration",120).put("formats",formats));
++  check(parsed.videos.size()==6,"Lost real containers or included storyboards/unresolved entries");
++  check(parsed.videos.get(0).height==4320,"Highest available resolution is not first");
++  check(parsed.videos.get(0).videoCodec.equals("AV1"),"8K AV1 was filtered out");
++  check(parsed.videos.get(0).directAudioUrl.equals("https://cdn.test/audio.m4a"),"Separate audio was not paired");
++  check(parsed.audios.size()==4,"MP3 options missing");
++  check(parsed.audios.get(0).audioQualityKbps==320,"MP3 conversion targets are not ordered");
++  var progressive=parser.parseFormats(new JSONObject().put("duration",60).put("formats",new JSONArray().put(video("18","mp4","avc1",360,true))));
++  check(progressive.audios.size()==4,"Progressive video with sound must provide MP3 extraction");
++  var onlyImages=parser.parseFormats(new JSONObject().put("formats",new JSONArray().put(video("sb","mhtml","images",9000,false))));
++  check(onlyImages.videos.isEmpty() && onlyImages.audios.isEmpty(),"Images must not count as downloadable media");
++  List<FormatSelectionPolicy.Format> previewOnly=List.of(new FormatSelectionPolicy.Format("https://cdn.test/sb","mhtml","images","none",9000));
++  check(!FormatSelectionPolicy.score(previewOnly).hasMedia(),"Storyboard-only extraction reported success");
++  var low=FormatSelectionPolicy.score(List.of(new FormatSelectionPolicy.Format("https://cdn.test/low","mp4","avc1","mp4a",360)));
++  var high=FormatSelectionPolicy.score(List.of(new FormatSelectionPolicy.Format("https://cdn.test/high","mp4","av01","none",4320)));
++  check(high.compareTo(low)>0,"Fallback selection must prefer the highest available video");
++  System.out.println("PASS full production parser: 8K > 4K > 1080p, AV1, MKV/TS, audio pairing, four MP3 targets, progressive audio, storyboard exclusion, highest-resolution selection");
++ }
++}
++'''+selection
++with tempfile.TemporaryDirectory() as tmp:
++    target=Path(tmp)/'FormatParserTest.java';target.write_text(source)
++    subprocess.run(['java',str(target)],check=True)
+--- /dev/null
++++ b/tests/format_rules_test.py
+@@ -0,0 +1,34 @@
++"""Exercise the actual Java format helpers without Android SDK dependencies."""
++from pathlib import Path
++import tempfile
++import subprocess
++root = Path(__file__).resolve().parents[1]
++s = (root/'app/src/main/java/com/satlink/geckoviewtest/MainActivity.java').read_text()
++metadata = s[s.index('    private static void applyCapturedFormatMetadata'):s.index('    private View createFormatCard')]
++support = s[s.index('    private static boolean isSupportedModernVideo'):s.index('    private GradientDrawable roundedBackground')]
++source = '''import java.util.Locale;
++class FormatRulesTest {
++ static class TextUtils { static boolean isEmpty(String s) { return s == null || s.isEmpty(); } }
++ static class MediaFormatItem { String ext, videoCodec; int height; double fps; boolean hasAudio; }
++''' + metadata + support + '''
++ static void check(boolean value, String message) { if (!value) throw new AssertionError(message); }
++ public static void main(String[] args) {
++  MediaFormatItem item = new MediaFormatItem(); item.videoCodec="H.264";
++  for (String ext : new String[]{"mkv", "ts", "mpegts", "mov", "m4v"}) {
++   item.ext=ext; check(isSupportedModernVideo(item), "Missing video container " + ext);
++  }
++  item.ext="mp4"; item.videoCodec="AV1";
++  check(isSupportedModernVideo(item), "AV1 MP4 was filtered out");
++  item.ext="mp3"; check(!isSupportedModernVideo(item), "Audio in video list");
++  item.height=0; item.ext="mp4";
++  applyCapturedFormatMetadata(item, "", "video/mp4", "1080p60");
++  check(item.height==1080, "Resolution must not become 108060");
++  item.ext="mkv"; applyCapturedFormatMetadata(item, "", "video/x-matroska", "");
++  check(item.ext.equals("mkv"), "MKV container must survive metadata enrichment");
++  System.out.println("PASS Java format rules: real MKV/TS, AV1 MP4, audio separation, 1080p60 label");
++ }
++}
++'''
++with tempfile.TemporaryDirectory() as tmp:
++    target=Path(tmp)/'FormatRulesTest.java'; target.write_text(source)
++    subprocess.run(['java', str(target)], check=True)
+--- /dev/null
++++ b/tests/player_metadata.test.cjs
+@@ -0,0 +1,60 @@
++const assert=require('node:assert/strict');
++const path=require('node:path');
++const fs=require('node:fs');
++const vm=require('node:vm');
++const assets=path.join(__dirname,'../app/src/main/assets/media_capture');
++const media=require(path.join(assets,'media_metadata.js'));
++const videoId='KnguPRCVUss';
++const player={videoDetails:{videoId,lengthSeconds:'300'},streamingData:{
++  formats:[{itag:18,url:'https://r1.googlevideo.com/videoplayback?itag=18',mimeType:'video/mp4; codecs="avc1.42001E, mp4a.40.2"',width:640,height:360,fps:30,contentLength:'12000000',bitrate:320000,qualityLabel:'360p',audioQuality:'AUDIO_QUALITY_MEDIUM'}],
++  adaptiveFormats:[
++    {itag:137,signatureCipher:'url=https%3A%2F%2Fr1.googlevideo.com%2Fvideoplayback%3Fitag%3D137&s=encrypted',mimeType:'video/mp4; codecs="avc1.640028"',width:1920,height:1080,fps:60,contentLength:'100000000',qualityLabel:'1080p60',bitrate:2666666},
++    {itag:140,url:'https://r1.googlevideo.com/videoplayback?itag=140',mimeType:'audio/mp4; codecs="mp4a.40.2"',contentLength:'5000000',bitrate:128000,audioChannels:2}
++  ]}};
++const page='https://m.youtube.com/watch?v='+videoId;
++const text='var ytInitialPlayerResponse = '+JSON.stringify(player)+'; var unrelated = "}";';
++const formats=media.formatsFromText(text,page);
++assert.equal(formats.length,3);
++const video=formats.find(f=>f.itag==='137');
++assert.equal(video.url,'','encrypted signature is not presented as a resolved URL');
++assert.equal(video.height,1080);assert.equal(video.fps,60);assert.equal(video.size,100000000);
++assert.equal(formats.find(f=>f.itag==='18').hasAudio,true);
++assert.equal(formats.find(f=>f.itag==='140').type,'audio');
++assert.equal(media.formatsFromText(text,'https://youtube.com/watch?v=AnotherVideo').length,0);
++assert.equal(media.typeOf('https://r1.googlevideo.com/videoplayback','application/vnd.yt-ump'),'transport');
++const ranged='https://r1.googlevideo.com/videoplayback?itag=137&sig=abc%2Bdef&sparams=itag&range=0-999&rn=12';
++const full=media.fullStreamUrl(ranged);
++assert(!full.includes('range='));assert.equal(media.query(full,'sig'),'abc+def');
++assert(media.fullStreamUrl(ranged.replace('sparams=itag','sparams=itag,range')).includes('range='));
++assert.equal(media.fullStreamUrl('https://another.test/movie.mp4?range=0-99'),'https://another.test/movie.mp4?range=0-99');
++console.log('PASS player metadata: exact resolution/FPS/size, muxed audio, audio-only, encrypted cipher, video identity, UMP rejection, full signed stream');
++function event(){const callbacks=[];return{callbacks,addListener(fn){callbacks.push(fn);}};}
++async function integration(){
++ const before=event(),headers=event(),request=event(),messages=event(),updated=event(),removed=event();
++ const sent=[],timers=new Map();let next=0;
++ const browser={cookies:{async getAll(){return[];}},runtime:{onMessage:messages,async sendNativeMessage(_,p){sent.push(p);}},
++ webRequest:{onBeforeRequest:request,onBeforeSendHeaders:before,onHeadersReceived:headers},tabs:{onUpdated:updated,onRemoved:removed}};
++ const context=vm.createContext({URL,URLSearchParams,Map,Set,Date,Number,Promise,browser,
++ setTimeout(fn){const id=++next;timers.set(id,fn);return id;},clearTimeout(id){timers.delete(id);}});
++ vm.runInContext(fs.readFileSync(path.join(assets,'media_metadata.js'),'utf8'),context);
++ vm.runInContext(fs.readFileSync(path.join(assets,'background.js'),'utf8'),context);
++ await messages.callbacks[0]({action:'pageSnapshot',pageUrl:page,isTopFrame:true,items:formats},{tab:{id:1},frameId:0});
++ for(let i=0;i<7;i++){
++  const url=ranged.replace('range=0-999','range='+i+'-'+(i+99)).replace('rn=12','rn='+i);
++  request.callbacks[0]({url,tabId:1,type:'media'});
++  headers.callbacks[0]({url,tabId:1,type:'media',responseHeaders:[{name:'Content-Type',value:'video/mp4'},{name:'Content-Length',value:'100'}]});
++ }
++ request.callbacks[0]({url:'https://r1.googlevideo.com/videoplayback?itag=999',tabId:1,type:'media'});
++ headers.callbacks[0]({url:'https://r1.googlevideo.com/videoplayback?itag=999',tabId:1,type:'media',responseHeaders:[{name:'Content-Type',value:'application/vnd.yt-ump'}]});
++ for(const fn of [...timers.values()]) await fn();
++ for(let i=0;i<30;i++) await Promise.resolve();
++ const items=sent.at(-1).items;
++ assert.equal(items.filter(i=>i.itag==='137').length,1,'Seven byte ranges must not become seven qualities');
++ const captured=items.find(i=>i.itag==='137');
++ assert.equal(captured.height,1080);assert.equal(captured.fps,60);assert.equal(captured.size,100000000);
++ assert(captured.mime.includes('codecs='));assert(!captured.url.includes('range='));
++ assert(items.some(i=>i.type==='audio'&&i.itag==='140'),'Audio must survive network merging');
++ assert(!items.some(i=>i.itag==='999'),'UMP transport is not a playable MP4');
++ console.log('PASS capture integration: player metadata + seven network ranges produce one 1080p60 video, one audio source, exact total size');
++}
++integration().catch(error=>{console.error(error);process.exitCode=1;});

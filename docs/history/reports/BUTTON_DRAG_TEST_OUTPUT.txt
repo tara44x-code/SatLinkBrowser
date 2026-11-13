@@ -1,0 +1,4 @@
+PASS fullscreen fit: default right-center, long-press drag, drag suppresses click, viewport bounds, rotation, same-page position retention, cancellation, short-tap toggle, 2-second idle hide, screen touch show/reset, noninteractive hidden button, timer cleanup, cover/contain, responsive viewport, style enforcement/restoration, controls, native-video key, inaccessible frame, player replacement, page exit
+
+PASS media invariance: exact original MainActivity recovered after scoped tab/file integration; capture bridge differs only in tab identity routing; 46 other app files byte-identical (engines, formats, media download service, build dependencies)
+PASS scope: fullscreen_fit.js only; 54 other app files byte-identical.

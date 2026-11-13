@@ -1,0 +1,4 @@
+PASS fullscreen fit: 2-second idle hide, screen touch show/reset, noninteractive hidden button, timer cleanup, cover/contain, responsive viewport, style enforcement/restoration, controls, native-video key, inaccessible frame, player replacement, page exit
+
+PASS media invariance: exact original MainActivity recovered after scoped tab/file integration; capture bridge differs only in tab identity routing; 46 other app files byte-identical (engines, formats, media download service, build dependencies)
+PASS scope: only fullscreen_fit.js changed; 54 other app files byte-identical.

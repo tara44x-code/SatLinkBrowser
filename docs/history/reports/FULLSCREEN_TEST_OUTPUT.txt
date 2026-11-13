@@ -1,0 +1,70 @@
+active_feed.test.cjs: 0
+PASS real feed/content integration: visible post on TikTok root, current JSON only, metadata, hidden media pause, back mini-player pause, no auto-resume, explicit user play, feed-switch isolation
+
+browser_workspace_test.py: 0
+PASS production browser workspace: tab/state/selection persistence, corrupt-row recovery, Arabic title/search, signed URLs, closed-tab stack, bounded/clearable history, search engines, URL validation
+PASS actual browser integration: selected-tab persistence, native state restore and URL fallback, reopen closed tab, restore setting, guarded forward, loading stop versus reload
+
+bundled_engine_test.py: 0
+PASS bundled engine: exact SL.Tube bytes, SHA-256, fresh install, upgrade, no downgrade, validation failure rollback, corrupt-file rejection, staging cleanup
+2026.08.19
+PASS engine execution --version and bundled EJS solver files (host Python, not Android)
+
+capture.test.cjs: 0
+PASS background: MKV/TS, 4GiB sizes, headers, bounded flush, tab isolation, navigation cleanup
+PASS content: immediate snapshot, automatic discovery, coalesced mutations, forced scan, SPA cleanup
+
+download_plan_test.py: 0
+PASS download plans: adaptive merge, direct audio, progressive MP3 input, signed URLs, native QuickJS path
+
+download_request_test.py: 0
+PASS production download requests: exact video+audio selector, original page refresh, session UA, EJS, signed HLS master without extension, selected 4K, pause/resume persistence, MP3 extraction, MKV plan
+
+format_parser_test.py: 0
+PASS full production parser: 8K > 4K > 1080p, AV1, MKV/TS, audio pairing, four MP3 targets, progressive audio, storyboard exclusion, highest-resolution selection
+
+format_rules_test.py: 0
+PASS Java format rules: real MKV/TS, AV1 MP4, audio separation, 1080p60 label
+
+fullscreen_fit.test.cjs: 0
+PASS fullscreen fit: cover/contain, responsive viewport, style enforcement/restoration, controls, native-video key, inaccessible frame, player replacement, page exit
+
+general_catalog_test.py: 0
+PASS production native catalog and actual refreshDownloads: ZIP/ISO/EXE/APK/all states, existing requests, 6GB totals, live progress/completion, unknown totals, MediaStore merge without duplicates, preserved video card, native open/remove ID, lifecycle-bounded polling
+
+general_files_test.py: 0
+PASS actual general-file policy/controller: archive/program/APK/torrent, media exclusions, signed URLs, RFC5987 Arabic names, MIME, scoped cookies, duplicate dialog/name, native download/notification, permission continuation, magnet handoff
+
+hls.test.cjs: 0
+PASS HLS: 360/1080p60/4K, relative signed URLs, separate audio groups, no segment cards, exact selectors, credentials, bounded fetch, no recursion, navigation isolation
+
+media_invariance_test.py: 0
+PASS media invariance: exact original MainActivity recovered after scoped tab/file integration; capture bridge differs only in tab identity routing; 46 other app files byte-identical (engines, formats, media download service, build dependencies)
+
+playback_test.py: 0
+PASS production initialization with inaccessible MediaSession constructor, delegate activation/deactivation and playback: home/history/app pause, late autoplay blocked, no resume play, home back, active feed post, root rejected, short links, YouTube preserved
+
+player_metadata.test.cjs: 0
+PASS player metadata: exact resolution/FPS/size, muxed audio, audio-only, encrypted cipher, video identity, UMP rejection, full signed stream
+PASS capture integration: player metadata + seven network ranges produce one 1080p60 video, one audio source, exact total size
+
+share_test.py: 0
+PASS production share handler: cold/warm intent, caption, short URL, signed query, stale session reset, ClipData, malformed input, single consumption
+PASS Android share manifest
+
+site_analysis_test.py: 0
+PASS production site routing: original post, all formats, anonymous profile, session retry, master fallback, passive variant preservation, cancellation
+
+site_metadata.test.cjs: 0
+PASS TikTok passive fixtures: current post only, all supplied variants, dimensions, bitrate, muxed AAC, hvc1 exception, signed URL, metadata precedence, background-music isolation
+
+sltube_analysis_test.py: 0
+PASS exact SL.Tube request parity and production routing: anonymous first, 37 synthetic video IDs preserved, 4K retained, session recovery, correct download profile, no forced client/filter, fragment-backed format score
+
+tabs_test.py: 0
+PASS production tabs: independent session/history, switch/close/last-tab replacement, unopened popup handoff with deferred attach, old-page preservation, hidden-media guard, scoped ports, closed-session cleanup, tab count
+PASS bridge guards: hidden/same-URL tabs cannot submit unscoped background results; scan targets current session; header and close controls wired
+
+PASS Java syntax (not Android compilation)
+PASS baseline comparison: 53 existing app files byte-identical, only manifest script registration changed
+Gradle assembleDebug: blocked at distribution download (Network is unreachable); no APK/phone test.

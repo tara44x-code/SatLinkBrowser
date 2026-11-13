@@ -1,0 +1,43 @@
+{
+  "manifest_version": 2,
+  "name": "SatLink Media Capture",
+  "version": "1.8",
+  "description": "Captures top-page and iframe media while preserving the active browser session.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "media-capture@satlink.local"
+    }
+  },
+  "background": {
+    "scripts": [
+      "media_metadata.js",
+      "hls_metadata.js",
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "media_metadata.js",
+        "active_post.js",
+        "capture.js",
+        "fullscreen_fit.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "permissions": [
+    "nativeMessaging",
+    "nativeMessagingFromContent",
+    "geckoViewAddons",
+    "cookies",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ]
+}

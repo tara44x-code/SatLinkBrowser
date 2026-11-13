@@ -1,0 +1,1016 @@
+--- a/README_AR.md
++++ b/README_AR.md
+@@ -1,6 +1,18 @@
+-# SatLink Browser PRO 1.9.8 — عرض الملفات العامة داخل التنزيلات
++# SatLink Browser PRO 1.9.8 — حفظ الصفحات والسجل وإعدادات المتصفح
+ 
+ مشروع المصدر الكامل المعدّل. هذه الحزمة لا تحتوي APK مبنياً؛ نتائج الفحص وحدوده داخل TEST_REPORT_AR.md.
++
++## إضافات المتصفح الحالية
++
++- حفظ الصفحات المفتوحة والتبويب المحدد تلقائياً، واستعادتها عند التشغيل. عند توفر حالة Gecko صالحة تُستعاد حالة سجل التنقل وموضع الصفحة؛ عند عدم توفرها أو فسادها يُفتح رابط الصفحة الأصلي. لا يُحفظ تشغيل الفيديو الجاري أو التنزيل داخل حالة المتصفح.
++- إعادة فتح آخر تبويب مغلق من قائمة ⋮، مع حفظ آخر 20 تبويباً مغلقاً. تُحفظ حتى 100 صفحة و1000 عنوان في السجل؛ الحالة الأصلية لكل صفحة محدودة بـ32KB وتعود إلى الرابط إذا تجاوزتها.
++- سجل التصفح مع البحث بالعنوان أو الرابط، وحذف صفحة محددة أو مسح السجل. يعرض أحدث 100 نتيجة ويتيح البحث ضمن كامل السجل المحفوظ.
++- إعدادات المتصفح: اختيار Google أو Bing أو DuckDuckGo، وتشغيل أو إيقاف استعادة الصفحات. البحث من شريط العنوان ومن الرئيسية يستخدم المحرك المحدد.
++- زر › للتقدّم في سجل التبويب. زر التحديث يعرض × أثناء التحميل لإيقاف تحميل الصفحة، ثم يعود إلى ↻.
++- قائمة ⋮ تجمع فتح وإغلاق التبويب والاستعادة والسجل والإعدادات، مع الوصول إلى المفضلة والتنزيلات والإضافات.
++- البيانات محلية في مساحة التطبيق الخاصة. حذف سجل التصفح لا يمسح التبويبات المفتوحة أو ملفات التنزيل أو بيانات تسجيل الدخول للمواقع.
++
++رقم الإصدار بقي 1.9.8. خدمات الفيديو والصوت ومحركاتهما والجودات والتحويل وجميع ملفات الالتقاط بقيت مطابقة لحزمة عرض الملفات السابقة. BROWSER_WORKSPACE.patch يوضح تغييرات المتصفح وحدها. نجحت 20 مجموعة فحص؛ الحزمة مصدر دون APK أو اختبار حي على هاتف.
+ 
+ ## إصلاح ظهور ZIP وISO وEXE وAPK وبقية الملفات
+ 
+@@ -13,7 +25,7 @@
+ - تندمج النتائج مع ملفات MediaStore الموجودة دون تكرار نفس اسم الملف في Downloads/SatLink، بما فيها ملف جارٍ سبق أن فُهرس. تبقى بطاقات الفيديو والصوت السابقة موجودة.
+ - لم يتغير مدير تنزيل الملفات العامة أو محركات الفيديو والصوت أو التبويبات أو خوارزميات الالتقاط في هذا التصحيح. رقم الإصدار بقي 1.9.8.
+ 
+-DOWNLOADS_LIST.patch يحتوي الفرق عن حزمة التبويبات السابقة. نجحت 19 مجموعة فحص. المصدر لا يتضمن APK مبنياً ولا اختباراً حياً على هاتف.
++DOWNLOADS_LIST.patch يحتوي الفرق عن حزمة التبويبات السابقة. نجحت 20 مجموعة فحص. المصدر لا يتضمن APK مبنياً ولا اختباراً حياً على هاتف.
+ 
+ ## التبويبات وفتح الصفحات الجديدة
+ 
+@@ -24,7 +36,7 @@
+ - لا تسمح الصفحة المخفية بتغيير عنوان الصفحة الظاهرة أو حالة رجوعها أو تقدمها. تُوقف وسائط الصفحة المخفية، ولا يبدأ تشغيل الفيديو عند التبديل تلقائياً. رسائل الالتقاط من كل صفحة تحمل هوية تبويبها، حتى عند فتح الرابط نفسه مرتين.
+ - محركات استخراج الفيديو والصوت واختيار الجودات وخدمة تنزيل الوسائط بقيت كما هي. التعديل المرتبط بالوسائط محصور في ربط رسائل الصفحات والتحكم بالمشغّل بتبويبها لمنع الاختلاط.
+ 
+-TABS.patch يوضح الفرق عن نسخة تنزيل الملفات السابقة. نجحت 19 مجموعة فحص. التبويبات محفوظة خلال جلسة التطبيق الحالية؛ لا تتضمن الإضافة استعادة التبويبات بعد إغلاق العملية أو وضع التصفح الخاص.
++TABS.patch يوضح الفرق عن نسخة تنزيل الملفات السابقة. نجحت 20 مجموعة فحص. أضيفت استعادة التبويبات بعد إغلاق العملية في إضافات المتصفح الحالية أعلاه. لا تتضمن هذه الحزمة وضع التصفح الخاص.
+ 
+ ## إضافة تنزيل الملفات العامة
+ 
+--- a/TEST_OUTPUT.txt
++++ b/TEST_OUTPUT.txt
+@@ -51,6 +51,10 @@
+ $ python3 tests/general_catalog_test.py
+ PASS production native catalog and actual refreshDownloads: ZIP/ISO/EXE/APK/all states, existing requests, 6GB totals, live progress/completion, unknown totals, MediaStore merge without duplicates, preserved video card, native open/remove ID, lifecycle-bounded polling
+ 
++$ python3 tests/browser_workspace_test.py
++PASS production browser workspace: tab/state/selection persistence, corrupt-row recovery, Arabic title/search, signed URLs, closed-tab stack, bounded/clearable history, search engines, URL validation
++PASS actual browser integration: selected-tab persistence, native state restore and URL fallback, reopen closed tab, restore setting, guarded forward, loading stop versus reload
++
+ $ python3 tests/media_invariance_test.py
+ PASS media invariance: exact original MainActivity recovered after scoped tab/file integration; capture bridge differs only in tab identity routing; 46 other app files byte-identical (engines, formats, media download service, build dependencies)
+ 
+@@ -58,7 +62,7 @@
+ PASS production tabs: independent session/history, switch/close/last-tab replacement, unopened popup handoff with deferred attach, old-page preservation, hidden-media guard, scoped ports, closed-session cleanup, tab count
+ PASS bridge guards: hidden/same-URL tabs cannot submit unscoped background results; scan targets current session; header and close controls wired
+ 
+-$ java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/ActiveMediaPage.java app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java app/src/main/java/com/satlink/geckoviewtest/CapturedDownloadPlan.java app/src/main/java/com/satlink/geckoviewtest/EngineBootstrap.java app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java app/src/main/java/com/satlink/geckoviewtest/GeneralDownloadCatalog.java app/src/main/java/com/satlink/geckoviewtest/GeneralFileDownloads.java app/src/main/java/com/satlink/geckoviewtest/GeneralFilePolicy.java app/src/main/java/com/satlink/geckoviewtest/MainActivity.java app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java app/src/main/java/com/satlink/geckoviewtest/SLTubeAnalysisRequest.java app/src/main/java/com/satlink/geckoviewtest/SharedUrlParser.java
++$ java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/ActiveMediaPage.java app/src/main/java/com/satlink/geckoviewtest/BrowserWorkspace.java app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java app/src/main/java/com/satlink/geckoviewtest/CapturedDownloadPlan.java app/src/main/java/com/satlink/geckoviewtest/EngineBootstrap.java app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java app/src/main/java/com/satlink/geckoviewtest/GeneralDownloadCatalog.java app/src/main/java/com/satlink/geckoviewtest/GeneralFileDownloads.java app/src/main/java/com/satlink/geckoviewtest/GeneralFilePolicy.java app/src/main/java/com/satlink/geckoviewtest/MainActivity.java app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java app/src/main/java/com/satlink/geckoviewtest/SLTubeAnalysisRequest.java app/src/main/java/com/satlink/geckoviewtest/SharedUrlParser.java
+ PASS Java syntax (not Android compilation)
+ 
+-CHECKS: 19 FAILURES: 0
++CHECKS: 20 FAILURES: 0
+--- a/TEST_REPORT_AR.md
++++ b/TEST_REPORT_AR.md
+@@ -1,10 +1,10 @@
+-# فحص PRO 1.9.8 — إصلاح عرض التنزيلات العامة
++# فحص PRO 1.9.8 — حفظ الصفحات والسجل وإعدادات المتصفح
+ 
+-التاريخ: 2026-10-08.
++التاريخ: 2026-10-09 (بغداد).
+ 
+ ## النتيجة
+ 
+-نجحت 19 مجموعة فحص. كل المخرجات محفوظة في TEST_OUTPUT.txt. لا يوجد APK مبني أو تأكيد تشغيل حي على هاتف ضمن هذه الحزمة.
++نجحت 20 مجموعة فحص. كل المخرجات محفوظة في TEST_OUTPUT.txt. لا يوجد APK مبني أو تأكيد تشغيل حي على هاتف ضمن هذه الحزمة.
+ 
+ ## التغطية
+ 
+@@ -26,15 +26,18 @@
+ 16. media_invariance_test.py: مقارنة بالتعديل السابق ثم بالنسخة المقبولة من 1.9.8. تُعاد MainActivity إلى الأصل بالبايت بعد عكس تغييرات التبويبات والملفات المحددة. سكربتا الالتقاط يتغيران فقط في نقل هوية التبويب؛ تبقى خوارزميات الالتقاط والتحليل كما هي. 46 ملفاً آخر من التطبيق مطابق بالبايت، بما فيها محركات الجودات وخدمة تنزيل الوسائط والاعتماديات.
+ 17. tabs_test.py: تنفيذ دوال إنشاء الجلسة والتبديل والإغلاق ومعالجة النافذة الجديدة من المصدر باستخدام بدائل صغيرة لواجهات Android/Gecko. يشمل عدم مسح الصفحة الأصلية، سجل الرجوع، استعادة ملفات ارتباط الصفحة، إغلاق صفحة مخفية/محددة/آخر صفحة، عدد التبويبات، تحرير منافذ الصفحة المغلقة، حجب تشغيل وسائط الصفحة المخفية، وإرجاع جلسة غير مفتوحة للمحرك دون loadUri. يفحص أيضاً محاولة ربط النافذة قبل فتحها؛ تُحجب وتنتظر إشارة جاهزيتها.
+ 18. general_catalog_test.py: تنفيذ GeneralDownloadCatalog ودالة refreshDownloads الحقيقيتين مع بدائل لواجهات Android. ZIP/ISO/EXE/APK وجميع الحالات، استرجاع الطلبات القديمة من قاعدة مدير التنزيل، تقدم ملف 6GB، حجم مجهول، التحول من جارٍ إلى مكتمل، دمج MediaStore دون تكرار ملف مكتمل أو جارٍ، استمرار ظهور بطاقة فيديو، فتح الملف المكتمل عبر URI النظام فقط، حذف/إلغاء بالمعرّف الصحيح، وأسماء عربية وتحديث دوري محصور بواجهة التنزيلات الظاهرة.
+-19. ValidateJava.java: صياغة كل ملفات Java فقط، دون Android SDK أو ربط الاعتماديات.
++19. browser_workspace_test.py: تنفيذ نموذج التخزين الحقيقي ودوال persist/restore/reopen/forward/refresh من MainActivity مع بدائل للواجهات. حفظ الصفحات والتبويب المحدد وحالة Gecko، فساد صف لا يمسح البيانات الصحيحة، فشل الحالة الأصلية يعيد فتح الرابط، أسماء عربية وفواصل وأسطر، الحفاظ على الرابط الموقّع، إعادة الفتح حسب آخر إغلاق، البحث العربي وحذف السجل وحدوده، اختيار المحرك وترميز البحث، منع URI غير صالح، وتعطيل الاستعادة. يختبر التقدّم للتبويب المسموح فقط وإيقاف التحميل مقابل إعادة تحميل الصفحة.
++20. ValidateJava.java: صياغة كل ملفات Java فقط، دون Android SDK أو ربط الاعتماديات.
+ 
+ فحص capture.test.cjs يتضمن تمرير هوية التبويب من رسالة أندرويد إلى محتوى الصفحة ثم إلى رسالة الالتقاط وملفات الارتباط الأصلية؛ يشمل تبويبين بنفس الرابط وهويتين مستقلتين.
+ 
+ ## بناء أندرويد وحدود التحقق
+ 
+-آخر محاولة بناء بتاريخ 2026-10-06؛ الأمر bash gradlew :app:assembleDebug --console=plain توقف أثناء تنزيل gradle-8.11.1-bin.zip من services.gradle.org بسبب java.net.SocketException: Network is unreachable.
++أعيدت محاولة البناء في هذه المهمة (2026-10-09 بتوقيت بغداد)؛ الأمر bash gradlew :app:assembleDebug --console=plain توقف أثناء تنزيل gradle-8.11.1-bin.zip من services.gradle.org بسبب java.net.SocketException: Network is unreachable.
+ 
+ لم يكتمل بناء أندرويد، ولم يتم تشغيل التطبيق على هاتف أو تنزيل ملف عام حي. اختبارات DownloadManager تستخدم بدائل لواجهات Android، وليست اختباراً لمدير التنزيل على الجهاز. لم يتم تنزيل ملف حي من تيك توك. البيانات المصطنعة تؤكد سلوك الدوال تحت الاختبار؛ لا تؤكد أن رابطاً حياً يعرض الدقات نفسها، ولا أن كل موقع تدعمه الخدمة حالياً. المحرك يحدد الصيغ التي يوفرها الموقع، والالتقاط الاحتياطي يتطلب بيانات فعلية من الصفحة.
++
++BROWSER_WORKSPACE.patch يحتوي فرق وظائف المتصفح عن الحزمة السابقة.
+ 
+ DOWNLOADS_LIST.patch يحتوي فرق إصلاح عرض الملفات العامة عن حزمة التبويبات السابقة.
+ 
+@@ -72,3 +75,7 @@
+ ## تحقق الحفاظ على النسخة التي عملت على الهاتف
+ 
+ بمقارنة جميع ملفات app مع حزمة التبويبات السابقة، التغيير الوحيد في الملفات الموجودة هو MainActivity: إضافة قراءة سجل مدير التنزيل وبطاقات الملفات العامة وتحديث القائمة الدوري. أضيف GeneralDownloadCatalog.java فقط. GeneralFileDownloads والسياسة وجميع محركات الفيديو والصوت وسكربتات الالتقاط والتبويبات والاعتماديات والواجهة XML بقيت مطابقة بالبايت. لم يجر بناء Android أو تشغيل على هاتف لهذا التصحيح؛ نتائج بدائل الواجهات لا تستبدل ذلك.
++
++## حدود وظائف المتصفح الجديدة
++
++التخزين وحالات Gecko والتنقل نُفذت في اختبارات المصدر باستخدام بدائل للواجهات؛ لم يتم ربط APK أو تشغيل هاتف. قد يستعاد الرابط فقط إذا كانت حالة Gecko غير متاحة أو تالفة أو تتجاوز الحد المحفوظ. لم تتغير مكتبة GeckoView أو اعتماديات البناء أو محركات الوسائط. محاولة البناء توقفت قبل الوصول إلى Android compilation بسبب Network is unreachable أثناء تنزيل Gradle.
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/BrowserWorkspace.java
+@@ -0,0 +1,86 @@
++package com.satlink.geckoviewtest;
++
++import java.net.URI;
++import java.net.URLEncoder;
++import java.nio.charset.StandardCharsets;
++import java.util.ArrayList;
++import java.util.Base64;
++import java.util.List;
++import java.util.Locale;
++
++/** Local browser session/history/settings; independent of download and media engines. */
++final class BrowserWorkspace {
++    static final int MAX_TABS = 100, MAX_HISTORY = 1000, MAX_CLOSED = 20;
++    static final class Page {
++        final String url, title, state;
++        final long time;
++        Page(String url,String title,String state,long time) {
++            this.url=url;this.title=title==null?"":title;
++            this.state=state!=null && state.length()<=32768?state:"";this.time=time;
++        }
++    }
++    final List<Page> tabs=new ArrayList<>(), history=new ArrayList<>(), closed=new ArrayList<>();
++    int selected;
++    String engine="Google";
++    boolean restoreTabs=true;
++
++    static boolean restorable(String url) {
++        if("about:blank".equals(url)) return true;
++        try {URI u=URI.create(url);return ("https".equalsIgnoreCase(u.getScheme()) || "http".equalsIgnoreCase(u.getScheme())) && u.getHost()!=null && u.getUserInfo()==null;}catch(Exception e){return false;}
++    }
++    void visit(String url,String title,long time) {
++        if(!restorable(url) || "about:blank".equals(url)) return;
++        history.removeIf(p->p.url.equals(url));history.add(0,new Page(url,title,"",time));
++        while(history.size()>MAX_HISTORY) history.remove(history.size()-1);
++    }
++    void rememberClosed(String url,String title,String state) {
++        if(!restorable(url) || "about:blank".equals(url)) return;
++        closed.add(0,new Page(url,title,state,System.currentTimeMillis()));
++        while(closed.size()>MAX_CLOSED) closed.remove(closed.size()-1);
++    }
++    Page reopen() {return closed.isEmpty()?null:closed.remove(0);}
++    List<Page> matching(String query) {
++        String key=query==null?"":query.toLowerCase(Locale.ROOT).trim();
++        List<Page> out=new ArrayList<>();
++        for(Page p:history) if(key.isEmpty() || (p.title+" "+p.url).toLowerCase(Locale.ROOT).contains(key)) out.add(p);
++        return out;
++    }
++    String search(String query) {
++        String prefix="Bing".equals(engine)?"https://www.bing.com/search?q=":"DuckDuckGo".equals(engine)?"https://duckduckgo.com/?q=":"https://www.google.com/search?q=";
++        return prefix+URLEncoder.encode(query,StandardCharsets.UTF_8);
++    }
++    String encode() {
++        StringBuilder b=new StringBuilder("SATLINK_BROWSER_1\n");
++        b.append("P\t").append(selected).append('\t').append(restoreTabs).append('\t').append(engine).append('\n');
++        append(b,"T",tabs,MAX_TABS);append(b,"C",closed,MAX_CLOSED);append(b,"H",history,MAX_HISTORY);
++        return b.toString();
++    }
++    private static void append(StringBuilder b,String type,List<Page> pages,int max) {
++        int count=0;
++        for(Page p:pages) {
++            if(count>=max)break;
++            if(!restorable(p.url)) continue;
++            b.append(type).append('\t').append(text(p.url)).append('\t').append(text(p.title)).append('\t').append(text(p.state)).append('\t').append(p.time).append('\n');count++;
++        }
++    }
++    static BrowserWorkspace decode(String raw) {
++        BrowserWorkspace w=new BrowserWorkspace();
++        if(raw==null || raw.length()>8_000_000 || !raw.startsWith("SATLINK_BROWSER_1\n")) return w;
++        for(String line:raw.split("\n")) {
++            try {
++                String[] f=line.split("\t",-1);
++                if(f.length==4 && "P".equals(f[0])) {w.selected=Integer.parseInt(f[1]);w.restoreTabs=Boolean.parseBoolean(f[2]);if("Google".equals(f[3])||"Bing".equals(f[3])||"DuckDuckGo".equals(f[3]))w.engine=f[3];}
++                else if(f.length==5) {
++                    String url=plain(f[1]);if(!restorable(url))continue;
++                    Page p=new Page(url,plain(f[2]),plain(f[3]),Long.parseLong(f[4]));
++                    List<Page> list="T".equals(f[0])?w.tabs:"C".equals(f[0])?w.closed:"H".equals(f[0])?w.history:null;
++                    int max="T".equals(f[0])?MAX_TABS:"C".equals(f[0])?MAX_CLOSED:MAX_HISTORY;
++                    if(list!=null && list.size()<max)list.add(p);
++                }
++            }catch(Exception ignored){}
++        }
++        w.selected=Math.max(0,Math.min(w.selected,Math.max(0,w.tabs.size()-1)));return w;
++    }
++    private static String text(String s) {return Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8));}
++    private static String plain(String s) {return new String(Base64.getDecoder().decode(s),StandardCharsets.UTF_8);}
++}
+--- a/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
+@@ -114,6 +114,10 @@
+     private final List<BrowserTab> browserTabs = new ArrayList<>();
+     private TextView tabsButton;
+     private boolean destroyingTabs;
++    private BrowserWorkspace browserWorkspace = new BrowserWorkspace();
++    private Button forwardPageButton;
++    private boolean restoringWorkspace;
++    private final Runnable browserWorkspaceSave = () -> persistBrowserWorkspace();
+ 
+     private WebExtension captureExtension;
+     private WebExtension.Port capturePort;
+@@ -255,6 +259,10 @@
+             runtime = GeckoRuntime.create(getApplicationContext());
+         }
+         configureExtensionPrompts();
++        browserWorkspace = BrowserWorkspace.decode(getSharedPreferences("satlink_browser", MODE_PRIVATE)
++                .getString("workspace", ""));
++        forwardPageButton = findViewById(R.id.forwardPageButton);
++        forwardPageButton.setOnClickListener(v -> goForwardInBrowser());
+ 
+         tabsButton = findViewById(R.id.browserTabsButton);
+         tabsButton.setOnClickListener(v -> showTabsScreen());
+@@ -296,7 +304,7 @@
+                 Toast.makeText(this, "افتح صفحة فيديو أولاً", Toast.LENGTH_SHORT).show();
+             }
+         });
+-        findViewById(R.id.headerMenuButton).setOnClickListener(v -> showExtensionsScreen());
++        findViewById(R.id.headerMenuButton).setOnClickListener(v -> showBrowserMenu());
+         headerExtensionsButton.setOnClickListener(v -> showExtensionQuickMenu());
+         addFavoriteButton.setOnClickListener(v -> toggleCurrentFavorite());
+         showFavoritesButton.setOnClickListener(v -> showFavoritesScreen());
+@@ -333,13 +341,13 @@
+         backButton.setOnClickListener(v -> goBackInBrowser());
+ 
+         renderShortcuts();
++        boolean restored = restoreBrowserWorkspace();
+         if (savedInstanceState == null && handleSharedLink(getIntent())) return;
+-        if (savedInstanceState == null) {
++        if (!restored) {
+             session.loadUri("about:blank");
+             showHomeScreen();
+-        } else {
+-            showHomeScreen();
+-        }
++        }
++
+     }
+ 
+     @Override
+@@ -384,8 +392,14 @@
+     private void refreshCurrentPage() {
+         if (session == null || !"browser".equals(activeScreen)) return;
+         try {
+-            session.reload();
+-            Toast.makeText(this, "جاري إنعاش الصفحة", Toast.LENGTH_SHORT).show();
++            BrowserTab tab = findTab(session);
++            if (tab != null && tab.loading) {
++                session.stop();tab.loading = false;refreshPageButton.setText("↻");
++                progressBar.setVisibility(View.GONE);
++            } else {
++                session.reload();
++                Toast.makeText(this, "جاري إنعاش الصفحة", Toast.LENGTH_SHORT).show();
++            }
+         } catch (Throwable error) {
+             Log.w(TAG, "Page reload failed", error);
+         }
+@@ -2217,6 +2231,7 @@
+     @Override
+     protected void onPause() {
+         activityForeground = false;
++        persistBrowserWorkspace();
+         downloadsList.removeCallbacks(generalDownloadsRefresh);
+         updateBrowserPlayback();
+         super.onPause();
+@@ -3236,11 +3251,150 @@
+                 .show();
+     }
+ 
++    private void goForwardInBrowser() {
++        BrowserTab tab = findTab(session);
++        if (tab != null && tab.canGoForward) {
++            showBrowserScreen();session.goForward();
++        }
++    }
++
++    private void scheduleBrowserWorkspaceSave() {
++        if (destroyingTabs || restoringWorkspace || addressBar == null) return;
++        addressBar.removeCallbacks(browserWorkspaceSave);
++        addressBar.postDelayed(browserWorkspaceSave, 1200L);
++    }
++
++    private void persistBrowserWorkspace() {
++        if (destroyingTabs || restoringWorkspace || browserTabs.isEmpty()) return;
++        browserWorkspace.tabs.clear();browserWorkspace.selected = 0;
++        for (BrowserTab tab : browserTabs) {
++            if (!BrowserWorkspace.restorable(tab.url)) continue;
++            if (tab.session == session) browserWorkspace.selected = browserWorkspace.tabs.size();
++            browserWorkspace.tabs.add(new BrowserWorkspace.Page(tab.url,tab.title,tab.savedState,0));
++        }
++        getSharedPreferences("satlink_browser",MODE_PRIVATE).edit()
++                .putString("workspace",browserWorkspace.encode()).apply();
++    }
++
++    private void loadSavedBrowserPage(BrowserTab tab, BrowserWorkspace.Page page) {
++        tab.url = page.url;tab.title = page.title;tab.savedState = page.state;
++        tab.session.setActive(false);
++        GeckoSession.SessionState state = GeckoSession.SessionState.fromString(page.state);
++        if (state != null) tab.session.restoreState(state);
++        else tab.session.loadUri(page.url);
++    }
++
++    private boolean restoreBrowserWorkspace() {
++        if (!browserWorkspace.restoreTabs || browserWorkspace.tabs.isEmpty()) return false;
++        restoringWorkspace = true;
++        List<BrowserWorkspace.Page> pages = new ArrayList<>(browserWorkspace.tabs);
++        int selected = browserWorkspace.selected;
++        try {
++            for (int i=0;i<pages.size();i++) {
++                BrowserTab tab;
++                if (i==0) tab = browserTabs.get(0);
++                else {
++                    GeckoSession created = createTabSession();
++                    tab = new BrowserTab(created);browserTabs.add(tab);created.open(runtime);
++                }
++                loadSavedBrowserPage(tab,pages.get(i));
++            }
++            selectTab(browserTabs.get(Math.min(selected,browserTabs.size()-1)));
++            return true;
++        } finally {restoringWorkspace = false;updateTabCount();}
++    }
++
++    private void reopenClosedBrowserTab() {
++        BrowserWorkspace.Page page = browserWorkspace.reopen();
++        if (page == null) {Toast.makeText(this,"لا يوجد تبويب مغلق لاستعادته",Toast.LENGTH_SHORT).show();return;}
++        GeckoSession created = createTabSession();
++        BrowserTab tab = new BrowserTab(created);browserTabs.add(tab);created.open(runtime);
++        loadSavedBrowserPage(tab,page);selectTab(tab);scheduleBrowserWorkspaceSave();
++    }
++
++    private void rememberBrowserVisit(BrowserTab tab) {
++        if (!restoringWorkspace) browserWorkspace.visit(tab.url,tab.title,System.currentTimeMillis());
++    }
++
++    private void showBrowserMenu() {
++        String[] items = {"تبويب جديد","إغلاق التبويب الحالي","إعادة فتح آخر تبويب مغلق",
++                "سجل التصفح","إعدادات المتصفح","التبويبات","المفضلة","التنزيلات","الإضافات"};
++        new AlertDialog.Builder(this).setTitle("المتصفح").setItems(items,(dialog,which)->{
++            switch(which) {
++                case 0:startNewTab();break;
++                case 1:BrowserTab tab=findTab(session);if(tab!=null)closeTab(tab);break;
++                case 2:reopenClosedBrowserTab();break;
++                case 3:showBrowserHistory();break;
++                case 4:showBrowserSettings();break;
++                case 5:showTabsScreen();break;
++                case 6:showFavoritesScreen();break;
++                case 7:showDownloadsScreen();break;
++                case 8:showExtensionsScreen();break;
++            }
++        }).show();
++    }
++
++    private void showBrowserSettings() {
++        String[] items = {"محرك البحث: " + browserWorkspace.engine,
++                "استعادة التبويبات عند التشغيل: " + (browserWorkspace.restoreTabs ? "مفعّلة" : "متوقفة")};
++        new AlertDialog.Builder(this).setTitle("إعدادات المتصفح").setItems(items,(d,which)->{
++            if (which==0) {
++                String[] engines={"Google","Bing","DuckDuckGo"};
++                int selected=java.util.Arrays.asList(engines).indexOf(browserWorkspace.engine);
++                new AlertDialog.Builder(this).setTitle("محرك البحث").setSingleChoiceItems(engines,selected,(choice,index)->{
++                    browserWorkspace.engine=engines[index];persistBrowserWorkspace();choice.dismiss();
++                }).setNegativeButton("رجوع",null).show();
++            } else {
++                browserWorkspace.restoreTabs=!browserWorkspace.restoreTabs;persistBrowserWorkspace();showBrowserSettings();
++            }
++        }).setNegativeButton("إغلاق",null).show();
++    }
++
++    private void showBrowserHistory() {
++        LinearLayout container=new LinearLayout(this);container.setOrientation(LinearLayout.VERTICAL);
++        container.setPadding(dp(14),dp(8),dp(14),dp(8));
++        EditText search=new EditText(this);search.setHint("ابحث بالعنوان أو الرابط");search.setSingleLine(true);container.addView(search);
++        ScrollView scroll=new ScrollView(this);LinearLayout rows=new LinearLayout(this);rows.setOrientation(LinearLayout.VERTICAL);
++        scroll.addView(rows);container.addView(scroll,new LinearLayout.LayoutParams(-1,dp(350)));
++        AlertDialog dialog=new AlertDialog.Builder(this).setTitle("سجل التصفح").setView(container)
++                .setNegativeButton("إغلاق",null).setNeutralButton("مسح السجل",(d,w)->new AlertDialog.Builder(this)
++                .setTitle("مسح سجل التصفح؟").setMessage("سيُحذف سجل الصفحات فقط.")
++                .setNegativeButton("رجوع",null).setPositiveButton("مسح",(confirm,index)->{
++                    browserWorkspace.history.clear();persistBrowserWorkspace();
++                }).show()).create();
++        search.addTextChangedListener(new TextWatcher(){
++            @Override public void beforeTextChanged(CharSequence t,int start,int count,int after){}
++            @Override public void onTextChanged(CharSequence t,int start,int before,int count){renderBrowserHistory(rows,t.toString(),dialog);}
++            @Override public void afterTextChanged(Editable e){}
++        });
++        renderBrowserHistory(rows,"",dialog);dialog.show();
++    }
++
++    private void renderBrowserHistory(LinearLayout rows,String query,AlertDialog dialog) {
++        rows.removeAllViews();List<BrowserWorkspace.Page> matches=browserWorkspace.matching(query);
++        if(matches.isEmpty()){TextView empty=new TextView(this);empty.setText("لا توجد نتائج");rows.addView(empty);return;}
++        int count=0;
++        for(BrowserWorkspace.Page page:matches){
++            if(count++>=100)break;
++            LinearLayout row=new LinearLayout(this);row.setOrientation(LinearLayout.HORIZONTAL);
++            TextView link=new TextView(this);link.setText((page.title.isEmpty()?page.url:page.title)+"\n"+page.url+"\n"+
++                    new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm",Locale.getDefault()).format(new java.util.Date(page.time)));
++            link.setTextSize(13);link.setPadding(0,dp(8),dp(6),dp(8));row.addView(link,new LinearLayout.LayoutParams(0,-2,1));
++            link.setOnClickListener(v->{dialog.dismiss();openUrl(page.url);});
++            Button remove=new Button(this);remove.setText("×");remove.setContentDescription("حذف الصفحة من السجل");
++            row.addView(remove,new LinearLayout.LayoutParams(dp(44),dp(44)));
++            remove.setOnClickListener(v->{browserWorkspace.history.remove(page);persistBrowserWorkspace();renderBrowserHistory(rows,query,dialog);});
++            rows.addView(row);
++        }
++        if(matches.size()>100){TextView more=new TextView(this);more.setText("تُعرض أحدث 100 نتيجة؛ استخدم البحث للوصول للبقية");rows.addView(more);}
++    }
++
+     private static final class BrowserTab {
+         final GeckoSession session;
+         final String key = java.util.UUID.randomUUID().toString();
+         String url = "about:blank", title = "", cookies = "", cookiePath = "", userAgent = "";
+-        boolean canGoBack, awaitingSelection;
++        boolean canGoBack, canGoForward, loading, awaitingSelection;
++        String savedState = "";
+         MediaSession media;
+         BrowserTab(GeckoSession session) {this.session = session;}
+     }
+@@ -3334,15 +3488,20 @@
+             browserCanGoBack = tab.canGoBack;
+             progressBar.setVisibility(View.GONE);
+         }
++        forwardPageButton.setEnabled(tab.canGoForward);
++        forwardPageButton.setAlpha(tab.canGoForward ? 1f : 0.4f);
++        refreshPageButton.setText(tab.loading ? "×" : "↻");
+         addressBar.setText("about:blank".equals(tab.url) ? "" : tab.url);
+         updateFavoriteButtonState();
+         if ("about:blank".equals(tab.url)) showHomeScreen();
+         else showBrowserScreen();
+         updateTabCount();
++        scheduleBrowserWorkspaceSave();
+     }
+ 
+     private void closeTab(BrowserTab tab) {
+         if (!browserTabs.contains(tab)) return;
++        browserWorkspace.rememberClosed(tab.url, tab.title, tab.savedState);
+         boolean current = session == tab.session;
+         boolean listing = "tabs".equals(activeScreen);
+         int previousCount = browserTabs.size();
+@@ -3370,6 +3529,7 @@
+         updateTabCount();
+         if (listing && previousCount > 1) showTabsScreen();
+         else if ("tabs".equals(activeScreen)) renderTabs();
++        scheduleBrowserWorkspaceSave();
+     }
+ 
+     private void renderTabs() {
+@@ -3421,8 +3581,7 @@
+         } else if (input.contains(".") && !input.contains(" ")) {
+             target = "https://" + input;
+         } else {
+-            target = "https://www.google.com/search?q=" +
+-                    URLEncoder.encode(input, StandardCharsets.UTF_8);
++            target = browserWorkspace.search(input);
+         }
+ 
+         closeCapturePanel();
+@@ -3454,6 +3613,8 @@
+         if (downloadReceiver != null) {
+             try { unregisterReceiver(downloadReceiver); } catch (Exception ignored) { }
+         }
++        persistBrowserWorkspace();
++        addressBar.removeCallbacks(browserWorkspaceSave);
+         downloadsList.removeCallbacks(generalDownloadsRefresh);
+         destroyingTabs = true;
+         geckoView.releaseSession();
+@@ -3478,6 +3639,7 @@
+             if (tab == null) return;
+             tab.title = title == null ? "" : title;
+             if (session == MainActivity.this.session) pendingPageTitle = tab.title;
++            rememberBrowserVisit(tab);scheduleBrowserWorkspaceSave();
+             if ("tabs".equals(activeScreen)) renderTabs();
+         }
+ 
+@@ -3680,6 +3842,14 @@
+     }
+ 
+     private final class BrowserNavigationDelegate implements GeckoSession.NavigationDelegate {
++        @Override public void onCanGoForward(GeckoSession session, boolean canGoForward) {
++            BrowserTab tab = findTab(session);
++            if (tab == null) return;
++            tab.canGoForward = canGoForward;
++            if (session != MainActivity.this.session) return;
++            forwardPageButton.setEnabled(canGoForward);
++            forwardPageButton.setAlpha(canGoForward ? 1f : 0.4f);
++        }
+         @Override public GeckoResult<GeckoSession> onNewSession(GeckoSession opener, String uri) {
+             if (destroyingTabs || findTab(opener) == null) return null;
+             // Gecko requires an unopened session and loads the requested URI itself.
+@@ -3714,7 +3884,10 @@
+                                      Boolean hasUserGesture) {
+             BrowserTab tab = findTab(session);
+             if (tab == null) return;
+-            if (url != null) tab.url = url;
++            if (url != null) {
++                if (!url.equals(tab.url)) tab.title = "";
++                tab.url = url;rememberBrowserVisit(tab);scheduleBrowserWorkspaceSave();
++            }
+             selectPopupIfReady(tab);
+             if (session != MainActivity.this.session) return;
+             if (url != null) {
+@@ -3749,11 +3922,19 @@
+     }
+ 
+     private final class BrowserProgressDelegate implements GeckoSession.ProgressDelegate {
++        @Override public void onSessionStateChange(GeckoSession session, GeckoSession.SessionState state) {
++            BrowserTab tab = findTab(session);
++            if (tab == null || state == null) return;
++            String encoded = state.toString();
++            tab.savedState = encoded != null && encoded.length() <= 32768 ? encoded : "";
++            scheduleBrowserWorkspaceSave();
++        }
+         @Override
+         public void onPageStart(GeckoSession session, String url) {
+             BrowserTab tab = findTab(session);
+-            if (tab != null) selectPopupIfReady(tab);
++            if (tab != null) {tab.loading = true;selectPopupIfReady(tab);}
+             if (session != MainActivity.this.session) return;
++            refreshPageButton.setText("×");
+             progressBar.setProgress(10);
+             progressBar.setVisibility(View.VISIBLE);
+         }
+@@ -3766,7 +3947,10 @@
+ 
+         @Override
+         public void onPageStop(GeckoSession session, boolean success) {
++            BrowserTab tab = findTab(session);
++            if (tab != null) tab.loading = false;
+             if (session != MainActivity.this.session) return;
++            refreshPageButton.setText("↻");
+             progressBar.setProgress(100);
+             progressBar.setVisibility(View.GONE);
+             if (sharedNavigationPending) {
+--- a/app/src/main/res/layout/activity_main.xml
++++ b/app/src/main/res/layout/activity_main.xml
+@@ -114,6 +114,22 @@
+                 android:textAllCaps="false"
+                 android:textColor="#FFFFFF"
+                 android:textSize="27sp" />
++
++            <Button
++                android:id="@+id/forwardPageButton"
++                android:layout_width="32dp"
++                android:layout_height="42dp"
++                android:layout_marginStart="4dp"
++                android:background="@drawable/toolbar_icon_background"
++                android:contentDescription="التقدم في سجل التبويب"
++                android:enabled="false"
++                android:alpha="0.4"
++                android:minWidth="0dp"
++                android:minHeight="0dp"
++                android:padding="0dp"
++                android:text="›"
++                android:textColor="#FFFFFF"
++                android:textSize="25sp" />
+ 
+             <Button
+                 android:id="@+id/refreshPageButton"
+--- /dev/null
++++ b/tests/browser_workspace_test.py
+@@ -0,0 +1,58 @@
++from pathlib import Path
++import subprocess,tempfile,re
++root=Path(__file__).resolve().parents[1]
++model=re.sub(r'^package .*;\n|^import .*;\n','',(root/'app/src/main/java/com/satlink/geckoviewtest/BrowserWorkspace.java').read_text(),flags=re.M)
++source='''import java.net.*;import java.nio.charset.*;import java.util.*;
++class WorkspaceTest {
++ static void check(boolean b,String m){if(!b)throw new AssertionError(m);}
++ public static void main(String[]args){
++ var w=new BrowserWorkspace();w.tabs.add(new BrowserWorkspace.Page("https://site.test/a?q=x%2By","عنوان عربي\\tمع فاصل\\nوسطر","{native-state}",0));w.tabs.add(new BrowserWorkspace.Page("about:blank","","",0));w.selected=1;w.engine="DuckDuckGo";w.restoreTabs=false;
++ w.visit("https://site.test/a","First",1);w.visit("https://site.test/b","Second",2);w.visit("https://site.test/a","عنوان",3);w.visit("javascript:alert(1)","Bad",4);
++ check(w.history.size()==2 && w.history.get(0).time==3,"History duplicate/order/invalid navigation");check(w.matching("عنوان").size()==1 && w.matching("SITE.TEST/B").size()==1,"History search lost Arabic or case-insensitive URL");
++ w.rememberClosed("https://site.test/a","A","STATE-A");w.rememberClosed("https://site.test/b","B","STATE-B");
++ var copy=BrowserWorkspace.decode(w.encode());check(copy.tabs.size()==2 && copy.selected==1 && !copy.restoreTabs && copy.engine.equals("DuckDuckGo"),"Persistence lost settings/tabs/selection");check(copy.tabs.get(0).title.equals(w.tabs.get(0).title) && copy.tabs.get(0).state.equals("{native-state}") && copy.tabs.get(0).url.endsWith("x%2By"),"Title/state/signed URL changed during serialization");
++ check(copy.reopen().url.endsWith("/b") && copy.reopen().state.equals("STATE-A") && copy.reopen()==null,"Closed tab order or state lost");check(copy.search("اختبار + ?").startsWith("https://duckduckgo.com/?q=") && copy.search("اختبار + ?").contains("%2B"),"Search query not encoded");copy.engine="Bing";check(copy.search("x").startsWith("https://www.bing.com/"),"Bing setting not applied");copy.engine="invalid";check(copy.search("x").startsWith("https://www.google.com/"),"Search fallback unsafe");
++ check(BrowserWorkspace.decode("corrupt").tabs.isEmpty(),"Invalid version accepted");String encoded=w.encode();var broken=BrowserWorkspace.decode(encoded+"T\\tNOT-BASE64!\\t\\t\\t0\\n");check(broken.tabs.size()==2,"Malformed row destroyed valid persisted tabs");
++ check(!BrowserWorkspace.restorable("https://user:pass@site.test/a") && !BrowserWorkspace.restorable("file:///private"),"Unsafe restoration URL accepted");
++ for(int i=0;i<1100;i++)w.visit("https://site.test/"+i,"P"+i,i);check(w.history.size()==1000,"History unbounded");for(int i=0;i<30;i++)w.rememberClosed("https://site.test/"+i,"","");check(w.closed.size()==20,"Closed history unbounded");
++ check(new BrowserWorkspace.Page("https://site.test","","x".repeat(40000),0).state.isEmpty(),"Oversized native state not bounded");
++ copy.history.clear();check(BrowserWorkspace.decode(copy.encode()).history.isEmpty(),"Clear history not persisted");
++ System.out.println("PASS production browser workspace: tab/state/selection persistence, corrupt-row recovery, Arabic title/search, signed URLs, closed-tab stack, bounded/clearable history, search engines, URL validation");
++ }
++}
++'''+model
++with tempfile.TemporaryDirectory() as tmp:
++ p=Path(tmp)/'WorkspaceTest.java';p.write_text(source);subprocess.run(['java',str(p)],check=True)
++main=(root/'app/src/main/java/com/satlink/geckoviewtest/MainActivity.java').read_text()
++def method(marker):
++ start=main.index(marker);at=main.index('{',start);depth=1;end=at+1
++ while depth:
++  depth+=(main[end]=='{')-(main[end]=='}');end+=1
++ return main[start:end]
++methods='\n'.join(method(x) for x in ['    private void persistBrowserWorkspace','    private void loadSavedBrowserPage','    private boolean restoreBrowserWorkspace','    private void reopenClosedBrowserTab','    private void goForwardInBrowser','    private void refreshCurrentPage'])
++harness='''import java.util.*;import java.net.*;import java.nio.charset.*;
++class BrowserIntegration {
++ BrowserWorkspace browserWorkspace=new BrowserWorkspace();List<BrowserTab>browserTabs=new ArrayList<>();GeckoSession session;Object runtime=new Object();boolean destroyingTabs,restoringWorkspace;String activeScreen="browser";int selected,saves;Prefs prefs=new Prefs();Button refreshPageButton=new Button();View progressBar=new View();static int MODE_PRIVATE=0,TAG=0;
++ static class BrowserTab{GeckoSession session;String url="about:blank",title="",savedState="";boolean loading,canGoForward;BrowserTab(GeckoSession s){session=s;}}
++ BrowserTab findTab(GeckoSession s){for(var t:browserTabs)if(t.session==s)return t;return null;}GeckoSession createTabSession(){return new GeckoSession();}void selectTab(BrowserTab t){session=t.session;selected=browserTabs.indexOf(t);activeScreen="browser";}void updateTabCount(){}void scheduleBrowserWorkspaceSave(){saves++;}void showBrowserScreen(){activeScreen="browser";}Prefs getSharedPreferences(String s,int mode){return prefs;}
++'''+methods+'''
++ static void check(boolean b,String m){if(!b)throw new AssertionError(m);}
++ public static void main(String[]args){
++ var a=new BrowserIntegration();a.session=a.createTabSession();a.session.open(a.runtime);a.browserTabs.add(new BrowserTab(a.session));a.browserWorkspace.tabs.add(new BrowserWorkspace.Page("https://site.test/first","First","VALID_STATE",0));a.browserWorkspace.tabs.add(new BrowserWorkspace.Page("https://site.test/second","Second","CORRUPT_STATE",0));a.browserWorkspace.selected=1;
++ check(a.restoreBrowserWorkspace() && a.browserTabs.size()==2 && a.selected==1,"Actual restore lost pages/active index");check(a.browserTabs.get(0).session.restored.equals("VALID_STATE") && a.browserTabs.get(0).session.loads.isEmpty(),"Native session state not restored");check(a.browserTabs.get(1).session.loads.equals(List.of("https://site.test/second")),"Invalid native state did not fall back to original URL");check(!a.restoringWorkspace,"Restore left saves disabled");
++ a.persistBrowserWorkspace();var saved=BrowserWorkspace.decode(a.prefs.value);check(saved.tabs.size()==2 && saved.selected==1 && saved.tabs.get(0).state.equals("VALID_STATE"),"Actual persistence lost active page/state");a.browserWorkspace.rememberClosed("https://site.test/closed","Closed","VALID_STATE");a.reopenClosedBrowserTab();check(a.browserTabs.size()==3 && a.session.restored.equals("VALID_STATE") && a.browserWorkspace.closed.isEmpty(),"Actual reopen did not restore/remove last closed snapshot");
++ var current=a.findTab(a.session);current.canGoForward=true;a.goForwardInBrowser();check(a.session.forwards==1,"Forward did not affect selected session");current.canGoForward=false;a.goForwardInBrowser();check(a.session.forwards==1,"Forward bypassed capability guard");
++ current.loading=true;a.refreshCurrentPage();check(a.session.stops==1 && a.session.reloads==0 && !current.loading && a.refreshPageButton.text.equals("↻"),"Refresh did not stop current loading page");a.refreshCurrentPage();check(a.session.reloads==1,"Idle refresh did not reload");
++ a.browserWorkspace.restoreTabs=false;var b=new BrowserIntegration();b.browserWorkspace=BrowserWorkspace.decode(a.browserWorkspace.encode());b.session=b.createTabSession();b.browserTabs.add(new BrowserTab(b.session));check(!b.restoreBrowserWorkspace() && b.browserTabs.size()==1,"Disabled restore still loaded tabs");
++ System.out.println("PASS actual browser integration: selected-tab persistence, native state restore and URL fallback, reopen closed tab, restore setting, guarded forward, loading stop versus reload");
++ }
++}
++class GeckoSession{List<String>loads=new ArrayList<>();String restored="";int forwards,stops,reloads;void open(Object r){}void setActive(boolean b){}void restoreState(SessionState s){restored=s.value;}void loadUri(String s){loads.add(s);}void goForward(){forwards++;}void stop(){stops++;}void reload(){reloads++;}static class SessionState{String value;static SessionState fromString(String s){if(!"VALID_STATE".equals(s))return null;var state=new SessionState();state.value=s;return state;}}}
++class Prefs{String value;Prefs edit(){return this;}Prefs putString(String k,String v){value=v;return this;}void apply(){}}
++class Button{String text;void setText(String s){text=s;}}
++class View{static int GONE=8;void setVisibility(int v){}}
++class Toast{static int LENGTH_SHORT=0;static Toast makeText(Object a,String b,int c){return new Toast();}void show(){}}
++class Log{static void w(int t,String s,Throwable e){}}
++'''+model
++with tempfile.TemporaryDirectory() as tmp:
++ p=Path(tmp)/'BrowserIntegration.java';p.write_text(harness);subprocess.run(['java',str(p)],check=True)
+--- a/tests/playback_test.py
++++ b/tests/playback_test.py
+@@ -10,7 +10,7 @@
+ class PlaybackTest extends Activity {
+  final List<BrowserTab> browserTabs=new ArrayList<>();BrowserTab findTab(GeckoSession target){for(var tab:browserTabs)if(tab.session==target)return tab;return null;}
+  static class BrowserTab{GeckoSession session;MediaSession media;String key="test-tab";BrowserTab(GeckoSession s){session=s;}}
+- final View downloadsList=new View();final Runnable generalDownloadsRefresh=()->{};void refreshDownloads(){}
++ final View downloadsList=new View();final Runnable generalDownloadsRefresh=()->{};void refreshDownloads(){}void persistBrowserWorkspace(){}
+  boolean activityForeground=true,browserCanGoBack=true;String activeScreen="browser";GeckoSession session;MediaSession browserMediaControl;final List<WebExtension.Port>capturePorts=new ArrayList<>();final View capturePanel=new View();final Text addressBar=new Text();int homes=0;boolean movedBack;
+  void showHomeScreen(){homes++;activeScreen="home";updateBrowserPlayback();}void showBrowserScreen(){activeScreen="browser";updateBrowserPlayback();}void closeCapturePanel(){capturePanel.visibility=8;}
+  boolean moveTaskToBack(boolean b){movedBack=b;return b;}
+--- a/tests/reference/media_baseline_sha256.json
++++ b/tests/reference/media_baseline_sha256.json
+@@ -58,201 +58,255 @@
+   "allowed_main_changes": [
+     {
+       "start": 113,
+-      "end": 117,
+-      "old": "",
+-      "new": "    private final List<BrowserTab> browserTabs = new ArrayList<>();\n    private TextView tabsButton;\n    private boolean destroyingTabs;\n\n"
+-    },
+-    {
+-      "start": 190,
+-      "end": 193,
++      "end": 121,
++      "old": "",
++      "new": "    private final List<BrowserTab> browserTabs = new ArrayList<>();\n    private TextView tabsButton;\n    private boolean destroyingTabs;\n    private BrowserWorkspace browserWorkspace = new BrowserWorkspace();\n    private Button forwardPageButton;\n    private boolean restoringWorkspace;\n    private final Runnable browserWorkspaceSave = () -> persistBrowserWorkspace();\n\n"
++    },
++    {
++      "start": 194,
++      "end": 197,
+       "old": "",
+       "new": "    private final Runnable generalDownloadsRefresh = () -> {\n        if (activityForeground && \"downloads\".equals(activeScreen)) refreshDownloads();\n    };\n"
+     },
+     {
+-      "start": 258,
+-      "end": 262,
++      "start": 261,
++      "end": 265,
++      "old": "",
++      "new": "        browserWorkspace = BrowserWorkspace.decode(getSharedPreferences(\"satlink_browser\", MODE_PRIVATE)\n                .getString(\"workspace\", \"\"));\n        forwardPageButton = findViewById(R.id.forwardPageButton);\n        forwardPageButton.setOnClickListener(v -> goForwardInBrowser());\n"
++    },
++    {
++      "start": 266,
++      "end": 270,
+       "old": "        session = new GeckoSession();\n        session.getSettings().setSuspendMediaWhenInactive(true);\n        session.setMediaSessionDelegate(new MediaSession.Delegate() {\n            @Override public void onActivated(GeckoSession tab, MediaSession media) {\n                browserMediaControl = media;\n                boolean allowed = activityForeground && \"browser\".equals(activeScreen);\n                media.muteAudio(!allowed);\n                if (!allowed) media.pause();\n            }\n            @Override public void onDeactivated(GeckoSession tab, MediaSession media) {\n                if (browserMediaControl == media) browserMediaControl = null;\n            }\n            @Override public void onPlay(GeckoSession tab, MediaSession media) {\n                browserMediaControl = media;\n                if (!activityForeground || !\"browser\".equals(activeScreen)) {media.pause();media.muteAudio(true);}\n            }\n        });\n        session.setContentDelegate(new BrowserContentDelegate());\n        session.setNavigationDelegate(new BrowserNavigationDelegate());\n        session.setProgressDelegate(new BrowserProgressDelegate());\n",
+       "new": "        tabsButton = findViewById(R.id.browserTabsButton);\n        tabsButton.setOnClickListener(v -> showTabsScreen());\n        session = createTabSession();\n        browserTabs.add(new BrowserTab(session));\n"
+     },
+     {
+-      "start": 264,
+-      "end": 265,
++      "start": 272,
++      "end": 273,
+       "old": "",
+       "new": "        updateTabCount();\n"
+     },
+     {
+-      "start": 601,
+-      "end": 603,
++      "start": 306,
++      "end": 307,
++      "old": "        findViewById(R.id.headerMenuButton).setOnClickListener(v -> showExtensionsScreen());\n",
++      "new": "        findViewById(R.id.headerMenuButton).setOnClickListener(v -> showBrowserMenu());\n"
++    },
++    {
++      "start": 343,
++      "end": 344,
++      "old": "",
++      "new": "        boolean restored = restoreBrowserWorkspace();\n"
++    },
++    {
++      "start": 345,
++      "end": 346,
++      "old": "        if (savedInstanceState == null) {\n",
++      "new": "        if (!restored) {\n"
++    },
++    {
++      "start": 348,
++      "end": 348,
++      "old": "        } else {\n            showHomeScreen();\n",
++      "new": ""
++    },
++    {
++      "start": 349,
++      "end": 350,
++      "old": "",
++      "new": "\n"
++    },
++    {
++      "start": 394,
++      "end": 402,
++      "old": "            session.reload();\n            Toast.makeText(this, \"جاري إنعاش الصفحة\", Toast.LENGTH_SHORT).show();\n",
++      "new": "            BrowserTab tab = findTab(session);\n            if (tab != null && tab.loading) {\n                session.stop();tab.loading = false;refreshPageButton.setText(\"↻\");\n                progressBar.setVisibility(View.GONE);\n            } else {\n                session.reload();\n                Toast.makeText(this, \"جاري إنعاش الصفحة\", Toast.LENGTH_SHORT).show();\n            }\n"
++    },
++    {
++      "start": 615,
++      "end": 617,
+       "old": "                    session.getWebExtensionController().setMessageDelegate(\n                            extension, delegate, NATIVE_APP);\n",
+       "new": "                    for (BrowserTab tab : browserTabs) tab.session.getWebExtensionController()\n                            .setMessageDelegate(extension, delegate, NATIVE_APP);\n"
+     },
+     {
+-      "start": 658,
+-      "end": 659,
++      "start": 672,
++      "end": 673,
+       "old": "",
+       "new": "            if (port.sender.session != session) continue;\n"
+     },
+     {
+-      "start": 667,
+-      "end": 668,
++      "start": 681,
++      "end": 682,
+       "old": "        if (!sent && capturePort != null) {\n",
+       "new": "        if (!sent && capturePort != null && capturePort.sender.session == session) {\n"
+     },
+     {
+-      "start": 2186,
+-      "end": 2194,
++      "start": 2200,
++      "end": 2208,
+       "old": "            try {port.postMessage(message);} catch (Throwable error) {capturePorts.remove(port);}\n",
+       "new": "            try {\n                JSONObject scoped = new JSONObject();\n                scoped.put(\"action\", action);\n                BrowserTab owner = findTab(port.sender.session);\n                scoped.put(\"tabKey\", owner == null ? \"\" : owner.key);\n                scoped.put(\"allowed\", allowed && port.sender.session == session);\n                port.postMessage(scoped);\n            } catch (Throwable error) {capturePorts.remove(port);}\n"
+     },
+     {
+-      "start": 2219,
+-      "end": 2220,
+-      "old": "",
+-      "new": "        downloadsList.removeCallbacks(generalDownloadsRefresh);\n"
+-    },
+-    {
+-      "start": 2229,
+-      "end": 2230,
++      "start": 2233,
++      "end": 2235,
++      "old": "",
++      "new": "        persistBrowserWorkspace();\n        downloadsList.removeCallbacks(generalDownloadsRefresh);\n"
++    },
++    {
++      "start": 2244,
++      "end": 2245,
+       "old": "",
+       "new": "        if (\"downloads\".equals(activeScreen)) refreshDownloads();\n"
+     },
+     {
+-      "start": 2649,
+-      "end": 2661,
++      "start": 2664,
++      "end": 2676,
+       "old": "",
+       "new": "        downloadsList.removeCallbacks(generalDownloadsRefresh);\n        List<GeneralDownloadCatalog.Entry> nativeFiles = new ArrayList<>();\n        try {\n            nativeFiles = GeneralDownloadCatalog.read((DownloadManager)getSystemService(DOWNLOAD_SERVICE));\n        } catch (Throwable error) {\n            addMessageCard(downloadsList, \"تعذر قراءة مدير التنزيل: \" + safeMessage(error));\n        }\n        Set<String> nativeNames = GeneralDownloadCatalog.representedNames(nativeFiles);\n        for (GeneralDownloadCatalog.Entry item : nativeFiles) {\n            downloadsList.addView(generalDownloadCard(item));\n            found++;\n        }\n"
+     },
+     {
+-      "start": 2679,
+-      "end": 2680,
++      "start": 2694,
++      "end": 2695,
+       "old": "",
+       "new": "                        if (nativeNames.contains(name)) continue;\n"
+     },
+     {
+-      "start": 2696,
+-      "end": 2697,
++      "start": 2711,
++      "end": 2712,
+       "old": "                    if (!file.isFile()) continue;\n",
+       "new": "                    if (!file.isFile() || nativeNames.contains(file.getName())) continue;\n"
+     },
+     {
+-      "start": 2703,
+-      "end": 2766,
++      "start": 2718,
++      "end": 2781,
+       "old": "",
+       "new": "        if (activityForeground && \"downloads\".equals(activeScreen))\n            downloadsList.postDelayed(generalDownloadsRefresh, 1000L);\n    }\n\n    private View generalDownloadCard(GeneralDownloadCatalog.Entry item) {\n        LinearLayout card = new LinearLayout(this);\n        card.setOrientation(LinearLayout.VERTICAL);\n        card.setPadding(dp(14), dp(12), dp(14), dp(12));\n        card.setBackground(roundedBackground(0xFF151219, 0xFF67314F, 15));\n        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);\n        params.setMargins(0, 0, 0, dp(9));card.setLayoutParams(params);\n        TextView title = new TextView(this);\n        title.setText(item.name);title.setTextColor(Color.WHITE);title.setTextSize(14);\n        title.setTypeface(Typeface.DEFAULT_BOLD);card.addView(title);\n        TextView status = new TextView(this);\n        String bytes = formatBytes(Math.max(0, item.downloaded));\n        if (item.total > 0) bytes += \" / \" + formatBytes(item.total);\n        int percent = item.percent();\n        status.setText(item.state() + (percent < 0 ? \"\" : \"  •  \" + percent + \"%\")\n                + \"\\n\" + (TextUtils.isEmpty(item.mime) ? \"ملف\" : item.mime) + \"  •  \" + bytes);\n        status.setTextColor(0xFFAAA3B2);status.setTextSize(11);\n        status.setPadding(0, dp(5), 0, dp(10));card.addView(status);\n        if (item.active()) {\n            ProgressBar progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);\n            progress.setIndeterminate(percent < 0);progress.setMax(100);\n            if (percent >= 0) progress.setProgress(percent);\n            card.addView(progress, new LinearLayout.LayoutParams(-1, dp(8)));\n        }\n        LinearLayout actions = new LinearLayout(this);\n        actions.setOrientation(LinearLayout.HORIZONTAL);actions.setGravity(Gravity.END);\n        DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);\n        if (item.complete()) {\n            Button open = smallDownloadActionButton(\"فتح\");actions.addView(open);\n            open.setOnClickListener(v -> {\n                try {\n                    Uri uri = GeneralDownloadCatalog.openUri(manager, item);\n                    if (uri == null) throw new IllegalStateException(\"الملف غير متاح\");\n                    openDownloadedUri(uri, item.mime);\n                } catch (Throwable error) {\n                    Toast.makeText(this, \"تعذر فتح الملف: \" + safeMessage(error), Toast.LENGTH_SHORT).show();\n                }\n            });\n        }\n        Button folder = smallDownloadActionButton(\"فتح المجلد\");actions.addView(folder);\n        folder.setOnClickListener(v -> openDownloadsFolder());\n        boolean cancel = item.active();\n        Button remove = smallDownloadActionButton(cancel ? \"إلغاء\" : \"حذف\");actions.addView(remove);\n        remove.setTextColor(0xFFFF7DAA);\n        remove.setOnClickListener(v -> new AlertDialog.Builder(this)\n                .setTitle(cancel ? \"إلغاء التنزيل\" : \"حذف الملف\")\n                .setMessage((cancel ? \"إلغاء التنزيل وحذف الجزء المحمّل؟\\n\" : \"حذف الملف نهائياً؟\\n\") + item.name)\n                .setNegativeButton(\"رجوع\", null)\n                .setPositiveButton(cancel ? \"إلغاء التنزيل\" : \"حذف\", (dialog, which) -> {\n                    try {\n                        boolean removed = GeneralDownloadCatalog.remove(manager, item);\n                        Toast.makeText(this, removed ? \"تمت الإزالة\" : \"تعذر إزالة التنزيل\", Toast.LENGTH_SHORT).show();\n                    } catch (Throwable error) {\n                        Toast.makeText(this, \"تعذر إزالة التنزيل: \" + safeMessage(error), Toast.LENGTH_SHORT).show();\n                    }\n                    refreshDownloads();\n                }).show());\n        card.addView(actions);\n        return card;\n"
+     },
+     {
+-      "start": 3238,
+-      "end": 3374,
+-      "old": "",
+-      "new": "    private static final class BrowserTab {\n        final GeckoSession session;\n        final String key = java.util.UUID.randomUUID().toString();\n        String url = \"about:blank\", title = \"\", cookies = \"\", cookiePath = \"\", userAgent = \"\";\n        boolean canGoBack, awaitingSelection;\n        MediaSession media;\n        BrowserTab(GeckoSession session) {this.session = session;}\n    }\n\n    private BrowserTab findTab(GeckoSession target) {\n        for (BrowserTab tab : browserTabs) if (tab.session == target) return tab;\n        return null;\n    }\n\n    private GeckoSession createTabSession() {\n        GeckoSession created = new GeckoSession();\n        created.getSettings().setSuspendMediaWhenInactive(true);\n        created.setMediaSessionDelegate(new MediaSession.Delegate() {\n            @Override public void onActivated(GeckoSession tab, MediaSession media) {\n                BrowserTab owner = findTab(tab);\n                if (owner == null) {media.pause();media.muteAudio(true);return;}\n                owner.media = media;\n                if (tab != MainActivity.this.session) {media.pause();media.muteAudio(true);return;}\n                browserMediaControl = media;\n                boolean allowed = activityForeground && \"browser\".equals(activeScreen);\n                media.muteAudio(!allowed);\n                if (!allowed) media.pause();\n            }\n            @Override public void onDeactivated(GeckoSession tab, MediaSession media) {\n                BrowserTab owner = findTab(tab);\n                if (owner != null && owner.media == media) owner.media = null;\n                if (browserMediaControl == media) browserMediaControl = null;\n            }\n            @Override public void onPlay(GeckoSession tab, MediaSession media) {\n                BrowserTab owner = findTab(tab);\n                if (owner == null) {media.pause();media.muteAudio(true);return;}\n                owner.media = media;\n                if (tab != MainActivity.this.session) {media.pause();media.muteAudio(true);return;}\n                browserMediaControl = media;\n                if (!activityForeground || !\"browser\".equals(activeScreen)) {media.pause();media.muteAudio(true);}\n            }\n        });\n        created.setContentDelegate(new BrowserContentDelegate());\n        created.setNavigationDelegate(new BrowserNavigationDelegate());\n        created.setProgressDelegate(new BrowserProgressDelegate());\n        if (captureExtension != null) created.getWebExtensionController().setMessageDelegate(\n                captureExtension, new CaptureMessageDelegate(), NATIVE_APP);\n        return created;\n    }\n\n    private void updateTabCount() {\n        if (tabsButton != null) tabsButton.setText(\"▣ \" + browserTabs.size());\n    }\n\n    private void saveTabSession() {\n        BrowserTab tab = findTab(session);\n        if (tab == null) return;\n        tab.cookies = latestCookieContents;\n        tab.cookiePath = latestCookieFilePath == null ? \"\" : latestCookieFilePath;\n        tab.userAgent = latestUserAgent == null ? \"\" : latestUserAgent;\n        tab.canGoBack = browserCanGoBack;\n    }\n\n    private void selectPopupIfReady(BrowserTab tab) {\n        if (tab.awaitingSelection && tab.session.isOpen()) {\n            tab.awaitingSelection = false;\n            selectTab(tab);\n        }\n    }\n\n    private void selectTab(BrowserTab tab) {\n        if (destroyingTabs || !browserTabs.contains(tab) || !tab.session.isOpen()) return;\n        if (session != tab.session) {\n            pauseBrowserMedia();\n            saveTabSession();\n            session.setActive(false);\n            closeCapturePanel();\n            geckoView.releaseSession();\n            session = tab.session;\n            geckoView.setSession(session);\n            browserMediaControl = tab.media;\n            // Analysis results and page metadata belong only to the visible tab.\n            pendingPageUrl = normalizePageUrl(tab.url);\n            pendingPageTitle = tab.title;\n            lastCapturedItems = null;\n            lastPlayerFormats = null;\n            latestActivePostUrl = \"\";\n            latestActiveMediaKey = \"\";\n            capturedDurationSeconds = 0;\n            preferredPlayerPageUrl = \"\";\n            latestCookieHeader = \"\";\n            latestOrigin = \"\";\n            latestCookieContents = tab.cookies;\n            latestCookieFilePath = tab.cookiePath;\n            if (!tab.userAgent.isEmpty()) latestUserAgent = tab.userAgent;\n            browserCanGoBack = tab.canGoBack;\n            progressBar.setVisibility(View.GONE);\n        }\n        addressBar.setText(\"about:blank\".equals(tab.url) ? \"\" : tab.url);\n        updateFavoriteButtonState();\n        if (\"about:blank\".equals(tab.url)) showHomeScreen();\n        else showBrowserScreen();\n        updateTabCount();\n    }\n\n    private void closeTab(BrowserTab tab) {\n        if (!browserTabs.contains(tab)) return;\n        boolean current = session == tab.session;\n        boolean listing = \"tabs\".equals(activeScreen);\n        int previousCount = browserTabs.size();\n        int index = browserTabs.indexOf(tab);\n        if (current) {\n            if (browserTabs.size() == 1) {\n                GeckoSession replacement = createTabSession();\n                replacement.open(runtime);\n                browserTabs.add(new BrowserTab(replacement));\n            }\n            BrowserTab next = browserTabs.get(index == browserTabs.size()-1 ? index-1 : index+1);\n            selectTab(next);\n        }\n        for (WebExtension.Port port : new ArrayList<>(capturePorts)) {\n            if (port.sender.session == tab.session) {\n                capturePorts.remove(port);\n                if (capturePort == port) capturePort = null;\n                try {port.disconnect();} catch (Throwable ignored) { }\n            }\n        }\n        browserTabs.remove(tab);\n        tab.session.setActive(false);\n        tab.session.close();\n        tab.media = null;\n        updateTabCount();\n        if (listing && previousCount > 1) showTabsScreen();\n        else if (\"tabs\".equals(activeScreen)) renderTabs();\n    }\n\n"
+-    },
+-    {
+-      "start": 3376,
+-      "end": 3401,
++      "start": 3253,
++      "end": 3534,
++      "old": "",
++      "new": "    private void goForwardInBrowser() {\n        BrowserTab tab = findTab(session);\n        if (tab != null && tab.canGoForward) {\n            showBrowserScreen();session.goForward();\n        }\n    }\n\n    private void scheduleBrowserWorkspaceSave() {\n        if (destroyingTabs || restoringWorkspace || addressBar == null) return;\n        addressBar.removeCallbacks(browserWorkspaceSave);\n        addressBar.postDelayed(browserWorkspaceSave, 1200L);\n    }\n\n    private void persistBrowserWorkspace() {\n        if (destroyingTabs || restoringWorkspace || browserTabs.isEmpty()) return;\n        browserWorkspace.tabs.clear();browserWorkspace.selected = 0;\n        for (BrowserTab tab : browserTabs) {\n            if (!BrowserWorkspace.restorable(tab.url)) continue;\n            if (tab.session == session) browserWorkspace.selected = browserWorkspace.tabs.size();\n            browserWorkspace.tabs.add(new BrowserWorkspace.Page(tab.url,tab.title,tab.savedState,0));\n        }\n        getSharedPreferences(\"satlink_browser\",MODE_PRIVATE).edit()\n                .putString(\"workspace\",browserWorkspace.encode()).apply();\n    }\n\n    private void loadSavedBrowserPage(BrowserTab tab, BrowserWorkspace.Page page) {\n        tab.url = page.url;tab.title = page.title;tab.savedState = page.state;\n        tab.session.setActive(false);\n        GeckoSession.SessionState state = GeckoSession.SessionState.fromString(page.state);\n        if (state != null) tab.session.restoreState(state);\n        else tab.session.loadUri(page.url);\n    }\n\n    private boolean restoreBrowserWorkspace() {\n        if (!browserWorkspace.restoreTabs || browserWorkspace.tabs.isEmpty()) return false;\n        restoringWorkspace = true;\n        List<BrowserWorkspace.Page> pages = new ArrayList<>(browserWorkspace.tabs);\n        int selected = browserWorkspace.selected;\n        try {\n            for (int i=0;i<pages.size();i++) {\n                BrowserTab tab;\n                if (i==0) tab = browserTabs.get(0);\n                else {\n                    GeckoSession created = createTabSession();\n                    tab = new BrowserTab(created);browserTabs.add(tab);created.open(runtime);\n                }\n                loadSavedBrowserPage(tab,pages.get(i));\n            }\n            selectTab(browserTabs.get(Math.min(selected,browserTabs.size()-1)));\n            return true;\n        } finally {restoringWorkspace = false;updateTabCount();}\n    }\n\n    private void reopenClosedBrowserTab() {\n        BrowserWorkspace.Page page = browserWorkspace.reopen();\n        if (page == null) {Toast.makeText(this,\"لا يوجد تبويب مغلق لاستعادته\",Toast.LENGTH_SHORT).show();return;}\n        GeckoSession created = createTabSession();\n        BrowserTab tab = new BrowserTab(created);browserTabs.add(tab);created.open(runtime);\n        loadSavedBrowserPage(tab,page);selectTab(tab);scheduleBrowserWorkspaceSave();\n    }\n\n    private void rememberBrowserVisit(BrowserTab tab) {\n        if (!restoringWorkspace) browserWorkspace.visit(tab.url,tab.title,System.currentTimeMillis());\n    }\n\n    private void showBrowserMenu() {\n        String[] items = {\"تبويب جديد\",\"إغلاق التبويب الحالي\",\"إعادة فتح آخر تبويب مغلق\",\n                \"سجل التصفح\",\"إعدادات المتصفح\",\"التبويبات\",\"المفضلة\",\"التنزيلات\",\"الإضافات\"};\n        new AlertDialog.Builder(this).setTitle(\"المتصفح\").setItems(items,(dialog,which)->{\n            switch(which) {\n                case 0:startNewTab();break;\n                case 1:BrowserTab tab=findTab(session);if(tab!=null)closeTab(tab);break;\n                case 2:reopenClosedBrowserTab();break;\n                case 3:showBrowserHistory();break;\n                case 4:showBrowserSettings();break;\n                case 5:showTabsScreen();break;\n                case 6:showFavoritesScreen();break;\n                case 7:showDownloadsScreen();break;\n                case 8:showExtensionsScreen();break;\n            }\n        }).show();\n    }\n\n    private void showBrowserSettings() {\n        String[] items = {\"محرك البحث: \" + browserWorkspace.engine,\n                \"استعادة التبويبات عند التشغيل: \" + (browserWorkspace.restoreTabs ? \"مفعّلة\" : \"متوقفة\")};\n        new AlertDialog.Builder(this).setTitle(\"إعدادات المتصفح\").setItems(items,(d,which)->{\n            if (which==0) {\n                String[] engines={\"Google\",\"Bing\",\"DuckDuckGo\"};\n                int selected=java.util.Arrays.asList(engines).indexOf(browserWorkspace.engine);\n                new AlertDialog.Builder(this).setTitle(\"محرك البحث\").setSingleChoiceItems(engines,selected,(choice,index)->{\n                    browserWorkspace.engine=engines[index];persistBrowserWorkspace();choice.dismiss();\n                }).setNegativeButton(\"رجوع\",null).show();\n            } else {\n                browserWorkspace.restoreTabs=!browserWorkspace.restoreTabs;persistBrowserWorkspace();showBrowserSettings();\n            }\n        }).setNegativeButton(\"إغلاق\",null).show();\n    }\n\n    private void showBrowserHistory() {\n        LinearLayout container=new LinearLayout(this);container.setOrientation(LinearLayout.VERTICAL);\n        container.setPadding(dp(14),dp(8),dp(14),dp(8));\n        EditText search=new EditText(this);search.setHint(\"ابحث بالعنوان أو الرابط\");search.setSingleLine(true);container.addView(search);\n        ScrollView scroll=new ScrollView(this);LinearLayout rows=new LinearLayout(this);rows.setOrientation(LinearLayout.VERTICAL);\n        scroll.addView(rows);container.addView(scroll,new LinearLayout.LayoutParams(-1,dp(350)));\n        AlertDialog dialog=new AlertDialog.Builder(this).setTitle(\"سجل التصفح\").setView(container)\n                .setNegativeButton(\"إغلاق\",null).setNeutralButton(\"مسح السجل\",(d,w)->new AlertDialog.Builder(this)\n                .setTitle(\"مسح سجل التصفح؟\").setMessage(\"سيُحذف سجل الصفحات فقط.\")\n                .setNegativeButton(\"رجوع\",null).setPositiveButton(\"مسح\",(confirm,index)->{\n                    browserWorkspace.history.clear();persistBrowserWorkspace();\n                }).show()).create();\n        search.addTextChangedListener(new TextWatcher(){\n            @Override public void beforeTextChanged(CharSequence t,int start,int count,int after){}\n            @Override public void onTextChanged(CharSequence t,int start,int before,int count){renderBrowserHistory(rows,t.toString(),dialog);}\n            @Override public void afterTextChanged(Editable e){}\n        });\n        renderBrowserHistory(rows,\"\",dialog);dialog.show();\n    }\n\n    private void renderBrowserHistory(LinearLayout rows,String query,AlertDialog dialog) {\n        rows.removeAllViews();List<BrowserWorkspace.Page> matches=browserWorkspace.matching(query);\n        if(matches.isEmpty()){TextView empty=new TextView(this);empty.setText(\"لا توجد نتائج\");rows.addView(empty);return;}\n        int count=0;\n        for(BrowserWorkspace.Page page:matches){\n            if(count++>=100)break;\n            LinearLayout row=new LinearLayout(this);row.setOrientation(LinearLayout.HORIZONTAL);\n            TextView link=new TextView(this);link.setText((page.title.isEmpty()?page.url:page.title)+\"\\n\"+page.url+\"\\n\"+\n                    new java.text.SimpleDateFormat(\"yyyy-MM-dd HH:mm\",Locale.getDefault()).format(new java.util.Date(page.time)));\n            link.setTextSize(13);link.setPadding(0,dp(8),dp(6),dp(8));row.addView(link,new LinearLayout.LayoutParams(0,-2,1));\n            link.setOnClickListener(v->{dialog.dismiss();openUrl(page.url);});\n            Button remove=new Button(this);remove.setText(\"×\");remove.setContentDescription(\"حذف الصفحة من السجل\");\n            row.addView(remove,new LinearLayout.LayoutParams(dp(44),dp(44)));\n            remove.setOnClickListener(v->{browserWorkspace.history.remove(page);persistBrowserWorkspace();renderBrowserHistory(rows,query,dialog);});\n            rows.addView(row);\n        }\n        if(matches.size()>100){TextView more=new TextView(this);more.setText(\"تُعرض أحدث 100 نتيجة؛ استخدم البحث للوصول للبقية\");rows.addView(more);}\n    }\n\n    private static final class BrowserTab {\n        final GeckoSession session;\n        final String key = java.util.UUID.randomUUID().toString();\n        String url = \"about:blank\", title = \"\", cookies = \"\", cookiePath = \"\", userAgent = \"\";\n        boolean canGoBack, canGoForward, loading, awaitingSelection;\n        String savedState = \"\";\n        MediaSession media;\n        BrowserTab(GeckoSession session) {this.session = session;}\n    }\n\n    private BrowserTab findTab(GeckoSession target) {\n        for (BrowserTab tab : browserTabs) if (tab.session == target) return tab;\n        return null;\n    }\n\n    private GeckoSession createTabSession() {\n        GeckoSession created = new GeckoSession();\n        created.getSettings().setSuspendMediaWhenInactive(true);\n        created.setMediaSessionDelegate(new MediaSession.Delegate() {\n            @Override public void onActivated(GeckoSession tab, MediaSession media) {\n                BrowserTab owner = findTab(tab);\n                if (owner == null) {media.pause();media.muteAudio(true);return;}\n                owner.media = media;\n                if (tab != MainActivity.this.session) {media.pause();media.muteAudio(true);return;}\n                browserMediaControl = media;\n                boolean allowed = activityForeground && \"browser\".equals(activeScreen);\n                media.muteAudio(!allowed);\n                if (!allowed) media.pause();\n            }\n            @Override public void onDeactivated(GeckoSession tab, MediaSession media) {\n                BrowserTab owner = findTab(tab);\n                if (owner != null && owner.media == media) owner.media = null;\n                if (browserMediaControl == media) browserMediaControl = null;\n            }\n            @Override public void onPlay(GeckoSession tab, MediaSession media) {\n                BrowserTab owner = findTab(tab);\n                if (owner == null) {media.pause();media.muteAudio(true);return;}\n                owner.media = media;\n                if (tab != MainActivity.this.session) {media.pause();media.muteAudio(true);return;}\n                browserMediaControl = media;\n                if (!activityForeground || !\"browser\".equals(activeScreen)) {media.pause();media.muteAudio(true);}\n            }\n        });\n        created.setContentDelegate(new BrowserContentDelegate());\n        created.setNavigationDelegate(new BrowserNavigationDelegate());\n        created.setProgressDelegate(new BrowserProgressDelegate());\n        if (captureExtension != null) created.getWebExtensionController().setMessageDelegate(\n                captureExtension, new CaptureMessageDelegate(), NATIVE_APP);\n        return created;\n    }\n\n    private void updateTabCount() {\n        if (tabsButton != null) tabsButton.setText(\"▣ \" + browserTabs.size());\n    }\n\n    private void saveTabSession() {\n        BrowserTab tab = findTab(session);\n        if (tab == null) return;\n        tab.cookies = latestCookieContents;\n        tab.cookiePath = latestCookieFilePath == null ? \"\" : latestCookieFilePath;\n        tab.userAgent = latestUserAgent == null ? \"\" : latestUserAgent;\n        tab.canGoBack = browserCanGoBack;\n    }\n\n    private void selectPopupIfReady(BrowserTab tab) {\n        if (tab.awaitingSelection && tab.session.isOpen()) {\n            tab.awaitingSelection = false;\n            selectTab(tab);\n        }\n    }\n\n    private void selectTab(BrowserTab tab) {\n        if (destroyingTabs || !browserTabs.contains(tab) || !tab.session.isOpen()) return;\n        if (session != tab.session) {\n            pauseBrowserMedia();\n            saveTabSession();\n            session.setActive(false);\n            closeCapturePanel();\n            geckoView.releaseSession();\n            session = tab.session;\n            geckoView.setSession(session);\n            browserMediaControl = tab.media;\n            // Analysis results and page metadata belong only to the visible tab.\n            pendingPageUrl = normalizePageUrl(tab.url);\n            pendingPageTitle = tab.title;\n            lastCapturedItems = null;\n            lastPlayerFormats = null;\n            latestActivePostUrl = \"\";\n            latestActiveMediaKey = \"\";\n            capturedDurationSeconds = 0;\n            preferredPlayerPageUrl = \"\";\n            latestCookieHeader = \"\";\n            latestOrigin = \"\";\n            latestCookieContents = tab.cookies;\n            latestCookieFilePath = tab.cookiePath;\n            if (!tab.userAgent.isEmpty()) latestUserAgent = tab.userAgent;\n            browserCanGoBack = tab.canGoBack;\n            progressBar.setVisibility(View.GONE);\n        }\n        forwardPageButton.setEnabled(tab.canGoForward);\n        forwardPageButton.setAlpha(tab.canGoForward ? 1f : 0.4f);\n        refreshPageButton.setText(tab.loading ? \"×\" : \"↻\");\n        addressBar.setText(\"about:blank\".equals(tab.url) ? \"\" : tab.url);\n        updateFavoriteButtonState();\n        if (\"about:blank\".equals(tab.url)) showHomeScreen();\n        else showBrowserScreen();\n        updateTabCount();\n        scheduleBrowserWorkspaceSave();\n    }\n\n    private void closeTab(BrowserTab tab) {\n        if (!browserTabs.contains(tab)) return;\n        browserWorkspace.rememberClosed(tab.url, tab.title, tab.savedState);\n        boolean current = session == tab.session;\n        boolean listing = \"tabs\".equals(activeScreen);\n        int previousCount = browserTabs.size();\n        int index = browserTabs.indexOf(tab);\n        if (current) {\n            if (browserTabs.size() == 1) {\n                GeckoSession replacement = createTabSession();\n                replacement.open(runtime);\n                browserTabs.add(new BrowserTab(replacement));\n            }\n            BrowserTab next = browserTabs.get(index == browserTabs.size()-1 ? index-1 : index+1);\n            selectTab(next);\n        }\n        for (WebExtension.Port port : new ArrayList<>(capturePorts)) {\n            if (port.sender.session == tab.session) {\n                capturePorts.remove(port);\n                if (capturePort == port) capturePort = null;\n                try {port.disconnect();} catch (Throwable ignored) { }\n            }\n        }\n        browserTabs.remove(tab);\n        tab.session.setActive(false);\n        tab.session.close();\n        tab.media = null;\n        updateTabCount();\n        if (listing && previousCount > 1) showTabsScreen();\n        else if (\"tabs\".equals(activeScreen)) renderTabs();\n        scheduleBrowserWorkspaceSave();\n    }\n\n"
++    },
++    {
++      "start": 3536,
++      "end": 3561,
+       "old": "        LinearLayout card = new LinearLayout(this);\n        card.setOrientation(LinearLayout.VERTICAL);\n        card.setPadding(dp(14), dp(13), dp(14), dp(13));\n        card.setBackground(roundedBackground(0xFF151219, 0xFF703456, 15));\n        TextView title = new TextView(this);\n        String url = addressBar.getText().toString().trim();\n        title.setText(TextUtils.isEmpty(url) || \"about:blank\".equals(url) ? \"الصفحة الرئيسية\" : url);\n        title.setTextColor(Color.WHITE);\n        title.setTextSize(13);\n        title.setMaxLines(2);\n        card.addView(title);\n        card.setOnClickListener(v -> {\n            if (TextUtils.isEmpty(url) || \"about:blank\".equals(url)) showHomeScreen();\n            else showBrowserScreen();\n        });\n        tabsList.addView(card);\n",
+       "new": "        for (BrowserTab tab : new ArrayList<>(browserTabs)) {\n            LinearLayout card = new LinearLayout(this);\n            card.setOrientation(LinearLayout.HORIZONTAL);\n            card.setGravity(Gravity.CENTER_VERTICAL);\n            card.setPadding(dp(14), dp(10), dp(10), dp(10));\n            card.setBackground(roundedBackground(0xFF151219,\n                    tab.session == session ? 0xFFFF4B9F : 0xFF703456, 15));\n            LinearLayout.LayoutParams margin = new LinearLayout.LayoutParams(-1, -2);\n            margin.bottomMargin = dp(8);card.setLayoutParams(margin);\n            TextView label = new TextView(this);\n            String name = TextUtils.isEmpty(tab.title) ? tab.url : tab.title;\n            if (\"about:blank\".equals(tab.url)) name = \"تبويب جديد\";\n            label.setText((tab.session == session ? \"● \" : \"\") + name +\n                    (\"about:blank\".equals(tab.url) ? \"\" : \"\\n\" + tab.url));\n            label.setTextColor(Color.WHITE);label.setTextSize(14);label.setMaxLines(3);\n            card.addView(label, new LinearLayout.LayoutParams(0, -2, 1f));\n            label.setOnClickListener(v -> selectTab(tab));\n            Button close = new Button(this);close.setText(\"×\");\n            close.setContentDescription(\"إغلاق التبويب\");close.setTextColor(Color.WHITE);\n            close.setBackground(roundedBackground(0xFF301525, 0xFF703456, 12));\n            card.addView(close, new LinearLayout.LayoutParams(dp(48), dp(48)));\n            close.setOnClickListener(v -> closeTab(tab));\n            card.setOnClickListener(v -> selectTab(tab));\n            tabsList.addView(card);\n        }\n"
+     },
+     {
+-      "start": 3404,
+-      "end": 3410,
++      "start": 3564,
++      "end": 3570,
+       "old": "        closeCapturePanel();\n        pendingPageUrl = null;\n        pendingPageTitle = null;\n        lastCapturedItems = null;\n        addressBar.setText(\"\");\n        session.loadUri(\"about:blank\");\n        showHomeScreen();\n",
+       "new": "        GeckoSession created = createTabSession();\n        BrowserTab tab = new BrowserTab(created);\n        browserTabs.add(tab);\n        created.open(runtime);\n        selectTab(tab);\n        created.loadUri(\"about:blank\");\n"
+     },
+     {
+-      "start": 3456,
+-      "end": 3463,
++      "start": 3583,
++      "end": 3584,
++      "old": "            target = \"https://www.google.com/search?q=\" +\n                    URLEncoder.encode(input, StandardCharsets.UTF_8);\n",
++      "new": "            target = browserWorkspace.search(input);\n"
++    },
++    {
++      "start": 3615,
++      "end": 3624,
+       "old": "        if (session != null) session.close();\n",
+-      "new": "        downloadsList.removeCallbacks(generalDownloadsRefresh);\n        destroyingTabs = true;\n        geckoView.releaseSession();\n        for (BrowserTab tab : new ArrayList<>(browserTabs)) tab.session.close();\n        browserTabs.clear();\n        capturePorts.clear();\n        capturePort = null;\n"
+-    },
+-    {
+-      "start": 3475,
+-      "end": 3487,
+-      "old": "",
+-      "new": "        @Override public void onTitleChange(GeckoSession session, String title) {\n            BrowserTab tab = findTab(session);\n            if (tab == null) return;\n            tab.title = title == null ? \"\" : title;\n            if (session == MainActivity.this.session) pendingPageTitle = tab.title;\n            if (\"tabs\".equals(activeScreen)) renderTabs();\n        }\n\n        @Override public void onCloseRequest(GeckoSession session) {\n            BrowserTab tab = findTab(session);\n            if (tab != null) closeTab(tab);\n        }\n"
+-    },
+-    {
+-      "start": 3489,
+-      "end": 3490,
++      "new": "        persistBrowserWorkspace();\n        addressBar.removeCallbacks(browserWorkspaceSave);\n        downloadsList.removeCallbacks(generalDownloadsRefresh);\n        destroyingTabs = true;\n        geckoView.releaseSession();\n        for (BrowserTab tab : new ArrayList<>(browserTabs)) tab.session.close();\n        browserTabs.clear();\n        capturePorts.clear();\n        capturePort = null;\n"
++    },
++    {
++      "start": 3636,
++      "end": 3649,
++      "old": "",
++      "new": "        @Override public void onTitleChange(GeckoSession session, String title) {\n            BrowserTab tab = findTab(session);\n            if (tab == null) return;\n            tab.title = title == null ? \"\" : title;\n            if (session == MainActivity.this.session) pendingPageTitle = tab.title;\n            rememberBrowserVisit(tab);scheduleBrowserWorkspaceSave();\n            if (\"tabs\".equals(activeScreen)) renderTabs();\n        }\n\n        @Override public void onCloseRequest(GeckoSession session) {\n            BrowserTab tab = findTab(session);\n            if (tab != null) closeTab(tab);\n        }\n"
++    },
++    {
++      "start": 3651,
++      "end": 3652,
+       "old": "",
+       "new": "            if (session != MainActivity.this.session) return;\n"
+     },
+     {
+-      "start": 3496,
+-      "end": 3498,
++      "start": 3658,
++      "end": 3660,
+       "old": "",
+       "new": "            BrowserTab sourceTab = findTab(session);\n            if (sourceTab == null) return;\n"
+     },
+     {
+-      "start": 3507,
+-      "end": 3511,
++      "start": 3669,
++      "end": 3673,
+       "old": "                        addressBar.getText().toString().trim(), latestUserAgent,\n                        TextUtils.isEmpty(latestCookieFilePath) ? \"\" : latestCookieContents));\n",
+       "new": "                        sourceTab.url, session == MainActivity.this.session ? latestUserAgent : sourceTab.userAgent,\n                        session == MainActivity.this.session\n                                ? (TextUtils.isEmpty(latestCookieFilePath) ? \"\" : latestCookieContents)\n                                : (sourceTab.cookiePath.isEmpty() ? \"\" : sourceTab.cookies)));\n"
+     },
+     {
+-      "start": 3656,
+-      "end": 3657,
++      "start": 3818,
++      "end": 3819,
+       "old": "            capturePort = port;\n",
+       "new": "            if (port.sender.session == session) capturePort = port;\n"
+     },
+     {
+-      "start": 3664,
+-      "end": 3665,
++      "start": 3826,
++      "end": 3827,
+       "old": "",
+       "new": "            if (sender.session != null && sender.session != session) return null;\n"
+     },
+     {
+-      "start": 3668,
+-      "end": 3671,
++      "start": 3830,
++      "end": 3833,
+       "old": "",
+       "new": "                BrowserTab active = findTab(session);\n                if (sender.session == null && (active == null\n                        || !active.key.equals(json.optString(\"tabKey\", \"\")))) return null;\n"
+     },
+     {
+-      "start": 3682,
+-      "end": 3696,
+-      "old": "",
+-      "new": "        @Override public GeckoResult<GeckoSession> onNewSession(GeckoSession opener, String uri) {\n            if (destroyingTabs || findTab(opener) == null) return null;\n            // Gecko requires an unopened session and loads the requested URI itself.\n            GeckoSession created = createTabSession();\n            BrowserTab tab = new BrowserTab(created);\n            tab.url = TextUtils.isEmpty(uri) ? \"about:blank\" : uri;\n            tab.awaitingSelection = true;\n            browserTabs.add(tab);\n            updateTabCount();\n            geckoView.post(() -> selectPopupIfReady(tab));\n            geckoView.postDelayed(() -> selectPopupIfReady(tab), 100L);\n            return GeckoResult.fromValue(created);\n        }\n\n"
+-    },
+-    {
+-      "start": 3699,
+-      "end": 3701,
++      "start": 3844,
++      "end": 3866,
++      "old": "",
++      "new": "        @Override public void onCanGoForward(GeckoSession session, boolean canGoForward) {\n            BrowserTab tab = findTab(session);\n            if (tab == null) return;\n            tab.canGoForward = canGoForward;\n            if (session != MainActivity.this.session) return;\n            forwardPageButton.setEnabled(canGoForward);\n            forwardPageButton.setAlpha(canGoForward ? 1f : 0.4f);\n        }\n        @Override public GeckoResult<GeckoSession> onNewSession(GeckoSession opener, String uri) {\n            if (destroyingTabs || findTab(opener) == null) return null;\n            // Gecko requires an unopened session and loads the requested URI itself.\n            GeckoSession created = createTabSession();\n            BrowserTab tab = new BrowserTab(created);\n            tab.url = TextUtils.isEmpty(uri) ? \"about:blank\" : uri;\n            tab.awaitingSelection = true;\n            browserTabs.add(tab);\n            updateTabCount();\n            geckoView.post(() -> selectPopupIfReady(tab));\n            geckoView.postDelayed(() -> selectPopupIfReady(tab), 100L);\n            return GeckoResult.fromValue(created);\n        }\n\n"
++    },
++    {
++      "start": 3869,
++      "end": 3871,
+       "old": "",
+       "new": "            BrowserTab sourceTab = findTab(session);\n            if (sourceTab == null) return GeckoResult.fromValue(AllowOrDeny.DENY);\n"
+     },
+     {
+-      "start": 3702,
+-      "end": 3707,
++      "start": 3872,
++      "end": 3877,
+       "old": "                    ? addressBar.getText().toString().trim() : request.triggerUri,\n                    latestUserAgent, TextUtils.isEmpty(latestCookieFilePath) ? \"\" : latestCookieContents)) return GeckoResult.fromValue(AllowOrDeny.DENY);\n",
+       "new": "                    ? sourceTab.url : request.triggerUri,\n                    session == MainActivity.this.session ? latestUserAgent : sourceTab.userAgent,\n                    session == MainActivity.this.session\n                            ? (TextUtils.isEmpty(latestCookieFilePath) ? \"\" : latestCookieContents)\n                            : (sourceTab.cookiePath.isEmpty() ? \"\" : sourceTab.cookies))) return GeckoResult.fromValue(AllowOrDeny.DENY);\n"
+     },
+     {
+-      "start": 3714,
+-      "end": 3719,
+-      "old": "",
+-      "new": "            BrowserTab tab = findTab(session);\n            if (tab == null) return;\n            if (url != null) tab.url = url;\n            selectPopupIfReady(tab);\n            if (session != MainActivity.this.session) return;\n"
+-    },
+-    {
+-      "start": 3740,
+-      "end": 3744,
++      "start": 3884,
++      "end": 3892,
++      "old": "",
++      "new": "            BrowserTab tab = findTab(session);\n            if (tab == null) return;\n            if (url != null) {\n                if (!url.equals(tab.url)) tab.title = \"\";\n                tab.url = url;rememberBrowserVisit(tab);scheduleBrowserWorkspaceSave();\n            }\n            selectPopupIfReady(tab);\n            if (session != MainActivity.this.session) return;\n"
++    },
++    {
++      "start": 3913,
++      "end": 3917,
+       "old": "",
+       "new": "            BrowserTab tab = findTab(session);\n            if (tab == null) return;\n            tab.canGoBack = canGoBack;\n            if (session != MainActivity.this.session) return;\n"
+     },
+     {
+-      "start": 3753,
+-      "end": 3756,
+-      "old": "",
+-      "new": "            BrowserTab tab = findTab(session);\n            if (tab != null) selectPopupIfReady(tab);\n            if (session != MainActivity.this.session) return;\n"
+-    },
+-    {
+-      "start": 3762,
+-      "end": 3763,
++      "start": 3924,
++      "end": 3931,
++      "old": "",
++      "new": "        @Override public void onSessionStateChange(GeckoSession session, GeckoSession.SessionState state) {\n            BrowserTab tab = findTab(session);\n            if (tab == null || state == null) return;\n            String encoded = state.toString();\n            tab.savedState = encoded != null && encoded.length() <= 32768 ? encoded : \"\";\n            scheduleBrowserWorkspaceSave();\n        }\n"
++    },
++    {
++      "start": 3933,
++      "end": 3937,
++      "old": "",
++      "new": "            BrowserTab tab = findTab(session);\n            if (tab != null) {tab.loading = true;selectPopupIfReady(tab);}\n            if (session != MainActivity.this.session) return;\n            refreshPageButton.setText(\"×\");\n"
++    },
++    {
++      "start": 3943,
++      "end": 3944,
+       "old": "",
+       "new": "            if (session != MainActivity.this.session) return;\n"
+     },
+     {
+-      "start": 3768,
+-      "end": 3769,
+-      "old": "",
+-      "new": "            if (session != MainActivity.this.session) return;\n"
++      "start": 3949,
++      "end": 3953,
++      "old": "",
++      "new": "            BrowserTab tab = findTab(session);\n            if (tab != null) tab.loading = false;\n            if (session != MainActivity.this.session) return;\n            refreshPageButton.setText(\"↻\");\n"
+     }
+   ],
+   "general_main_sha256": "c53d1efb6300048c13158eb26ca9c6a43285e1c2b2f80d1f5aee4af5d224d5fa",
+--- a/tests/tabs_test.py
++++ b/tests/tabs_test.py
+@@ -17,7 +17,7 @@
+ source=r'''import java.util.*;
+ class MainActivity {
+  GeckoSession session;GeckoView geckoView=new GeckoView();Object runtime=new Object();WebExtension captureExtension;
+- List<BrowserTab>browserTabs=new ArrayList<>();boolean destroyingTabs,activityForeground=true,browserCanGoBack,sharedNavigationPending;
++ List<BrowserTab>browserTabs=new ArrayList<>();BrowserWorkspace browserWorkspace=new BrowserWorkspace();Button forwardPageButton=new Button(),refreshPageButton=new Button();void scheduleBrowserWorkspaceSave(){}boolean destroyingTabs,activityForeground=true,browserCanGoBack,sharedNavigationPending;
+  String activeScreen="browser",pendingPageUrl,pendingPageTitle,latestActivePostUrl,latestActiveMediaKey,preferredPlayerPageUrl,latestCookieHeader,latestOrigin,latestCookieContents="",latestCookieFilePath="",latestUserAgent="UA";
+  Object lastCapturedItems,lastPlayerFormats;double capturedDurationSeconds;int captureRequestSerial,renders;MediaSession browserMediaControl;
+  Set<WebExtension.Port>capturePorts=new HashSet<>();WebExtension.Port capturePort;TextView tabsButton=new TextView(),addressBar=new TextView();View progressBar=new View();static String NATIVE_APP="satlink_capture";
+@@ -60,7 +60,10 @@
+ class TextUtils{static boolean isEmpty(String s){return s==null||s.isEmpty();}}
+ '''
+ # Production history callback uses the existing toolbar.
+-source=source.replace('Object lastCapturedItems,lastPlayerFormats;', 'Button backButton=new Button();Object lastCapturedItems,lastPlayerFormats;')+'\nclass Button{void setEnabled(boolean b){}void setAlpha(float f){}}\n'
++source=source.replace('Object lastCapturedItems,lastPlayerFormats;', 'Button backButton=new Button();Object lastCapturedItems,lastPlayerFormats;')+'\nclass Button{void setEnabled(boolean b){}void setAlpha(float f){}void setText(String s){}}\n'
++import re
++source+='\n'+re.sub(r'^package .*;\n|^import .*;\n','',(root/'app/src/main/java/com/satlink/geckoviewtest/BrowserWorkspace.java').read_text(),flags=re.M)
++source=source.replace('import java.util.*;','import java.util.*;import java.net.*;import java.nio.charset.*;',1)
+ with tempfile.TemporaryDirectory() as tmp:
+  p=Path(tmp)/'TabHarness.java';p.write_text(source);subprocess.run(['java',str(p)],check=True)
+ # Check background bridge routing from the source and the actual site's saved link behavior fixture.

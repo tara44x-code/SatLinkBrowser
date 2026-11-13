@@ -1,0 +1,907 @@
+--- a/README_AR.md
++++ b/README_AR.md
+@@ -1,6 +1,18 @@
+-# SatLink Browser PRO 1.9.8 — إيقاف التشغيل والتقاط مقطع الصفحة الرئيسية
++# SatLink Browser PRO 1.9.8 — تنزيل الملفات العامة
+ 
+ مشروع المصدر الكامل المعدّل. هذه الحزمة لا تحتوي APK مبنياً؛ نتائج الفحص وحدوده داخل TEST_REPORT_AR.md.
++
++## إضافة تنزيل الملفات العامة
++
++الإضافة محصورة بتنزيل الملفات العادية؛ بقيت دوال الفيديو والصوت والمشاهدة السابقة مطابقة للنسخة التي عملت عند المستخدم، دون تغيير رقم الإصدار أو اعتماديات البناء.
++
++- تنزيل روابط ملفات ZIP وRAR و7z وملفات الضغط الأخرى، APK وXAPK وAPKS، وبرامج الحاسبة EXE وMSI وغيرها، وملفات PDF والمستندات. يدعم أيضاً ردود تنزيل الملفات العامة التي يرسلها الموقع، بما فيها الملفات دون امتداد معروف.
++- تأكيد اسم الملف قبل التنزيل، والحفظ داخل Downloads/SatLink، وإظهار التقدم والاكتمال عبر إشعارات مدير تنزيل أندرويد. تُضاف لاحقة عند تعارض الاسم مع ملف موجود أو تنزيل جارٍ.
++- الحفاظ على معاملات الروابط الموقعة، وأسماء الملفات العربية، وUser-Agent وReferer وملفات الارتباط الخاصة بمسار ومضيف الملف. على Android 8/9 يستكمل التنزيل بعد منح إذن الحفظ.
++- ملفات .torrent تُنزّل كملفات؛ روابط magnet تفتح تطبيق تورنت مثبتاً لتحميل المحتوى. لا يوجد عميل تورنت مدمج. ملفات APK تُنزّل فقط؛ لا يبدأ التثبيت تلقائياً.
++- الملفات العامة تستخدم مدير تنزيل أندرويد بصورة مستقلة عن خدمة الفيديو والصوت. التنزيل العام مخصص لروابط HTTP/HTTPS العادية؛ لا يدّعي دعم كل بروتوكول أو تنزيل يعتمد على POST أو blob.
++
++GENERAL_FILES.patch يوضح التغيير عن نسخة 1.9.8 التي عملت سابقاً. نجحت 17 مجموعة فحص، منها تنفيذ سياسة تنزيل الملفات ووحدة التحكم وفحص تطابق كود الوسائط السابق.
+ 
+ ## تصحيح خطأ بناء MediaSession
+ 
+--- a/TEST_OUTPUT.txt
++++ b/TEST_OUTPUT.txt
+@@ -43,10 +43,13 @@
+ PASS production site routing: original post, all formats, anonymous profile, session retry, master fallback, passive variant preservation, cancellation
+ 
+ $ python3 tests/playback_test.py
+-PASS production playback and target selection: home/history/app pause, late autoplay blocked, no resume play, home back, active feed post, root rejected, short links, YouTube preserved
++PASS production initialization with inaccessible MediaSession constructor, delegate activation/deactivation and playback: home/history/app pause, late autoplay blocked, no resume play, home back, active feed post, root rejected, short links, YouTube preserved
+ 
+-$ java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/ActiveMediaPage.java app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java app/src/main/java/com/satlink/geckoviewtest/CapturedDownloadPlan.java app/src/main/java/com/satlink/geckoviewtest/EngineBootstrap.java app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java app/src/main/java/com/satlink/geckoviewtest/MainActivity.java app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java app/src/main/java/com/satlink/geckoviewtest/SLTubeAnalysisRequest.java app/src/main/java/com/satlink/geckoviewtest/SharedUrlParser.java
++$ python3 tests/general_files_test.py
++PASS actual general-file policy/controller: archive/program/APK/torrent, media exclusions, signed URLs, RFC5987 Arabic names, MIME, scoped cookies, duplicate dialog/name, native download/notification, permission continuation, magnet handoff
++
++$ python3 tests/media_invariance_test.py
++PASS exact media invariance: existing MainActivity recovered byte-for-byte; 49 existing app files unchanged, including media service, engines, capture scripts, playback, layout and manifest
++
++$ java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/ActiveMediaPage.java app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java app/src/main/java/com/satlink/geckoviewtest/CapturedDownloadPlan.java app/src/main/java/com/satlink/geckoviewtest/EngineBootstrap.java app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java app/src/main/java/com/satlink/geckoviewtest/GeneralFileDownloads.java app/src/main/java/com/satlink/geckoviewtest/GeneralFilePolicy.java app/src/main/java/com/satlink/geckoviewtest/MainActivity.java app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java app/src/main/java/com/satlink/geckoviewtest/SLTubeAnalysisRequest.java app/src/main/java/com/satlink/geckoviewtest/SharedUrlParser.java
+ PASS Java syntax (not Android compilation)
+-
+-MediaSession constructor access fix: targeted regression re-run
+-PASS production initialization with inaccessible MediaSession constructor, delegate activation/deactivation and playback: home/history/app pause, late autoplay blocked, no resume play, home back, active feed post, root rejected, short links, YouTube preserved
+--- a/TEST_REPORT_AR.md
++++ b/TEST_REPORT_AR.md
+@@ -1,10 +1,10 @@
+-# فحص PRO 1.9.8 Playback & Feed
++# فحص PRO 1.9.8 — إضافة الملفات العامة
+ 
+-التاريخ: 2026-10-05.
++التاريخ: 2026-10-06.
+ 
+ ## النتيجة
+ 
+-نجحت 15 مجموعة فحص. كل المخرجات محفوظة في TEST_OUTPUT.txt. لا يوجد APK مبني أو تأكيد تشغيل حي على هاتف ضمن هذه الحزمة.
++نجحت 17 مجموعة فحص. كل المخرجات محفوظة في TEST_OUTPUT.txt. لا يوجد APK مبني أو تأكيد تشغيل حي على هاتف ضمن هذه الحزمة.
+ 
+ ## التغطية
+ 
+@@ -22,13 +22,17 @@
+ 12. site_analysis_test.py: تنفيذ توجيه تحليل المواقع من المصدر، المنشور الأصلي أولاً، جلسة احتياطية، master playlist، الحفاظ على كل النسخ الاحتياطية وعدم اختزالها إلى ملف CDN واحد، وإلغاء الصفحة السابقة. وفحص ملفات المواقع العامة التي تُرجع حاوية فيديو دون ترميز معروف؛ تبقى قابلة للاختيار دون ادعاء وجود الصوت.
+ 13. active_feed.test.cjs: تنفيذ سكربت المحتوى مع محدد المشغّل الظاهر على صفحة تيك توك الرئيسية. فحص إرسال رابط المنشور، اختيار بيانات المنشور الحالي وحده، إيقاف autoplay أثناء الإخفاء وبعد الرجوع، عدم التشغيل عند العودة، التشغيل بعد تفاعل المستخدم، ومسح المقطع السابق عند تغيير المصدر.
+ 14. playback_test.py: تنفيذ دوال إيقاف وتشغيل واجهة المتصفح ومعالج الرجوع من المصدر مع بدائل صغيرة لواجهات Android/Gecko. فحص الرئيسية والرجوع بالسجل وعدم وجود سجل والخروج للخلفية وحجب حدث تشغيل متأخر واختيار رابط المنشور بدلاً من الجذر. لا يمثل ربطاً بمكتبة GeckoView على الهاتف.
+-15. ValidateJava.java: صياغة كل ملفات Java فقط، دون Android SDK أو فحص ربط الاعتماديات.
++15. general_files_test.py: تنفيذ كود سياسة الملفات ووحدة التنزيل الحقيقيين مع بدائل صغيرة لواجهات Android؛ ملفات الضغط والبرامج وAPK و.torrent، استبعاد الوسائط، الروابط الموقعة، أسماء عربية RFC5987، MIME، عزل ملفات الارتباط، منع حوار مكرر، تعارض الأسماء، طلب DownloadManager وإشعاراته، استكمال إذن الحفظ وفتح magnet بتطبيق خارجي.
++16. media_invariance_test.py: مقارنة بمرجع نسخة 1.9.8 المقبولة؛ إزالة الإضافات الأربع الجديدة من MainActivity تعيد الملف السابق مطابقاً بالبايت، والتحقق من بقاء 49 ملفاً سابقاً دون أي تغيير، ومنها خدمة الوسائط والمحركات وسكربتات الالتقاط والمشاهدة والواجهة وManifest وإعدادات البناء.
++17. ValidateJava.java: صياغة كل ملفات Java فقط، دون Android SDK أو فحص ربط الاعتماديات.
+ 
+ ## بناء أندرويد وحدود التحقق
+ 
+-الأمر bash gradlew :app:assembleDebug --console=plain توقف أثناء تنزيل gradle-8.11.1-bin.zip من services.gradle.org بسبب java.net.SocketException: Network is unreachable.
++أعيدت محاولة البناء بتاريخ الفحص الحالي؛ الأمر bash gradlew :app:assembleDebug --console=plain توقف أثناء تنزيل gradle-8.11.1-bin.zip من services.gradle.org بسبب java.net.SocketException: Network is unreachable.
+ 
+-لم يكتمل بناء أندرويد، ولم يتم تشغيل التطبيق على هاتف أو تنزيل ملف حي من تيك توك. البيانات المصطنعة تؤكد سلوك الدوال تحت الاختبار؛ لا تؤكد أن رابطاً حياً يعرض الدقات نفسها، ولا أن كل موقع تدعمه الخدمة حالياً. المحرك يحدد الصيغ التي يوفرها الموقع، والالتقاط الاحتياطي يتطلب بيانات فعلية من الصفحة.
++لم يكتمل بناء أندرويد، ولم يتم تشغيل التطبيق على هاتف أو تنزيل ملف عام حي. اختبارات DownloadManager تستخدم بدائل لواجهات Android، وليست اختباراً لمدير التنزيل على الجهاز. لم يتم تنزيل ملف حي من تيك توك. البيانات المصطنعة تؤكد سلوك الدوال تحت الاختبار؛ لا تؤكد أن رابطاً حياً يعرض الدقات نفسها، ولا أن كل موقع تدعمه الخدمة حالياً. المحرك يحدد الصيغ التي يوفرها الموقع، والالتقاط الاحتياطي يتطلب بيانات فعلية من الصفحة.
++
++GENERAL_FILES.patch يحتوي فرق إضافة الملفات العامة عن نسخة 1.9.8 المقبولة.
+ 
+ PLAYBACK_FEED.patch يحتوي الفرق عن مصدر PRO 1.9.7 السابق.
+ 
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/GeneralFileDownloads.java
+@@ -0,0 +1,152 @@
++package com.satlink.geckoviewtest;
++
++import android.Manifest;
++import android.app.Activity;
++import android.app.AlertDialog;
++import android.app.DownloadManager;
++import android.content.Context;
++import android.content.Intent;
++import android.content.pm.PackageManager;
++import android.database.Cursor;
++import android.net.Uri;
++import android.os.Build;
++import android.os.Environment;
++import android.provider.MediaStore;
++import android.widget.Toast;
++
++import java.io.File;
++import java.util.Locale;
++
++/** Uses Android's file download manager independently of the video/audio service. */
++final class GeneralFileDownloads {
++    static final int STORAGE_PERMISSION = 4093;
++    private final Activity activity;
++    private Pending pendingPermission;
++    private String showingUrl;
++
++    GeneralFileDownloads(Activity activity) {this.activity=activity;}
++
++    boolean navigation(String url, String referer, String userAgent, String cookies) {
++        if (url!=null && url.toLowerCase(Locale.ROOT).startsWith("magnet:?")) {
++            offerMagnet(url);return true;
++        }
++        if (!GeneralFilePolicy.directFile(url)) return false;
++        offer(url,"","",0L,referer,userAgent,cookies);
++        return true;
++    }
++
++    void offer(String url, String disposition, String suppliedMime, long size,
++               String referer, String userAgent, String cookies) {
++        if (activity.isFinishing() || activity.isDestroyed() || !GeneralFilePolicy.http(url)) return;
++        if (url.equals(showingUrl)) return;
++        String name=GeneralFilePolicy.fileName(url,disposition,suppliedMime);
++        String mime=GeneralFilePolicy.mime(name,suppliedMime);
++        Pending pending=new Pending(url,name,mime,referer,userAgent,
++                GeneralFilePolicy.cookieHeader(cookies,url,System.currentTimeMillis()/1000L));
++        String sizeText=size>0?size(size):"يظهر الحجم أثناء التنزيل";
++        showingUrl=url;
++        AlertDialog dialog=new AlertDialog.Builder(activity)
++                .setTitle("تنزيل ملف")
++                .setMessage("الاسم: "+name+"\nالنوع: "+mime+"\nالحجم: "+sizeText+"\nالحفظ: Downloads/SatLink")
++                .setNegativeButton("إلغاء",null)
++                .setPositiveButton("تنزيل",(d,which)->enqueue(pending))
++                .create();
++        dialog.setOnDismissListener(d->showingUrl=null);
++        dialog.show();
++    }
++
++    void permissionResult(int requestCode, int[] grantResults) {
++        if(requestCode!=STORAGE_PERMISSION) return;
++        Pending pending=pendingPermission;pendingPermission=null;
++        if(pending==null) return;
++        if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) enqueue(pending);
++        else toast("يلزم السماح بحفظ الملفات لبدء التنزيل");
++    }
++
++    private void enqueue(Pending pending) {
++        if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.P
++                && activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED) {
++            pendingPermission=pending;
++            activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},STORAGE_PERMISSION);
++            return;
++        }
++        try {
++            DownloadManager manager=(DownloadManager)activity.getSystemService(Context.DOWNLOAD_SERVICE);
++            if(manager==null) throw new IllegalStateException("مدير التنزيل غير متاح");
++            String name=uniqueName(pending.name,manager);
++            DownloadManager.Request request=new DownloadManager.Request(Uri.parse(pending.url));
++            request.setTitle(name);
++            request.setDescription("SatLink Browser — تنزيل ملف");
++            request.setMimeType(pending.mime);
++            request.setAllowedOverMetered(true);
++            request.setAllowedOverRoaming(true);
++            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
++            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,"SatLink/"+name);
++            if(!pending.userAgent.isEmpty()) request.addRequestHeader("User-Agent",pending.userAgent);
++            if(GeneralFilePolicy.http(pending.referer)) request.addRequestHeader("Referer",pending.referer);
++            if(!pending.cookies.isEmpty()) request.addRequestHeader("Cookie",pending.cookies);
++            manager.enqueue(request);
++            toast("بدأ تنزيل "+name+" — تابع التقدم من إشعار التنزيل");
++        } catch(Exception error) {toast("تعذر بدء تنزيل الملف: "+error.getMessage());}
++    }
++
++    private String uniqueName(String wanted, DownloadManager manager) {
++        String safe=GeneralFilePolicy.safeName(wanted);
++        int dot=safe.lastIndexOf('.');
++        String stem=dot>0?safe.substring(0,dot):safe;
++        String suffix=dot>0?safe.substring(dot):"";
++        for(int index=0;index<10000;index++) {
++            String name=index==0?safe:stem+" ("+index+")"+suffix;
++            if(!exists(name,manager)) return name;
++        }
++        return stem+" ("+System.currentTimeMillis()+")"+suffix;
++    }
++
++    private boolean exists(String name, DownloadManager manager) {
++        // Include queued and running files, not only already completed files.
++        try(Cursor cursor=manager.query(new DownloadManager.Query())) {
++            if(cursor!=null) {
++                int title=cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE);
++                while(cursor.moveToNext()) if(name.equals(cursor.getString(title))) return true;
++            }
++        } catch(Exception ignored) { }
++        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.Q) {
++            try(Cursor cursor=activity.getContentResolver().query(MediaStore.Downloads.EXTERNAL_CONTENT_URI,
++                    new String[]{MediaStore.Downloads._ID},MediaStore.Downloads.DISPLAY_NAME+"=? AND "+MediaStore.Downloads.RELATIVE_PATH+"=?",
++                    new String[]{name,Environment.DIRECTORY_DOWNLOADS+"/SatLink/"},null)) {
++                return cursor!=null && cursor.moveToFirst();
++            } catch(Exception ignored) {return false;}
++        }
++        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),"SatLink/"+name).exists();
++    }
++
++    private void offerMagnet(String url) {
++        if(activity.isFinishing() || activity.isDestroyed() || url.equals(showingUrl)) return;
++        showingUrl=url;
++        AlertDialog dialog=new AlertDialog.Builder(activity)
++                .setTitle("رابط تورنت")
++                .setMessage("ملفات .torrent تُنزّل كملفات. رابط magnet يحتاج تطبيق تورنت لتحميل محتوياته.")
++                .setNegativeButton("إلغاء",null)
++                .setPositiveButton("فتح بتطبيق تورنت",(d,which)->{
++                    try {activity.startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url)));}
++                    catch(Exception error) {toast("لا يوجد تطبيق تورنت مناسب مثبت على الجهاز");}
++                }).create();
++        dialog.setOnDismissListener(d->showingUrl=null);dialog.show();
++    }
++
++    private void toast(String text) {Toast.makeText(activity,text,Toast.LENGTH_LONG).show();}
++    private static String size(long bytes) {
++        if(bytes<1024) return bytes+" B";
++        double value=bytes;String unit="B";
++        for(String next:new String[]{"KB","MB","GB","TB"}) {value/=1024d;unit=next;if(value<1024) break;}
++        return String.format(Locale.US,"%.1f %s",value,unit);
++    }
++
++    private static final class Pending {
++        final String url,name,mime,referer,userAgent,cookies;
++        Pending(String url,String name,String mime,String referer,String userAgent,String cookies) {
++            this.url=url;this.name=name;this.mime=mime;this.referer=referer==null?"":referer;
++            this.userAgent=userAgent==null?"":userAgent;this.cookies=cookies;
++        }
++    }
++}
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/GeneralFilePolicy.java
+@@ -0,0 +1,183 @@
++package com.satlink.geckoviewtest;
++
++import java.net.URI;
++import java.net.URLDecoder;
++import java.nio.charset.StandardCharsets;
++import java.util.ArrayList;
++import java.util.Comparator;
++import java.util.LinkedHashMap;
++import java.util.List;
++import java.util.Locale;
++import java.util.Map;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++
++/** General file metadata only. Never classifies video/audio links as file navigation. */
++final class GeneralFilePolicy {
++    private static final Map<String,String> TYPES = new LinkedHashMap<>();
++    static {
++        TYPES.put("zip", "application/zip");
++        TYPES.put("rar", "application/vnd.rar");
++        TYPES.put("7z", "application/x-7z-compressed");
++        TYPES.put("gz", "application/gzip");
++        TYPES.put("tgz", "application/gzip");
++        TYPES.put("tar", "application/x-tar");
++        TYPES.put("bz2", "application/x-bzip2");
++        TYPES.put("xz", "application/x-xz");
++        TYPES.put("zst", "application/zstd");
++        TYPES.put("apk", "application/vnd.android.package-archive");
++        TYPES.put("torrent", "application/x-bittorrent");
++        TYPES.put("exe", "application/vnd.microsoft.portable-executable");
++        TYPES.put("msi", "application/x-msi");
++        TYPES.put("pdf", "application/pdf");
++        TYPES.put("doc", "application/msword");
++        TYPES.put("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
++        TYPES.put("xls", "application/vnd.ms-excel");
++        TYPES.put("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
++        TYPES.put("ppt", "application/vnd.ms-powerpoint");
++        TYPES.put("pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
++        for (String ext : new String[]{"iso","img","cab","msix","msixbundle","appx","appxbundle",
++                "apks","xapk","aab","dmg","pkg","deb","rpm","epub","mobi","bin"})
++            TYPES.put(ext, "application/octet-stream");
++    }
++
++    static boolean http(String url) {
++        try {
++            URI uri = new URI(url);
++            return uri.getHost()!=null && uri.getRawUserInfo()==null
++                    && ("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme()));
++        } catch (Exception ignored) {return false;}
++    }
++
++    static boolean directFile(String url) {
++        return http(url) && !media(url,"","") && !extension(urlName(url)).equals("bin") && TYPES.containsKey(extension(urlName(url)));
++    }
++
++    static boolean media(String url, String mime, String disposition) {
++        String type = cleanMime(mime);
++        if (type.startsWith("video/") || type.startsWith("audio/")
++                || type.contains("mpegurl") || type.contains("dash+xml")
++                || type.contains("yt-ump") || type.contains("sabr")) return true;
++        try {
++            URI uri=new URI(url);
++            String host=uri.getHost()==null?"":uri.getHost().toLowerCase(Locale.ROOT);
++            if(host.equals("googlevideo.com") || host.endsWith(".googlevideo.com")) return true;
++            String query=uri.getRawQuery();
++            if(query!=null) for(String param:query.split("&")) {
++                String[] pair=param.split("=",2);
++                if(pair.length==2 && (pair[0].equals("mime") || pair[0].equals("mime_type"))) {
++                    String value=decode(pair[1],"UTF-8").replace('_','/');
++                    if(value.startsWith("video/") || value.startsWith("audio/")) return true;
++                }
++            }
++        } catch(Exception ignored) { }
++        String ext = extension(urlName(url));
++        String named = extension(dispositionName(disposition));
++        return mediaExtension(ext) || mediaExtension(named);
++    }
++
++    private static boolean mediaExtension(String ext) {
++        return ext.matches("mp4|webm|mkv|mov|m4v|avi|flv|wmv|mpg|mpeg|ts|m4s|m3u8|mpd|mp3|m4a|aac|ogg|opus|wav|flac");
++    }
++
++    static String mime(String name, String supplied) {
++        String type = cleanMime(supplied);
++        if (!type.isEmpty() && !type.equals("application/octet-stream")) return type;
++        return TYPES.getOrDefault(extension(name), "application/octet-stream");
++    }
++
++    static String cleanMime(String value) {
++        if (value==null) return "";
++        return value.split(";",2)[0].trim().toLowerCase(Locale.ROOT);
++    }
++
++    static String fileName(String url, String disposition, String mime) {
++        String name = dispositionName(disposition);
++        if (name.isEmpty()) name = urlName(url);
++        if (name.isEmpty()) {
++            String type = cleanMime(mime);
++            String ext = "bin";
++            for (Map.Entry<String,String> entry:TYPES.entrySet()) {
++                if (!type.equals("application/octet-stream") && type.equals(entry.getValue())) {ext=entry.getKey();break;}
++            }
++            name="download."+ext;
++        }
++        return safeName(name);
++    }
++
++    static String safeName(String value) {
++        String clean = value==null?"":value.replaceAll("[\\p{Cntrl}\\\\/:*?\"<>|]", "_").trim();
++        clean=clean.replaceAll("[. ]+$", "");
++        if (clean.isEmpty() || clean.equals(".") || clean.equals("..")) clean="download.bin";
++        // Bound UTF-8 bytes, not Java characters; preserve the filename extension.
++        if (clean.getBytes(StandardCharsets.UTF_8).length>180) {
++            int dot=clean.lastIndexOf('.');
++            String suffix=dot>0 && clean.length()-dot<20?clean.substring(dot):"";
++            String stem=suffix.isEmpty()?clean:clean.substring(0,dot);
++            while (!stem.isEmpty() && (stem+suffix).getBytes(StandardCharsets.UTF_8).length>180)
++                stem=stem.substring(0,stem.offsetByCodePoints(stem.length(),-1));
++            clean=stem+suffix;
++        }
++        return clean;
++    }
++
++    private static String extension(String name) {
++        int dot=name==null?-1:name.lastIndexOf('.');
++        return dot<0?"":name.substring(dot+1).toLowerCase(Locale.ROOT);
++    }
++
++    private static String urlName(String value) {
++        try {
++            String path=new URI(value).getRawPath();
++            if (path==null || path.isEmpty() || path.endsWith("/")) return "";
++            return decode(path.substring(path.lastIndexOf('/')+1),"UTF-8");
++        } catch (Exception ignored) {return "";}
++    }
++
++    private static String dispositionName(String header) {
++        if (header==null) return "";
++        Matcher encoded=Pattern.compile("(?:^|;)\\s*filename\\*\\s*=\\s*(?:\"([^\"]*)\"|([^;]*))",Pattern.CASE_INSENSITIVE).matcher(header);
++        if (encoded.find()) {
++            String value=(encoded.group(1)!=null?encoded.group(1):encoded.group(2)).trim();
++            int first=value.indexOf('\'');int second=first<0?-1:value.indexOf('\'',first+1);
++            if (first>0 && second>=0) {
++                String charset=value.substring(0,first);
++                if (charset.equalsIgnoreCase("UTF-8") || charset.equalsIgnoreCase("ISO-8859-1"))
++                    return decode(value.substring(second+1),charset);
++            }
++        }
++        Matcher plain=Pattern.compile("(?:^|;)\\s*filename\\s*=\\s*(?:\"((?:\\\\.|[^\"])*)\"|([^;]*))",Pattern.CASE_INSENSITIVE).matcher(header);
++        if (!plain.find()) return "";
++        return (plain.group(1)!=null?plain.group(1).replace("\\\"","\"").replace("\\\\","\\"):plain.group(2)).trim();
++    }
++
++    private static String decode(String text, String charset) {
++        try {return URLDecoder.decode(text.replace("+","%2B"),charset);} catch (Exception ignored) {return text;}
++    }
++
++    static String cookieHeader(String netscape, String url, long nowSeconds) {
++        if (!http(url) || netscape==null) return "";
++        try {
++            URI target=new URI(url);String host=target.getHost().toLowerCase(Locale.ROOT);
++            String path=target.getPath();if(path==null || path.isEmpty()) path="/";
++            List<String[]> matched=new ArrayList<>();
++            for(String line:netscape.split("\\r?\\n")) {
++                if(line.startsWith("#HttpOnly_")) line=line.substring(10);
++                else if(line.startsWith("#")) continue;
++                String[] row=line.split("\\t",7);if(row.length!=7) continue;
++                String domain=row[0].replaceFirst("^\\.","").toLowerCase(Locale.ROOT);
++                if(!host.equals(domain) && !(row[1].equalsIgnoreCase("TRUE") && host.endsWith("."+domain))) continue;
++                String cookiePath=row[2].isEmpty()?"/":row[2];
++                if(!path.startsWith(cookiePath) || (!cookiePath.endsWith("/") && path.length()>cookiePath.length() && path.charAt(cookiePath.length())!='/')) continue;
++                if(row[3].equalsIgnoreCase("TRUE") && !target.getScheme().equalsIgnoreCase("https")) continue;
++                long expiry;try{expiry=Long.parseLong(row[4]);}catch(Exception ignored){continue;}
++                if(expiry>0 && expiry<=nowSeconds || row[5].isEmpty() || row[5].matches(".*[\\r\\n;=].*") || row[6].matches(".*[\\r\\n;].*")) continue;
++                matched.add(row);
++            }
++            matched.sort(Comparator.comparingInt((String[] row)->row[2].length()).reversed());
++            StringBuilder result=new StringBuilder();
++            for(String[] row:matched) {if(result.length()>0) result.append("; ");result.append(row[5]).append('=').append(row[6]);}
++            return result.toString();
++        } catch(Exception ignored) {return "";}
++    }
++}
+--- a/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
+@@ -169,6 +169,7 @@
+     private boolean activityForeground = true;
+     private boolean browserCanGoBack;
+     private MediaSession browserMediaControl;
++    private GeneralFileDownloads generalFileDownloads;
+     private String latestActivePostUrl = "";
+     private String latestActiveMediaKey = "";
+     private volatile String latestCookieFilePath;
+@@ -3252,6 +3253,19 @@
+         @Override
+         public void onExternalResponse(GeckoSession session, WebResponse response) {
+             if (response == null || TextUtils.isEmpty(response.uri)) return;
++            if (!GeneralFilePolicy.media(response.uri,
++                    responseHeader(response.headers, "content-type"),
++                    responseHeader(response.headers, "content-disposition"))
++                    && GeneralFilePolicy.http(response.uri)) {
++                String disposition = responseHeader(response.headers, "content-disposition");
++                String type = responseHeader(response.headers, "content-type");
++                long bytes = parseContentLength(responseHeader(response.headers, "content-length"));
++                try {if (response.body != null) response.body.close();} catch (Throwable ignored) { }
++                runOnUiThread(() -> generalFiles().offer(response.uri, disposition, type, bytes,
++                        addressBar.getText().toString().trim(), latestUserAgent,
++                        TextUtils.isEmpty(latestCookieFilePath) ? "" : latestCookieContents));
++                return;
++            }
+             final String url = response.uri;
+             final String contentDisposition = responseHeader(response.headers, "content-disposition");
+             String detectedMime = responseHeader(response.headers, "content-type");
+@@ -3269,6 +3283,17 @@
+ 
+             runOnUiThread(() -> showGeneralDownloadDialog(url, fileName, mime, size));
+         }
++    }
++
++    private GeneralFileDownloads generalFiles() {
++        if (generalFileDownloads == null) generalFileDownloads = new GeneralFileDownloads(this);
++        return generalFileDownloads;
++    }
++
++    @Override
++    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
++        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
++        if (generalFileDownloads != null) generalFileDownloads.permissionResult(requestCode, grantResults);
+     }
+ 
+     private void showGeneralDownloadDialog(String url, String requestedName, String mime, long size) {
+@@ -3406,6 +3431,15 @@
+     }
+ 
+     private final class BrowserNavigationDelegate implements GeckoSession.NavigationDelegate {
++        @Override
++        public GeckoResult<AllowOrDeny> onLoadRequest(GeckoSession session,
++                                                     GeckoSession.NavigationDelegate.LoadRequest request) {
++            if (generalFiles().navigation(request.uri, TextUtils.isEmpty(request.triggerUri)
++                    ? addressBar.getText().toString().trim() : request.triggerUri,
++                    latestUserAgent, TextUtils.isEmpty(latestCookieFilePath) ? "" : latestCookieContents)) return GeckoResult.fromValue(AllowOrDeny.DENY);
++            return null;
++        }
++
+         @Override
+         public void onLocationChange(GeckoSession session, String url,
+                                      List<GeckoSession.PermissionDelegate.ContentPermission> perms,
+--- /dev/null
++++ b/tests/general_files_test.py
+@@ -0,0 +1,64 @@
++from pathlib import Path
++import re,subprocess,tempfile
++base=Path(__file__).resolve().parents[1]/'app/src/main/java/com/satlink/geckoviewtest'
++parts=[]
++for name in ['GeneralFilePolicy.java','GeneralFileDownloads.java']:
++ parts.append(re.sub(r'^package .*;\n|^import .*;\n','',(base/name).read_text(),flags=re.M))
++source='''import java.util.*;import java.util.regex.*;import java.net.*;import java.nio.charset.*;import java.io.*;
++class GeneralFilesTest {
++ static void check(boolean value,String text){if(!value)throw new AssertionError(text);}
++ public static void main(String[] args) {
++ for(String ext:new String[]{"zip","rar","7z","torrent","exe","msi","apk","apks","xapk","iso","dmg","deb","docx","pdf"})check(GeneralFilePolicy.directFile("https://site.test/file."+ext+"?token=abc%2Bdef"),"Missing "+ext);
++ for(String ext:new String[]{"mp4","mkv","ts","webm","mp3","m4a","m3u8","mpd","bin","html"})check(!GeneralFilePolicy.directFile("https://site.test/file."+ext),"Unexpected navigation interception "+ext);
++ check(!GeneralFilePolicy.directFile("javascript:alert(1)") && !GeneralFilePolicy.directFile("file:///tmp/file.apk"),"Invalid URL accepted");
++ check(!GeneralFilePolicy.directFile("https://site.test/watch?file=installer.apk"),"Page query mistaken for download");
++ check(GeneralFilePolicy.media("https://cdn.test/file","video/mp4","") && GeneralFilePolicy.media("https://cdn.test/file","","attachment; filename=video.mkv"),"Media response changed");
++ check(!GeneralFilePolicy.directFile("https://cdn.test/file.zip?mime=video%2Fmp4"),"Declared media intercepted");
++ check(!GeneralFilePolicy.directFile("https://r1.googlevideo.com/file.zip"),"YouTube stream intercepted");
++ check(GeneralFilePolicy.fileName("https://site.test/download","attachment; filename=fallback.apk; filename*=UTF-8''%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D8%AC.apk","application/octet-stream").equals("برنامج.apk"),"Arabic RFC5987 filename lost");
++ check(GeneralFilePolicy.fileName("https://site.test/A+B%20C.zip?signature=a%2Fb","","application/zip").equals("A+B C.zip"),"Signed filename decoding changed plus");
++ check(GeneralFilePolicy.fileName("https://site.test/","","application/vnd.android.package-archive").equals("download.apk"),"MIME fallback missing");
++ check(GeneralFilePolicy.mime("app.apk","application/octet-stream").equals("application/vnd.android.package-archive"),"APK MIME not recognized");
++ check(!GeneralFilePolicy.safeName("../../folder/file.apk").contains("/"),"Unsafe output path");
++ check(GeneralFilePolicy.safeName("برنامج".repeat(60)+".apk").getBytes(StandardCharsets.UTF_8).length<=180 && GeneralFilePolicy.safeName("برنامج".repeat(60)+".apk").endsWith(".apk"),"Long UTF8 name lost extension");
++ String cookies=".site.test\\tTRUE\\t/\\tTRUE\\t0\\tsession\\tABC\\nsite.test\\tFALSE\\t/private\\tTRUE\\t0\\tsecret\\tDEF\\nother.test\\tFALSE\\t/\\tFALSE\\t0\\tother\\tNO\\nsite.test\\tFALSE\\t/\\tTRUE\\t1\\told\\tEXPIRED\\n";
++ check(GeneralFilePolicy.cookieHeader(cookies,"https://site.test/private/file.apk",100).equals("secret=DEF; session=ABC"),"Cookie scope/order wrong");
++ check(GeneralFilePolicy.cookieHeader(cookies,"https://cdn.site.test/app.apk",100).equals("session=ABC"),"Cookie subdomain scoping wrong");
++ check(GeneralFilePolicy.cookieHeader(cookies,"http://site.test/app.apk",100).isEmpty(),"Secure cookie sent over HTTP");
++ check(GeneralFilePolicy.cookieHeader(cookies,"https://site.test.fake/app.apk",100).isEmpty(),"Cookie leaked to wrong host");
++ var activity=new Activity();var files=new GeneralFileDownloads(activity);String url="https://site.test/app.apk?sig=a%2Bb%2Fc";
++ check(files.navigation(url,"https://site.test/page","Browser-UA",cookies),"APK navigation not handled");
++ files.navigation(url,"https://site.test/page","Browser-UA",cookies);check(AlertDialog.created==1,"Duplicate dialog");
++ AlertDialog.last.accept();check(activity.manager.requests.size()==1,"No native download request");
++ var request=activity.manager.requests.get(0);check(request.uri.value.equals(url),"Signed URL altered");
++ check(request.mime.equals("application/vnd.android.package-archive") && request.path.equals("SatLink/app.apk"),"APK path/MIME wrong");
++ check(request.headers.get("Cookie").equals("session=ABC") && request.headers.get("Referer").equals("https://site.test/page") && request.headers.get("User-Agent").equals("Browser-UA"),"Browser session lost");
++ check(request.metered && request.roaming && request.visibility==1,"Native background notification missing");
++ files.navigation(url,"https://site.test/page","Browser-UA",cookies);AlertDialog.last.accept();check(activity.manager.requests.get(1).path.equals("SatLink/app (1).apk"),"Running filename collision");
++ check(!files.navigation("https://youtube.com/watch?v=abc","","",""),"Watch page intercepted");
++ check(!files.navigation("https://cdn.test/movie.mp4","","",""),"Video intercepted");
++ Build.VERSION.SDK_INT=28;activity.permission=-1;
++ files.navigation("https://site.test/archive.zip","https://site.test/page","",cookies);AlertDialog.last.accept();check(activity.permissionRequest==4093 && activity.manager.requests.size()==2,"Legacy storage didn't defer download");
++ activity.permission=0;files.permissionResult(4093,new int[]{0});check(activity.manager.requests.size()==3,"Permission grant didn't continue pending file");
++ Build.VERSION.SDK_INT=36;
++ check(files.navigation("magnet:?xt=urn:btih:test","","",""),"Magnet not handed off");AlertDialog.last.accept();check(activity.opened!=null && activity.opened.uri.value.startsWith("magnet:"),"Torrent app handoff missing");
++ System.out.println("PASS actual general-file policy/controller: archive/program/APK/torrent, media exclusions, signed URLs, RFC5987 Arabic names, MIME, scoped cookies, duplicate dialog/name, native download/notification, permission continuation, magnet handoff");
++ }
++}
++class Activity extends Context {int permission=0,permissionRequest;DownloadManager manager=new DownloadManager();Intent opened;boolean isFinishing(){return false;}boolean isDestroyed(){return false;}int checkSelfPermission(String s){return permission;}void requestPermissions(String[] p,int c){permissionRequest=c;}Object getSystemService(String s){return manager;}Resolver getContentResolver(){return new Resolver();}void startActivity(Intent i){opened=i;}}
++class Context {static String DOWNLOAD_SERVICE="download";}
++class Manifest {static class permission{static String WRITE_EXTERNAL_STORAGE="storage";}}
++class PackageManager{static int PERMISSION_GRANTED=0;}
++class Build{static class VERSION{static int SDK_INT=36;}static class VERSION_CODES{static int P=28,Q=29;}}
++class Uri{String value;Uri(String s){value=s;}static Uri parse(String s){return new Uri(s);}}
++class Environment{static String DIRECTORY_DOWNLOADS="Download";static File getExternalStoragePublicDirectory(String s){return new File("/not-used");}}
++class MediaStore{static class Downloads{static Uri EXTERNAL_CONTENT_URI=new Uri("content:test");static String _ID="id",DISPLAY_NAME="name",RELATIVE_PATH="path";}}
++class Resolver{Cursor query(Uri u,String[] p,String s,String[] a,String o){return new Cursor(List.of());}}
++class Cursor implements AutoCloseable{List<String> rows;int index=-1;Cursor(List<String> r){rows=r;}int getColumnIndexOrThrow(String s){return 0;}boolean moveToNext(){return ++index<rows.size();}boolean moveToFirst(){return !rows.isEmpty();}String getString(int i){return rows.get(index);}public void close(){}}
++class DownloadManager{static String COLUMN_TITLE="title";List<Request>requests=new ArrayList<>();long enqueue(Request r){requests.add(r);return requests.size();}Cursor query(Query q){return new Cursor(requests.stream().map(r->r.title).toList());}static class Query{}static class Request{static int VISIBILITY_VISIBLE_NOTIFY_COMPLETED=1;Uri uri;String title,mime,path;int visibility;boolean metered,roaming;Map<String,String>headers=new HashMap<>();Request(Uri u){uri=u;}void setTitle(String v){title=v;}void setDescription(String v){}void setMimeType(String v){mime=v;}void setAllowedOverMetered(boolean v){metered=v;}void setAllowedOverRoaming(boolean v){roaming=v;}void setNotificationVisibility(int v){visibility=v;}void setDestinationInExternalPublicDir(String d,String p){path=p;}void addRequestHeader(String k,String v){headers.put(k,v);}}}
++class Intent{static String ACTION_VIEW="VIEW";Uri uri;Intent(String a,Uri u){uri=u;}}
++class AlertDialog{static AlertDialog last;static int created;Click positive;Dismiss dismiss;interface Click{void onClick(Object d,int w);}interface Dismiss{void onDismiss(Object d);}void setOnDismissListener(Dismiss d){dismiss=d;}void show(){}void accept(){positive.onClick(null,0);if(dismiss!=null)dismiss.onDismiss(null);}static class Builder{Click positive;Builder(Activity a){}Builder setTitle(String s){return this;}Builder setMessage(String s){return this;}Builder setNegativeButton(String s,Click c){return this;}Builder setPositiveButton(String s,Click c){positive=c;return this;}AlertDialog create(){created++;last=new AlertDialog();last.positive=positive;return last;}}}
++class Toast{static int LENGTH_LONG=1;static Toast makeText(Activity a,String s,int t){return new Toast();}void show(){}}
++'''+''.join(parts)
++with tempfile.TemporaryDirectory() as tmp:
++ target=Path(tmp)/'GeneralFilesTest.java';target.write_text(source);subprocess.run(['java',str(target)],check=True)
+--- /dev/null
++++ b/tests/media_invariance_test.py
+@@ -0,0 +1,13 @@
++"""Ensure general downloads do not modify the previously working browser media code."""
++from pathlib import Path
++import hashlib,json
++root=Path(__file__).resolve().parents[1]
++spec=json.loads((root/'tests/reference/media_baseline_sha256.json').read_text())
++source=(root/'app/src/main/java/com/satlink/geckoviewtest/MainActivity.java').read_text()
++for inserted in spec['allowed_main_insertions']:
++ assert source.count(inserted)==1,'General file integration missing or unexpectedly duplicated'
++ source=source.replace(inserted,'',1)
++assert hashlib.sha256(source.encode()).hexdigest()==spec['main_sha256'],'Existing MainActivity code changed beyond general file additions'
++for name,digest in spec['protected_files'].items():
++ assert hashlib.sha256((root/name).read_bytes()).hexdigest()==digest,'Protected application/media file changed: '+name
++print('PASS exact media invariance: existing MainActivity recovered byte-for-byte; '+str(len(spec['protected_files']))+' existing app files unchanged, including media service, engines, capture scripts, playback, layout and manifest')
+--- /dev/null
++++ b/tests/reference/media_baseline_sha256.json
+@@ -0,0 +1,61 @@
++{
++  "baseline": "PRO 1.9.8 fixed source, MediaSession constructor correction, before general files feature",
++  "main_sha256": "ae10f786ff4155d4d3885cea82381341196fd421db60bda52b824f469242864c",
++  "allowed_main_insertions": [
++    "    private GeneralFileDownloads generalFileDownloads;\n",
++    "            if (!GeneralFilePolicy.media(response.uri,\n                    responseHeader(response.headers, \"content-type\"),\n                    responseHeader(response.headers, \"content-disposition\"))\n                    && GeneralFilePolicy.http(response.uri)) {\n                String disposition = responseHeader(response.headers, \"content-disposition\");\n                String type = responseHeader(response.headers, \"content-type\");\n                long bytes = parseContentLength(responseHeader(response.headers, \"content-length\"));\n                try {if (response.body != null) response.body.close();} catch (Throwable ignored) { }\n                runOnUiThread(() -> generalFiles().offer(response.uri, disposition, type, bytes,\n                        addressBar.getText().toString().trim(), latestUserAgent,\n                        TextUtils.isEmpty(latestCookieFilePath) ? \"\" : latestCookieContents));\n                return;\n            }\n",
++    "    }\n\n    private GeneralFileDownloads generalFiles() {\n        if (generalFileDownloads == null) generalFileDownloads = new GeneralFileDownloads(this);\n        return generalFileDownloads;\n    }\n\n    @Override\n    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {\n        super.onRequestPermissionsResult(requestCode, permissions, grantResults);\n        if (generalFileDownloads != null) generalFileDownloads.permissionResult(requestCode, grantResults);\n",
++    "        @Override\n        public GeckoResult<AllowOrDeny> onLoadRequest(GeckoSession session,\n                                                     GeckoSession.NavigationDelegate.LoadRequest request) {\n            if (generalFiles().navigation(request.uri, TextUtils.isEmpty(request.triggerUri)\n                    ? addressBar.getText().toString().trim() : request.triggerUri,\n                    latestUserAgent, TextUtils.isEmpty(latestCookieFilePath) ? \"\" : latestCookieContents)) return GeckoResult.fromValue(AllowOrDeny.DENY);\n            return null;\n        }\n\n"
++  ],
++  "protected_files": {
++    "app/build.gradle": "f39d356dcc423bc3606caa3a28db07d3bc4a8a45b6215e8b03c7f69d77421aea",
++    "app/proguard-rules.pro": "fb9cf23124c16ced9e4da289637cb69ed83aa62cb71f99ef76a75c25a177db9a",
++    "app/src/main/AndroidManifest.xml": "c3549f0dc82e6636ee03aa3d5ca167baf7c98d23c5d231ea7cc40807b3bab34d",
++    "app/src/main/assets/media_capture/active_post.js": "c77b718302d57f7a34c7765db62e2076a190ab27faf841a862f70f1fc773c63a",
++    "app/src/main/assets/media_capture/background.js": "7e1ac4377225297445d8a4ed9afac48ee30ecbb9c8fcdc078c4abe709a88b8a8",
++    "app/src/main/assets/media_capture/capture.js": "74eab739d9ddbd1b536e3b9ef71fe63f618b0c8de78a5df11b64603606a3af38",
++    "app/src/main/assets/media_capture/hls_metadata.js": "c608a75f8c38edc146c9a07662ebe4ad71676a6aad8ed9f9ab747708816da1a9",
++    "app/src/main/assets/media_capture/manifest.json": "7adc1327c0e7bc65090ab224598d3efe0bbca3eb8c73d425354de6735c5d6a60",
++    "app/src/main/assets/media_capture/media_metadata.js": "5b3a544e3e12b1e8282440aea5851d40ce075ba3d4e8bfbbbbfaab76a901ff01",
++    "app/src/main/java/com/satlink/geckoviewtest/ActiveMediaPage.java": "e249e18dcf9a10e1aaaea3786e68df6ce4be73bdc2b334319b96598e925438f6",
++    "app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java": "51c07d33702008c2fa8f53e4b7a3c7df6b0c1ce1f540ab66a713a03b4f1d8ba2",
++    "app/src/main/java/com/satlink/geckoviewtest/CapturedDownloadPlan.java": "72654b63462b425cedb7bd40202dbd3436540da236a5bb9d59bff4e23fff9c02",
++    "app/src/main/java/com/satlink/geckoviewtest/EngineBootstrap.java": "1322e695309e6d4947195b3ec5e89ac71cd7d40ad471dd5cb316d11603deea13",
++    "app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java": "5944755be41eab8210079a98d80d8a6efb243b9174278260372537a952a210c4",
++    "app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java": "94fb8cff01629dbe8e90fc8509c974dde4f180a79c1d88da4f92f2645a094ceb",
++    "app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java": "fb6f46bdcac227d3e9a479b5271caa97b3931dc557b893b200d1d92377046eac",
++    "app/src/main/java/com/satlink/geckoviewtest/SLTubeAnalysisRequest.java": "36d361a7b1ce52e5bb4527c4d23abc81e45d1f2022b5e18deb0f8c7d903a3d66",
++    "app/src/main/java/com/satlink/geckoviewtest/SharedUrlParser.java": "177ab5b4602ad93b4607df1134646859e2cd38e6c408fcc929561fd1d299105b",
++    "app/src/main/res/drawable/address_background.xml": "e48a2263e4baf801c6fafefbbba3649b4044ef506211b6bab152a02bbb376d24",
++    "app/src/main/res/drawable/audio_header_background.xml": "492f3fefc3b3adf29e90c31d6f58fd44bad2d6e2cebc2dabc34aa041738b775c",
++    "app/src/main/res/drawable/capture_button_background.xml": "e1a0b9e9d3d812ae0c1f0a4b42c27fc4475dad4bfebae8af08f7cd9225060b26",
++    "app/src/main/res/drawable/close_button_background.xml": "d0e942e50ad48272330de89702684b7530450dd3afaaf43c21543052a57d6932",
++    "app/src/main/res/drawable/download_button_background.xml": "71d2ea7d98c424f77c99b8092883d952cb1900c4e803da9d3671545fab08b84b",
++    "app/src/main/res/drawable/favorite_item_background.xml": "e1d689cf62f85ba7d8ce3263369cbcd5bdf7e538aafd20bc8e62021fca5cd687",
++    "app/src/main/res/drawable/header_background.xml": "5341eccb8ffe9fe89b95b7ca81f1c4f3f1663c5bfffef787e6366e6aa622f69d",
++    "app/src/main/res/drawable/ic_stat_cancel.xml": "a30ffca80e037b2544f8053270931d51f8f62bc53bcc527467f844668bbca8d5",
++    "app/src/main/res/drawable/ic_stat_download.xml": "f1f874e3db4ded0a84919cba380d739845d43b0056c7641cdf61990a5b311be8",
++    "app/src/main/res/drawable/ic_stat_pause.xml": "7c7a0d7c6c2ff7e382cea72b63803bf270540cca1f7efa95100d14be13d68515",
++    "app/src/main/res/drawable/ic_stat_resume.xml": "9dcb371706bae53dae4822779eff04e3fcfe0ec17bcd5c186b2c211215d9b2db",
++    "app/src/main/res/drawable/panel_background.xml": "f41699f52a1750ef2bcf02d4fc1a1ad4bb7d4cedd6009688d7ecf3032a6e8e82",
++    "app/src/main/res/drawable/pro_badge_background.xml": "7752e4e4ff2cc27aab5d2fcb1ca1a6e319e29e44978dc0ad5d6ad0c188b4b8fa",
++    "app/src/main/res/drawable/progress_horizontal_neon.xml": "339350f7090cb46e9344f27c5df38eae24027e9282e08bee72359077e551faff",
++    "app/src/main/res/drawable/satlink_logo.png": "2e89f59852c3444962ef4c14bcde3cfb69e5b10f03bcfbb55336ea3ba814b754",
++    "app/src/main/res/drawable/toolbar_icon_background.xml": "39ab13b32aef34b0156695ed2c088aea783624ef9ea44a048bec59e735b1d978",
++    "app/src/main/res/drawable/video_header_background.xml": "35bc8355e5ec498bfc357ad252b52877f5926ab4d4313e228e62d3312dfc68ce",
++    "app/src/main/res/layout/activity_main.xml": "1435c07451171ae5d7f610be62c87e0bd923bf02b50c6f8e74a19c8f0b55353a",
++    "app/src/main/res/mipmap-hdpi/ic_launcher.png": "4af0ba51747423496db7b793bf821ec16e22b45ff24a224b92347cca814ff4aa",
++    "app/src/main/res/mipmap-hdpi/ic_launcher_round.png": "4af0ba51747423496db7b793bf821ec16e22b45ff24a224b92347cca814ff4aa",
++    "app/src/main/res/mipmap-mdpi/ic_launcher.png": "5ec818cb2e31d3c9ec1dfda361fe9a846b8185ccea9510840c48adf4affe8c84",
++    "app/src/main/res/mipmap-mdpi/ic_launcher_round.png": "5ec818cb2e31d3c9ec1dfda361fe9a846b8185ccea9510840c48adf4affe8c84",
++    "app/src/main/res/mipmap-xhdpi/ic_launcher.png": "fc560c56feb24afe0200e174cb6665ca61946dfa40b88d9ac4fbb844ccd75bb7",
++    "app/src/main/res/mipmap-xhdpi/ic_launcher_round.png": "fc560c56feb24afe0200e174cb6665ca61946dfa40b88d9ac4fbb844ccd75bb7",
++    "app/src/main/res/mipmap-xxhdpi/ic_launcher.png": "822fd93a8737bd7201b32dec23700b3d094b351eae772118fee83811cb620ba5",
++    "app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png": "822fd93a8737bd7201b32dec23700b3d094b351eae772118fee83811cb620ba5",
++    "app/src/main/res/mipmap-xxxhdpi/ic_launcher.png": "91591f0977da1f46e4ba16a36cdf6146e879c41d5823672144dbc14f12851a6f",
++    "app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png": "91591f0977da1f46e4ba16a36cdf6146e879c41d5823672144dbc14f12851a6f",
++    "app/src/main/res/raw/ytdlp": "1fa6733c37ea6fb51c99ad8fe785e7b7e5f3246c9b980230329d4fb72ed8d4d6",
++    "app/src/main/res/values/colors.xml": "84dcacd7a87a57aa007c1201236887b1712d885b565653d5e873e9949f27cb3f",
++    "app/src/main/res/values/styles.xml": "0dd93dc4e1bcdb43b3eb71b449976e6eaffe3abc6c475ee88ea0d148c5063116"
++  }
++}
+--- /dev/null
++++ b/tmpcc65fpz5/DownloadPlanTest.java
+@@ -0,0 +1,159 @@
++import java.io.*;
++import java.io.File;
++import java.net.URI;
++import java.net.URLDecoder;
++import java.nio.file.*;
++import java.util.*;
++import java.util.ArrayList;
++import java.util.LinkedHashMap;
++import java.util.List;
++import java.util.Map;
++class DownloadPlanTest {
++ static void check(boolean condition,String message){if(!condition) throw new AssertionError(message);}
++ @SuppressWarnings("unchecked")
++ public static void main(String[] args) throws Exception {
++  String video="https://r1.googlevideo.com/videoplayback?itag=137&mime=video%2Fmp4&sig=signed";
++  String audio="https://r1.googlevideo.com/videoplayback?itag=140&mime=audio%2Fmp4&sig=signed";
++  var root=CapturedDownloadPlan.create("id","Title",video,audio,"137","mp4","H.264","AAC",false,false,"UA","https://youtube.com/watch?v=id");
++  var formats=(List<Map<String,Object>>)root.get("formats");
++  check(formats.size()==2,"Adaptive source must contain both streams");
++  check(formats.get(0).get("format_id").equals("137"),"Preserve selected video format");
++  check(formats.get(0).get("url").equals(video),"Do not replace signed video URL with failed page extraction");
++  check(formats.get(0).get("acodec").equals("none"),"Video-only stream is not muxed audio");
++  check(formats.get(1).get("ext").equals("m4a"),"Compatible captured audio extension");
++  check(formats.get(1).get("vcodec").equals("none"),"Audio-only stream must not become video");
++  root=CapturedDownloadPlan.create("id","Title","https://cdn.test/movie.mp4","","","mp3","H.264","AAC",true,false,"","");
++  formats=(List<Map<String,Object>>)root.get("formats");
++  check(formats.size()==1,"Progressive file needs no invented second audio URL");
++  check(formats.get(0).get("ext").equals("mp4"),"MP3 extraction input remains MP4");
++  check(formats.get(0).get("acodec").equals("mp4a.40.2"),"Progressive audio is available to extraction");
++  root=CapturedDownloadPlan.create("id","Title",audio,"","","mp3","","AAC",true,true,"","");
++  formats=(List<Map<String,Object>>)root.get("formats");
++  check(formats.get(0).get("vcodec").equals("none"),"Captured audio remains audio");
++  try {CapturedDownloadPlan.create("id","Title","blob:unsafe","","","mp4","","",false,false,"","");throw new AssertionError("blob accepted");} catch(IllegalArgumentException expected){}
++  Path temp=Files.createTempDirectory("runtime-test-");
++  try {
++   Context context=new Context();context.info.nativeLibraryDir=temp.toString();
++   YoutubeDLRequest request=new YoutubeDLRequest();EngineRuntimeOptions.apply(context,request);
++   check(!request.options.containsKey("--js-runtimes"),"Missing runtime must not be advertised as a PATH command");
++   File executable=temp.resolve("libqjs.so").toFile();executable.createNewFile();executable.setExecutable(true);
++   request=new YoutubeDLRequest();EngineRuntimeOptions.apply(context,request);
++   check(request.options.get("--js-runtimes").equals("quickjs:"+executable.getAbsolutePath()),"QuickJS must use extracted binary path");
++   check(request.options.get("--remote-components").equals("ejs:github"),"Updated engine can request matching challenge scripts");
++   executable.delete();
++  } finally {Files.delete(temp);}
++  System.out.println("PASS download plans: adaptive merge, direct audio, progressive MP3 input, signed URLs, native QuickJS path");
++ }
++}
++
++
++
++
++/** Creates yt-dlp info data from actual browser streams; never runs FFmpeg directly. */
++final class CapturedDownloadPlan {
++    private CapturedDownloadPlan() { }
++    private static boolean empty(String value) { return value == null || value.isEmpty(); }
++
++    static Map<String, Object> create(String id, String title, String url, String audioUrl,
++            String formatId, String outputExt, String videoCodec, String audioCodec,
++            boolean hasAudio, boolean audioOnly, String userAgent, String referer) {
++        Map<String, String> headers = new LinkedHashMap<>();
++        if (!empty(userAgent)) headers.put("User-Agent", userAgent);
++        if (!empty(referer)) headers.put("Referer", referer);
++        List<Map<String, Object>> formats = new ArrayList<>();
++        formats.add(format(empty(formatId) ? "captured-video" : formatId, url,
++                audioOnly ? audioExtension(url) : videoExtension(url, outputExt),
++                audioOnly ? "none" : codec(videoCodec, "unknown"),
++                audioOnly || hasAudio ? codec(audioCodec, "unknown") : "none", headers));
++        if (!audioOnly && !hasAudio && !empty(audioUrl)) {
++            formats.add(format("captured-audio", audioUrl, audioExtension(audioUrl),
++                    "none", codec(audioCodec, "unknown"), headers));
++        }
++        Map<String, Object> root = new LinkedHashMap<>();
++        root.put("_type", "video"); root.put("id", id);
++        root.put("title", empty(title) ? "SatLink" : title);
++        root.put("extractor", "generic"); root.put("extractor_key", "Generic");
++        root.put("formats", formats);
++        return root;
++    }
++
++    private static Map<String, Object> format(String id, String url, String ext,
++            String vcodec, String acodec, Map<String, String> headers) {
++        URI uri = URI.create(url);
++        String scheme = uri.getScheme();
++        if (!("http".equals(scheme) || "https".equals(scheme)) || uri.getHost() == null)
++            throw new IllegalArgumentException("Captured media must have an HTTP URL");
++        String path = uri.getPath() == null ? "" : uri.getPath().toLowerCase();
++        Map<String, Object> format = new LinkedHashMap<>();
++        format.put("format_id", id); format.put("url", url);
++        format.put("ext", empty(ext) ? "mp4" : ext);
++        format.put("protocol", path.endsWith(".m3u8") ? "m3u8_native"
++                : path.endsWith(".mpd") ? "http_dash_segments" : scheme);
++        format.put("vcodec", vcodec); format.put("acodec", acodec);
++        format.put("http_headers", headers);
++        return format;
++    }
++
++    private static String videoExtension(String url, String outputExt) {
++        String path=URI.create(url).getPath();
++        if (path != null) {
++            for (String ext : new String[]{"mp4", "webm", "mkv", "ts", "mov", "m4v"}) {
++                if (path.toLowerCase().endsWith("."+ext)) return ext;
++            }
++        }
++        if (url.contains("video%2Fwebm") || url.contains("video/webm")) return "webm";
++        return "mp3".equals(outputExt) ? "mp4" : outputExt;
++    }
++
++    private static String audioExtension(String url) {
++        URI uri=URI.create(url);
++        String mime="";
++        for (String param : (uri.getRawQuery()==null ? "" : uri.getRawQuery()).split("&")) {
++            String[] pair=param.split("=",2);
++            if (pair.length==2 && pair[0].equals("mime")) {
++                try { mime=URLDecoder.decode(pair[1], "UTF-8"); }
++                catch (java.io.UnsupportedEncodingException ignored) { }
++            }
++        }
++        String path=uri.getPath()==null ? "" : uri.getPath().toLowerCase();
++        if(mime.contains("webm") || path.endsWith(".webm")) return "webm";
++        if(mime.contains("opus") || path.endsWith(".opus")) return "opus";
++        if(mime.contains("mpeg") || path.endsWith(".mp3")) return "mp3";
++        if(path.endsWith(".ogg")) return "ogg";
++        return "m4a";
++    }
++
++    private static String codec(String value, String fallback) {
++        if(empty(value)) return fallback;
++        if(value.equalsIgnoreCase("H.264")) return "avc1";
++        if(value.equalsIgnoreCase("H.265")) return "hevc";
++        if(value.equalsIgnoreCase("AAC")) return "mp4a.40.2";
++        return value.toLowerCase();
++    }
++}
++
++
++
++/** The packaged QuickJS binary is an extracted native executable, not a PATH command named qjs. */
++final class EngineRuntimeOptions {
++    private EngineRuntimeOptions() { }
++
++    static void apply(Context context, YoutubeDLRequest request) {
++        File quickJs = new File(context.getApplicationInfo().nativeLibraryDir, "libqjs.so");
++        if (quickJs.isFile() && quickJs.canExecute()) {
++            request.addOption("--js-runtimes", "quickjs:" + quickJs.getAbsolutePath());
++        }
++        // SL.Tube enables matching EJS components independently of runtime discovery.
++        request.addOption("--remote-components", "ejs:github");
++    }
++}
++
++class Context {
++ final ApplicationInfo info=new ApplicationInfo();
++ ApplicationInfo getApplicationInfo(){return info;}
++}
++class ApplicationInfo {String nativeLibraryDir;}
++class YoutubeDLRequest {
++ final Map<String,String> options=new LinkedHashMap<>();
++ void addOption(String name,String value){options.put(name,value);}
++}
+--- /dev/null
++++ b/tmpj_vpfu8s/ShareTest.java
+@@ -0,0 +1,110 @@
++import java.net.URI;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++
++class ShareTest extends Activity {
++ Object lastCapturedItems="old",lastPlayerFormats="old";double capturedDurationSeconds=99;
++ String latestCookieHeader="old",latestCookieFilePath="old",latestOrigin="old",latestUserAgent="old",preferredPlayerPageUrl="old",pendingPageTitle="old",pendingPageUrl="";
++ String latestActivePostUrl="old-post",latestActiveMediaKey="old-media";boolean sharedNavigationPending;int scans=0,closed=0;String opened="";
++ void closeCapturePanel(){closed++;sharedNavigationPending=false;}void openUrl(String url){opened=url;}
++ void requestMediaScan(){scans++;}String normalizePageUrl(String url){return url;}
++    
++    protected void onNewIntent(Intent intent) {
++        super.onNewIntent(intent);
++        setIntent(intent);
++        handleSharedLink(intent);
++    }
++
++    private boolean handleSharedLink(Intent intent) {
++        if (intent == null || !Intent.ACTION_SEND.equals(intent.getAction())) return false;
++        CharSequence text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT);
++        if (text == null && intent.getClipData() != null && intent.getClipData().getItemCount() > 0)
++            text = intent.getClipData().getItemAt(0).getText();
++        String url = SharedUrlParser.firstHttpUrl(text);
++        if (url.isEmpty()) {
++            Toast.makeText(this, "المشاركة لا تحتوي رابط فيديو صالحاً", Toast.LENGTH_LONG).show();
++            return false;
++        }
++        closeCapturePanel();
++        lastCapturedItems = null;
++        lastPlayerFormats = null;
++        latestActivePostUrl = "";
++        latestActiveMediaKey = "";
++        capturedDurationSeconds = 0;
++        latestCookieHeader = "";
++        latestCookieFilePath = "";
++        latestOrigin = "";
++        latestUserAgent = "";
++        preferredPlayerPageUrl = "";
++        pendingPageTitle = "";
++        pendingPageUrl = normalizePageUrl(url);
++        sharedNavigationPending = true;
++        openUrl(url);
++        requestMediaScan();
++        // A recreated activity must not consume the same share twice.
++        intent.setAction(null);
++        intent.removeExtra(Intent.EXTRA_TEXT);
++        return true;
++    }
++
++
++ static void check(boolean v,String m){if(!v)throw new AssertionError(m);}
++ public static void main(String[] a){
++ check(SharedUrlParser.firstHttpUrl("شوف المقطع (https://vm.tiktok.com/AbCd/). نص").equals("https://vm.tiktok.com/AbCd/"),"Short link in caption");
++ check(SharedUrlParser.firstHttpUrl("https://cdn.test/video?a=x%2By&sig=ABC%2FDEF").equals("https://cdn.test/video?a=x%2By&sig=ABC%2FDEF"),"Signed query changed");
++ check(SharedUrlParser.firstHttpUrl("https://site.test/video_(abc)").endsWith("_(abc)"),"Balanced URL parentheses removed");
++ check(SharedUrlParser.firstHttpUrl("javascript:alert(1)").isEmpty(),"Invalid scheme");
++ check(SharedUrlParser.firstHttpUrl("https://name:secret@site.test/").isEmpty(),"Embedded credentials accepted");
++ var app=new ShareTest();var cold=new Intent(Intent.ACTION_SEND,"شوف https://vm.tiktok.com/AbCd/");
++ check(app.handleSharedLink(cold) && app.scans==1 && app.opened.equals("https://vm.tiktok.com/AbCd/"),"Cold share didn't open capture");
++ check(app.lastCapturedItems==null && app.latestCookieHeader.isEmpty() && app.sharedNavigationPending,"Old page leaked into new share");
++ check(!app.handleSharedLink(cold) && app.scans==1,"Same intent consumed twice");
++ app.onNewIntent(new Intent(Intent.ACTION_SEND,"https://www.tiktok.com/@u/video/123"));
++ check(app.scans==2 && app.opened.endsWith("/123"),"Warm share not handled");
++ var clip=new Intent(Intent.ACTION_SEND,null);clip.clip=new ClipData("https://site.test/video");check(app.handleSharedLink(clip),"ClipData text fallback failed");
++ check(!app.handleSharedLink(new Intent("MAIN","https://site.test/")),"Launcher interpreted as share");
++ check(!app.handleSharedLink(new Intent(Intent.ACTION_SEND,"No link")),"Missing URL accepted");
++ System.out.println("PASS production share handler: cold/warm intent, caption, short URL, signed query, stale session reset, ClipData, malformed input, single consumption");
++ }
++}
++class Activity {protected void onNewIntent(Intent i){}void setIntent(Intent i){}}
++class Intent {static final String ACTION_SEND="SEND",EXTRA_TEXT="TEXT";String action,text;ClipData clip;Intent(String a,String t){action=a;text=t;}String getAction(){return action;}CharSequence getCharSequenceExtra(String k){return text;}ClipData getClipData(){return clip;}void setAction(String a){action=a;}void removeExtra(String k){text=null;}}
++class ClipData {String text;ClipData(String s){text=s;}int getItemCount(){return 1;}ClipData getItemAt(int i){return this;}CharSequence getText(){return text;}}
++class Toast {static final int LENGTH_LONG=1;static Toast makeText(Object c,String s,int t){return new Toast();}void show(){}}
++
++
++/** Reads a shared web link without changing signed query parameters. */
++final class SharedUrlParser {
++    private static final Pattern URL = Pattern.compile("https?://[^\\s<>\\\"'\\u200e\\u200f]+", Pattern.CASE_INSENSITIVE);
++
++    static String firstHttpUrl(CharSequence sharedText) {
++        if (sharedText == null) return "";
++        String text = sharedText.toString();
++        if (text.length() > 100_000) text = text.substring(0, 100_000);
++        Matcher matcher = URL.matcher(text);
++        while (matcher.find()) {
++            String candidate = matcher.group();
++            while (!candidate.isEmpty()) {
++                char tail = candidate.charAt(candidate.length()-1);
++                boolean punctuation = candidate.indexOf('?') < 0 && ".,،؛!؟".indexOf(tail) >= 0;
++                boolean unmatched = tail == ')' && count(candidate, ')') > count(candidate, '(')
++                        || tail == ']' && count(candidate, ']') > count(candidate, '[');
++                if (!punctuation && !unmatched) break;
++                candidate = candidate.substring(0, candidate.length()-1);
++            }
++            try {
++                URI uri = new URI(candidate);
++                if (uri.getHost() != null && uri.getRawUserInfo() == null
++                        && ("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme())))
++                    return candidate;
++            } catch (Exception ignored) { }
++        }
++        return "";
++    }
++
++    private static int count(String text, char value) {
++        int result = 0;
++        for (int i = 0; i < text.length(); i++) if (text.charAt(i) == value) result++;
++        return result;
++    }
++}

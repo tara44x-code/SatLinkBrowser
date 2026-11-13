@@ -1,0 +1,1969 @@
+--- a/README_AR.md
++++ b/README_AR.md
+@@ -1,86 +1,41 @@
+-# SatLink Browser PRO 1.9.5 — مشروع المصدر المعدّل
++# SatLink Browser PRO 1.9.6 — توحيد تحليل SL.Tube
+ 
+-تطبيق أندرويد للتصفح والتقاط روابط الفيديو وتنزيل الفيديو والصوت باستخدام GeckoView وyt-dlp وFFmpeg.
++المشروع الكامل للمصدر؛ لم ينتج APK في بيئة الفحص. تقرير النتائج والحدود داخل TEST_REPORT_AR.md.
+ 
+-## دمج مسار SL.Tube
++## التغيير الحالي
+ 
+-المصدر المرجعي: SL.Tube-4.5.3-sltube.3-source-unbuilt.zip. روجعت ملفات DownloadRequestFactory وVrkaDownloadManager وMediaFormats وإضافة media-detector، ثم كُيّف المسار لواجهة وجلسات SatLink Browser.
++- طلب تحليل يوتيوب الأول مطابق لخيارات SL.Tube DownloadRequestFactory.info وVrkaDownloadManager.analyze للرابط المباشر. لا يضاف User-Agent/كوكيز/Origin المتصفح لهذا الطلب، ولا عميل يوتيوب ثابت أو محدد -f.
++- إذا أخفق هذا الطلب أو رجّع حتى 360p فقط، تجرّب جلسة المتصفح كطلب مستقل. يحفظ التطبيق نتيجة الاستجابة الأفضل كاملة، ويختار إعداد الجلسة الناجح للتنزيل والإيقاف والاستئناف. لا تخلط صيغاً من استجابتين مختلفتين.
++- عرض كل معرّف صيغة مستقل كما في SL.Tube؛ أزيل التجميع السابق حسب الدقة والترميز والحاوية الذي كان يخفي صيغاً مختلفة.
++- الصيغ التي يرجعها yt-dlp بمعرّف صالح دون رابط ملف منفرد تبقى قابلة للاختيار من صفحة الفيديو ومعرّفها. لم يتغير رفض روابط signatureCipher الخام في الالتقاط الاحتياطي.
++- تبقى أعلى دقة أولاً، مع صيغة صوت متوافقة محددة، أو MKV عند اختلاف الحاويتين. MKV وTS ضمن الفيديو، وأربع قيم MP3 هي أهداف تحويل الصوت.
++- أزيل فرض android_vr عند إعادة محاولة التنزيل؛ يستخدم الطلب إعدادات التحليل الناجحة.
+ 
+-- تضمين ملف yt-dlp نفسه من SL.Tube (2026.08.19)، بما فيه حزمة yt_dlp_ejs وملفات solver؛ تثبيت محرك البداية لا يحتاج تنزيل ملف المحرك من الإنترنت.
+-- التهيئة المشتركة للالتقاط وخدمة التنزيل. فحص SHA-256، والتحقق بواسطة --version، واستعادة المحرك السابق عند فشل التثبيت، وإبقاء المحرك المثبت إذا كان أحدث.
+-- استخدام عملاء yt-dlp الافتراضيين أولاً، ومسار QuickJS الأصلي وإعداد EJS من SL.Tube، وخيار توافق الاتصال TLS الموجود فيه. يستمر تحديث المحرك تلقائياً.
+-- تحديث التحليل بعد تحديث المحرك حتى لو كانت النتيجة السابقة جودة منخفضة؛ لا يستبدل التحكم بتنزيل بدأ.
+-- قراءة جودات HLS من قائمة master، مع الدقة والفريمات والبتريت والترميز المعلن. طلب القراءة محدود زمنياً وحجمياً ولا يؤخر نتائج الالتقاط الأولية.
+-- لا تظهر أجزاء TS من قائمة media كجودات مستقلة. تُحفظ روابط MKV/TS المستقلة ضمن الفيديو.
+-- جودة HLS المختارة تمر عبر القائمة الأصلية مع محدد دقة، حتى يتولى المحرك قراءة مجموعة الصوت وأجزاء الفيديو. تبقى الجلسة وروابط التوقيع محفوظة.
+-- ربط الفيديو الصامت بصيغة صوت محددة ومتوافقة، واختيار MKV عند عدم توافق حاويتي الفيديو والصوت، كما في MediaFormats الخاص بـSL.Tube.
+-- تمييز filesize_approx والحجم بعد دمج الصوت كتقدير، واستبعاد DRM وصور المعاينة.
++## الأجزاء المحفوظة
+ 
+-يعرض التطبيق الدقات التي يرجعها الموقع والمحرك فعلياً. اختبارات 4K و8K تستخدم بيانات مضبوطة ولا تثبت أن الفيديو المحدد في الصورة يُستخرج بهذه الدقات على الهاتف.
+-
+-## إصلاحات مراجعة 1.9.5
+-
+-- اختيار استجابة المحرك حسب أعلى دقة فيديو قابلة للتنزيل، واستبعاد صور المعاينة والروابط الفارغة من الاختيار.
+-- ترتيب قائمة الفيديو من أعلى دقة إلى الأدنى، مع صوت منفصل أو مصدر فيديو بصوت لاستخراج MP3.
+-- إعادة التحليل تلقائياً بعد تحديث المحرك إذا فشل التحليل السابق، وإلغاء التحليل القديم عند إغلاق اللوحة أو التنقل.
+-- حد 45 ثانية لكل محاولة تحليل، وإظهار سبب الفشل بدلاً من استبداله برسالة عامة.
+-- التقاط طلبات الشبكة مجهولة التبويب فقط إذا تطابقت صفحة المصدر أو رابط الإطار؛ عنوان الموقع وحده لا يكفي.
+-- استبعاد موارد الأداء السابقة عند الانتقال بين الفيديوهات دون إعادة تحميل الصفحة.
+-
+-## إصلاحات الالتقاط المحفوظة
+-
+-- قراءة الدقة والحجم والفريمات والترميز من JSON الخاص بالمشغّل، بدلاً من الاكتفاء بالروابط المجردة.
+-- إثراء طلبات المتصفح ببيانات الجودة المطابقة لـitag مع الحفاظ على الحجم الكلي والترميز.
+-- دمج طلبات أجزاء الفيديو المتكررة، وتفضيل الرابط الذي استعمله المتصفح فعلياً على رابط أولي من بيانات الصفحة.
+-- عدم عرض طلبات UMP/SABR كبطاقات MP4، وعدم اختراع أبعاد للجودات التي لا يعلنها المصدر.
+-- إتاحة MP3 من مصدر صوت منفصل أو من فيديو بصوت، دون اختراع رابط صوت آخر.
+-- تعيين مسار ملف QuickJS الأصلي libqjs.so عند وجوده بدلاً من اسم qjs غير الموجود بالضرورة في PATH، وإتاحة تنزيل مكونات EJS المطابقة للمحرك.
+-- تنزيل المصادر الملتقطة فعلياً عبر بيانات yt-dlp المحلية، بما فيها دمج الصوت المنفصل، بدلاً من إجبارها على إعادة تحليل صفحة فشلت سابقاً. المصادر الأولية ليوتيوب تبقى على مسار التحليل المعتاد لتجديد التوقيع.
+-- تمييز الحجم التقديري بعلامة ≈، وإزالة التخمين H.264/H.265 ووعد دمج الصوت عند عدم وجود مسار صوت مؤكد.
+-- تحديث الرقم الظاهر في الواجهة من PRO 1.8.7 إلى PRO 1.9.5.
+-
+-## التعديلات السابقة المحفوظة
+-
+-- إرسال الالتقاط من بداية الصفحة وعند ظهور روابط جديدة، دون انتظار ضغطة ثانية.
+-- جدولة إرسال نتائج الشبكة كل 100 ملي ثانية تقريباً عند وجود تغييرات؛ حركة HLS المستمرة لا تؤجل الإرسال.
+-- إظهار الروابط المباشرة قبل اكتمال قراءة الجودات، وتقليل مهلة بدء التحليل الاحتياطية من 5.5 ثوانٍ إلى 0.8 ثانية.
+-- إعلان جاهزية المحرك قبل إجراء تحديث yt-dlp التلقائي. التحديث اليومي ما زال مفعلاً.
+-- مهلة اتصال تحليل الجودات 25 ثانية وإعادة محاولة المستخرج مرتان. إعدادات إعادة محاولة التنزيل بقيت كما هي.
+-- MKV وTS المكتشفتان فعلياً تظهران ضمن قائمة الفيديو. أزيل قسم الصيغ الإضافية وخيارات تحويل MKV/TS المصطنعة.
+-- إصلاح رصد امتدادات روابط الشبكة التي لا تحتوي معاملات، وإضافة التعرف على Matroska.
+-- إبقاء بيانات Referer والحجم والدقة عند إثراء نتائج الشبكة، وقراءة الحجم الإجمالي من Content-Range للطلبات الجزئية.
+-- عدم خلط طلبات مجهولة التبويب مع الصفحة الحالية، ومسح الالتقاط السابق عند التنقل.
+-- منع تكرار التحليل ضمن طلب التقاط واحد وتجاهل نتائج التحليل القديم بعد إغلاق اللوحة أو تغيير الصفحة.
+-- تقليل الفحوص الثقيلة المتكررة عند تغيّر الصفحة، وحفظ آخر 1000 رابط داخل كل إطار.
+-- استبعاد أجزاء M4S، واستبعاد TS الجزئية عندما يوجد رابط قائمة تشغيل؛ رابط TS مستقل يبقى فيديو.
+-- دعم AV1 داخل MP4 وتصحيح قراءة 1080p60 حتى لا تصبح الدقة 108060.
+-- حفظ ملفات جلسة مستقلة عند تغيّر الكوكيز حتى لا تستبدل جلسة تنزيل منتظر بجلسة صفحة أخرى.
+-- إبقاء بطاقات التحكم بالتنزيل الذي بدأ عند وصول تحديثات الالتقاط أو اكتمال تحليل الجودات.
++محرك SL.Tube المرفق 2026.08.19 مع EJS، تثبيت/ترقية مع تحقق SHA-256 و--version وتراجع عند الفشل، إبقاء المحرك الأحدث، تحديث المحرك التلقائي، QuickJS الأصلي، الالتقاط المبكر، قراءة HLS master ضمن حدود زمن وحجم، عزل التبويبات والتنقل، والحفاظ على التنزيلات الجارية.
+ 
+ ## البناء
+ 
+-1. افتح هذا المجلد في Android Studio، وجهّز JDK 17 وAndroid SDK 36.
+-2. اسمح بتنزيل Gradle واعتماديات المشروع من مستودعاتها.
+-3. على ويندوز: `gradlew.bat :app:assembleDebug`.
+-4. على لينكس/macOS: `chmod +x gradlew` ثم `./gradlew :app:assembleDebug`.
+-5. ينتج ملف التجربة: `app/build/outputs/apk/debug/app-debug.apk`.
++JDK 17 وAndroid SDK 36 واتصال لتنزيل Gradle واعتماديات المشروع.
+ 
+-رقم الإصدار 195، واسم الإصدار PRO 1.9.5 SL.Tube Engine. النسخة التجريبية لا تستبدل نسخة موقعة بمفتاح مختلف؛ لبناء تحديث تثبيت مباشر يلزم مفتاح توقيع النسخة الأصلية.
++- ويندوز: BUILD-SATLINK.bat.
++- لينكس/macOS: bash BUILD-SATLINK.sh.
++- المخرج عند نجاح البناء: app/build/outputs/apk/debug/app-debug.apk.
+ 
+-## الفحص
++الإصدار 196 / PRO 1.9.6 SL.Tube Analysis. تحديث نسخة مثبتة مباشرة يتطلب مفتاح توقيعها نفسه.
+ 
+-- `node tests/capture.test.cjs`
+-- `node tests/player_metadata.test.cjs`
+-- `node tests/hls.test.cjs`
+-- `python3 tests/format_rules_test.py` (يتطلب JDK 17)
+-- `python3 tests/download_plan_test.py` (يتطلب JDK 17)
+-- `python3 tests/format_parser_test.py` (يتطلب JDK 17)
+-- `python3 tests/download_request_test.py` (يتطلب JDK 17)
+-- `python3 tests/bundled_engine_test.py` (يتطلب JDK 17 وPython 3.10 أو أحدث)
+-- `java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/*.java`
++## الاختبارات
+ 
+-راجع TEST_REPORT_AR.md لنتائج الاختبارات وحدودها. ملف CHANGES.patch يوضح فروق المصدر عن الملف المرفق.
++- node tests/capture.test.cjs
++- node tests/player_metadata.test.cjs
++- node tests/hls.test.cjs
++- python3 tests/format_rules_test.py
++- python3 tests/format_parser_test.py
++- python3 tests/download_plan_test.py
++- python3 tests/download_request_test.py
++- python3 tests/bundled_engine_test.py
++- python3 tests/sltube_analysis_test.py
++- java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/*.java
+ 
+-## الاستخدام
+-
+-افتح صفحة الفيديو وشغله عند الحاجة ثم اضغط زر الالتقاط. تظهر الروابط المتاحة أولاً، ثم الجودات بعد اكتمال التحليل. سرعة ظهور الرابط تعتمد أيضاً على وقت إنشاء الموقع للرابط واستجابة الشبكة. المحتوى المشفّر بنظام DRM لا يصبح قابلاً للتنزيل بمجرد تحسين الالتقاط.
++اختبارات Java تتطلب JDK 17. اختبار المحرك يتطلب Python 3.10 أو أحدث. tests/reference يحتوي النسخ المرجعية من SL.Tube المستخدمة لفحص تطابق الطلب. بيانات 37 صيغة و4K في الاختبارات اصطناعية وليست نتيجة استخراج حي للرابط المرسل.
+--- a/TEST_REPORT_AR.md
++++ b/TEST_REPORT_AR.md
+@@ -1,48 +1,38 @@
+-# تقرير فحص دمج SL.Tube في SatLink Browser PRO 1.9.5
++# فحص PRO 1.9.6 SL.Tube Analysis
+ 
+ التاريخ: 2026-10-04
+ 
+-## المصادر التي فُحصت
++## الدليل المتاح
+ 
+-- SL.Tube-4.5.3-sltube.3-source-unbuilt.zip: أحدث مصدر مطابق وجد في الملفات.
+-- SatLinkBrowser-PRO-1.9.4-reviewed-source.zip: مصدر المشروع الهدف.
+-- روجعت ملفات المحرك وطلبات التحليل والتنزيل واختيار الصيغ وإضافة الالتقاط في SL.Tube. المشروعان يستعملان library/ffmpeg 0.18.1؛ لا يوجد محرك NewPipe في مسار التحليل المرجعي.
++صورة المستخدم تعرض SL.Tube بقائمة 37 صيغة فيديو لنفس الرابط KxV33MvXzBw، بينها 2160p60 بترميز AV1/VP9 وصيغ MP4/WEBM. صورة المتصفح السابقة تحمل الإصدار 1.9.3 وتعرض 360p فقط. هذا يثبت الفرق المعروض على الهاتف، ولا يثبت أن الإصدار المصدر 1.9.5 بُني أو جُرّب أو أخفق على الهاتف.
+ 
+-## ما نُقل وكُيّف
++## فروق مصدر مثبتة وصححت
+ 
+-ملف yt-dlp 2026.08.19 نُقل بدون تعديل، ويحتوي yt_dlp_ejs وcore.min.js وlib.min.js. SHA-256:
++- المتصفح كان يفرض User-Agent وReferer وOrigin والكوكيز أثناء التحليل، بينما المسار المباشر في SL.Tube يبدأ بدونها إن لم يدخل المستخدم رؤوساً مخصصة. طلب يوتيوب الأول أصبح مطابقاً لخيارات المسار المباشر. الجلسة تستعمل كاستعادة مستقلة فقط عند الإخفاق أو الاكتفاء بدقة حتى 360p.
++- خيارات التحليل السابقة تضمنت محدد صيغة وgeo-bypass ومحاولات عميل ثابت. أزيلت من مسار يوتيوب الجديد لصالح خيارات SL.Tube الأصلية.
++- القائمة السابقة تدمج معرّفات مختلفة إذا اتفقت الدقة والحاوية والترميز. أزيل هذا التجميع، وبقي منع تكرار معرّف الصيغة نفسه.
++- SL.Tube يقبل صيغة بمعرّف صالح دون اشتراط URL مفرد. شرط المتصفح كان يسقطها. أصبحت هذه الصيغ تحمل صفحة الفيديو ومعرّفها للتنزيل بواسطة المحرك؛ لا تعامل كرابط مباشر.
++- حفظ إعداد جلسة الاستجابة المختارة ضمن الصيغة ومهمة التنزيل والاستئناف، حتى لا يتحول تحليل مباشر ناجح إلى طلب مختلف عند التحميل.
++- أزيل android_vr من إعادة محاولة التنزيل. الاستجابة الأفضل لا تمزج مع صوت من استجابة أخرى.
+ 
+-`1fa6733c37ea6fb51c99ad8fe785e7b7e5f3246c9b980230329d4fb72ed8d4d6`
++هذه فروق مثبتة في المصدر، ولا يمكن نسب سبب 360p المحدد على الهاتف لأحدها دون سجل استخراج وتشغيل فعلي. لم يدّع التقرير تحديد هذا السبب نهائياً.
+ 
+-كُيّفت إعدادات QuickJS/EJS وlegacy-server-connect، وقراءة HLS master، واختيار صيغة فيديو مع صيغة صوت متوافقة. لم تُنسخ أخطاء المسار المرجعي التي كانت قد تحوّل URI لجزء TS داخل media playlist إلى بطاقة جودة أو تنقل أبعاد المشغل إلى كل طلب شبكة. يعتمد المشروع على الأبعاد المعلنة لكل جودة، ويعزل النتائج حسب الصفحة والتبويب.
++## اختبارات نجحت
+ 
+-أضيف تثبيت محرك موحّد قبل جاهزية الالتقاط وخدمة التنزيل، مع منع الرجوع إلى إصدار أقدم والتحقق والتراجع عند الفشل. بقي التحديث التلقائي الحالي للمحرك مفعلاً. لم تُنقل شاشة SL.Tube أو تاريخ تنزيلاته أو كامل مدير تحديث إضافاته.
++- sltube_analysis_test.py: مقارنة خيارات SLTubeAnalysisRequest مع خيارات المصدر المرجعي الحقيقي DownloadRequestFactory.kt/VrkaDownloadManager.kt. ثم تشغيل executeYouTubeAnalysis وextractionScore الفعليين ببدائل صغيرة، وفحص نجاح مباشر 4K دون إضافة جلسة، وبقاء 37 معرّفاً اصطناعياً، واستعادة 360p إلى 4K في طلب جلسة ثانٍ، والحفاظ على النتيجة الأولى عند فشل الاستعادة، واختيار صيغ ذات أجزاء بلا URL مفرد.
++- format_parser_test.py: تشغيل parseFormats الكامل. 37 معرّف فيديو اصطناعياً بقيت 37 بطاقة، مع ترتيب 4K أولاً؛ حفظ إعداد الجلسة للفيديو وMP3؛ دعم المعرف دون URL؛ ترتيب 8K/4K/1080p، صيغ AV1/MKV/TS، صوت محدد، حاوية متوافقة، استبعاد DRM والمعاينات، وعلامة الحجم التقريبي.
++- download_request_test.py: تشغيل buildRequest وTaskState الفعليين ببدائل Android، وفحص الصيغة الدقيقة، وعدم إضافة رؤوس/كوكيز المتصفح إلى التنزيل المباشر الناجح، وحفظ هذا الإعداد في الاستئناف؛ HLS موقّع دون امتداد، الدقة المختارة، MP3 وMKV.
++- capture.test.cjs وplayer_metadata.test.cjs وhls.test.cjs: الالتقاط المبكر والتلقائي، MKV/TS، الحجم الكلي، عزل الصفحة والتبويب، بيانات المشغل، دمج طلبات الأجزاء، وعدم عرض الأجزاء كجودات HLS، وحفظ روابط التوقيع.
++- format_rules_test.py وdownload_plan_test.py وbundled_engine_test.py: دوال Java الأصلية للصيغ وخطة التنزيل ومسار QuickJS وتثبيت المحرك والتحقق والتراجع ومنع الرجوع إلى الأقدم.
++- شغّل Python المضيف المحرك الأصلي المرفق وأرجع --version = 2026.08.19. تحقق وجود ملفات EJS.
++- تحليل قواعد Java لجميع ملفات التطبيق، وnode --check لجميع JavaScript، وصحة XML ومعرفات R.id وملفات الإضافة، نجحت.
+ 
+-## فحوص نفذت ونجحت
++## ما تعذّر التحقق منه
+ 
+-- capture.test.cjs: الإرسال المبكر والتلقائي، جدولة DOM، MKV/TS، Content-Range، جلسات الإطارات، وتنظيف التنقل وعزل الشبكة مجهولة التبويب.
+-- player_metadata.test.cjs: الدقة/الفريمات/الحجم والترميز من JSON، عدم اعتبار signatureCipher المشفر رابطاً، ودمج سبعة طلبات أجزاء في جودة واحدة مع صوتها، واستبعاد UMP.
+-- hls.test.cjs: قوائم 360p و1080p60 و4K، روابط نسبية وموقعة، مجموعات صوت، محدد الجودة، عدم تحويل الأجزاء إلى خيارات، الحفاظ على جلسة الطلب، عدم تكرار القراءة لكل variant، ومنع دخول نتيجة قائمة قديمة لصفحة جديدة.
+-- format_rules_test.py: دوال Java الفعلية لصيغ MKV/TS/AV1 وتصحيح 1080p60.
+-- format_parser_test.py: تشغيل parseFormats الكامل ببدائل JSON للقراءة؛ ترتيب 8K ثم 4K ثم 1080p، اختيار الصوت المحدد، الحاوية المتوافقة وMKV عند الحاجة، أربع وجهات MP3، صوت الفيديو المدمج، استبعاد المعاينة وDRM، وعلامة الحجم التقريبي.
+-- download_plan_test.py: خطة بيانات التنزيل المباشر من روابط الشبكة الفعلية، دمج مسارين، MP3 من فيديو بصوت، روابط التوقيع، ومسار QuickJS.
+-- download_request_test.py: تشغيل buildRequest وTaskState الفعليين ببدائل Android صغيرة؛ صيغة الفيديو+الصوت الدقيقة، تجديد رابط الصفحة، جلسة المتصفح، EJS، قائمة HLS موقعة بلا امتداد، الدقة المختارة، حفظ بيانات الإيقاف والاستئناف، استخراج MP3 وخطة MKV.
+-- bundled_engine_test.py: تشغيل مثبت المحرك الفعلي على الملف المنقول؛ تطابق البايتات وSHA-256، تثبيت جديد، ترقية، إبقاء الأحدث، استعادة السابق عند فشل التحقق، رفض ملف تالف، وتنظيف الملفات المؤقتة.
+-- شغّل Python المضيف ملف المحرك الحقيقي بواسطة --version وأرجع 2026.08.19. تحقق وجود ملفات EJS داخل أرشيف المحرك.
+-- تحليل قواعد Java بجميع الملفات نجح؛ node --check لكل JavaScript نجح؛ XML ومعرفات R.id ومراجع ملفات manifest نجحت.
++محاولة assembleDebug توقفت قبل التجميع: Network is unreachable عند تنزيل Gradle 8.11.1. لا يوجد APK جديد في هذا الملف. لم تحصل تجربة Android/GeckoView كاملة، ولا تنزيل/دمج فعلي على الهاتف.
+ 
+-## حدود الفحص الفعلية
++المحاولة الحية السابقة للرابط المرسل انتهت بمهلة اتصال إلى صفحة يوتيوب وAPI وملف المشغل. لم تُستخرج قائمة جودات حية منه في هذه البيئة. اختبارات 37 صيغة و4K تعتمد بيانات مضبوطة؛ ليست تأكيداً أن الرابط نفسه صار يستخرج 4K على الهاتف.
+ 
+-محاولة `bash gradlew :app:assembleDebug --console=plain` توقفت عند تنزيل Gradle 8.11.1 برسالة Network is unreachable، قبل تجميع أندرويد. لا يوجد APK جديد في الحزمة.
++المرجع هو SL.Tube-4.5.3-sltube.3-source-unbuilt.zip، والمحركان يستخدمان library/ffmpeg 0.18.1. سجلات الاختبار التاريخية داخل SL.Tube لا تعتبر تحققاً لهذا الدمج.
+ 
+-اختبارات Java تستعمل بدائل صغيرة لـAndroid/JSON/YoutubeDLRequest وتنفذ المنطق الإنتاجي، وليست تحقق أنواع Android/GeckoView كاملاً. تنفيذ --version تم على Python المضيف، وليس على هاتف. لم يحصل استخراج حي للفيديو في الصورة، أو تنزيل/دمج فعلي على أندرويد. اختبارات SL.Tube التاريخية الواردة داخل مشروعه ليست نتائج تحقق لهذا الدمج.
+-
+-لا يمكن إعلان خلو التطبيق من كل خطأ أو تأكيد حل مشكلة 360p على الهاتف قبل البناء والتجربة الحية. ملفات المصدر والاختبارات وتقرير الحدود مرفقة كاملة.
+-
+-## مراجع
+-
+-- المصدر المرجعي المحلي: SL.Tube-4.5.3-sltube.3-source-unbuilt.zip.
+-- مكتبة المحرك الرسمية: https://github.com/yausername/youtubedl-android
+-- دليل EJS الرسمي: https://github.com/yt-dlp/yt-dlp/wiki/EJS
+-
+-فروق هذا الدمج عن 1.9.4 موجودة في SLTUBE_INTEGRATION.patch.
++فروق الإصدار الحالي عن 1.9.5 داخل ANALYSIS_PARITY.patch. تقرير 1.9.5 محفوظ في docs/history.
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -10,8 +10,8 @@
+         applicationId 'com.satlink.geckoviewtest'
+         minSdk 26
+         targetSdk 36
+-        versionCode 195
+-        versionName 'PRO 1.9.5 SL.Tube Engine'
++        versionCode 196
++        versionName 'PRO 1.9.6 SL.Tube Analysis'
+ 
+         ndk {
+             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
+--- a/app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java
+@@ -8,12 +8,16 @@
+     private FormatSelectionPolicy() { }
+ 
+     static final class Format {
+-        final String url, ext, videoCodec, audioCodec;
++        final String id, url, ext, videoCodec, audioCodec;
+         final int height;
+         Format(String url, String ext, String videoCodec, String audioCodec, int height) {
+-            this.url=url;this.ext=ext;this.videoCodec=videoCodec;this.audioCodec=audioCodec;this.height=height;
++            this.id="";this.url=url;this.ext=ext;this.videoCodec=videoCodec;this.audioCodec=audioCodec;this.height=height;
++        }
++        Format(String id,String url,String ext,String videoCodec,String audioCodec,int height) {
++            this.id=id;this.url=url;this.ext=ext;this.videoCodec=videoCodec;this.audioCodec=audioCodec;this.height=height;
+         }
+     }
++    // yt-dlp may supply a fragment-backed format without one standalone URL.
+     static final class Score implements Comparable<Score> {
+         int videoCount, audioCount, maxHeight;
+         boolean hasMedia() { return videoCount>0 || audioCount>0; }
+@@ -29,7 +33,9 @@
+     static Score score(List<Format> formats) {
+         Score score=new Score();
+         for (Format format:formats) {
+-            if (format.url==null || !(format.url.startsWith("https://") || format.url.startsWith("http://"))) continue;
++            boolean byId=format.id!=null && format.id.matches("[A-Za-z0-9_.:-]+");
++            boolean byUrl=format.url!=null && (format.url.startsWith("https://") || format.url.startsWith("http://"));
++            if (!byId && !byUrl) continue;
+             String ext=format.ext==null?"":format.ext.toLowerCase(Locale.ROOT);
+             if(ext.equals("mhtml") || ext.equals("jpg") || ext.equals("png") || ext.equals("webp")) continue;
+             boolean video=present(format.videoCodec) && !"images".equalsIgnoreCase(format.videoCodec);
+--- a/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
+@@ -766,7 +766,7 @@
+                     // YouTube-only path. Do not alter the proven extraction path for any other site.
+                     root = executeYouTubeAnalysis(normalizedPageUrl);
+                 } else {
+-                    root = executeAnalysis(normalizedPageUrl, false);
++                    root = executeAnalysis(normalizedPageUrl);
+                 }
+ 
+                 FormatCollection collection = parseFormats(root);
+@@ -810,12 +810,6 @@
+     }
+ 
+ 
+-    /**
+-     * Analyze YouTube independently from all other sites.
+-     * Recent YouTube A/B tests can make android_vr return only itag 18 (360p).
+-     * Try the current default clients first and keep the response exposing the
+-     * highest downloadable resolution. Other websites never enter this method.
+-     */
+     private FormatSelectionPolicy.Score extractionScore(JSONObject root) {
+         List<FormatSelectionPolicy.Format> formats = new ArrayList<>();
+         JSONArray raw = root.optJSONArray("formats");
+@@ -824,57 +818,39 @@
+             JSONObject format=raw.optJSONObject(i);
+             if(format==null || format.optBoolean("has_drm",false)
+                     || "mhtml".equals(format.optString("protocol")) || "images".equals(format.optString("protocol"))) continue;
+-            formats.add(new FormatSelectionPolicy.Format(format.optString("url"),format.optString("ext"),
++            formats.add(new FormatSelectionPolicy.Format(format.optString("format_id"),format.optString("url"),format.optString("ext"),
+                     format.optString("vcodec","none"),format.optString("acodec","none"),numberToInt(format.opt("height"))));
+         }
+         return FormatSelectionPolicy.score(formats);
+     }
+ 
+     private JSONObject executeYouTubeAnalysis(String pageUrl) throws Exception {
+-        // Let the installed engine choose current clients first. Try the VR fallback only
+-        // if the normal response is incomplete compared with the player's declared metadata.
+-        String[] clients = {"", "youtube:player_client=android_vr"};
+-        JSONObject best = null;
+-        FormatSelectionPolicy.Score bestScore = new FormatSelectionPolicy.Score();
+-        Throwable lastError = null;
+-        final int serialAtStart=captureRequestSerial;
+-        List<JSONObject> audioFallbacks=new ArrayList<>();
+-        int expectedHeight=0;
+-        JSONArray declared=lastPlayerFormats;
+-        if(declared!=null) for(int i=0;i<declared.length();i++) {
+-            JSONObject format=declared.optJSONObject(i);
+-            if(format!=null) expectedHeight=Math.max(expectedHeight,numberToInt(format.opt("height")));
+-        }
+-        for (String client : clients) {
+-            if(serialAtStart!=captureRequestSerial || Thread.currentThread().isInterrupted())
++        JSONObject best=null;
++        FormatSelectionPolicy.Score bestScore=new FormatSelectionPolicy.Score();
++        Exception lastError=null;
++        int serial=captureRequestSerial;
++        // Match the direct URL path that SL.Tube uses first. Browser credentials are an
++        // independent recovery attempt, never mixed into a successful anonymous response.
++        for(boolean useSession:new boolean[]{false,true}) {
++            if(serial!=captureRequestSerial || Thread.currentThread().isInterrupted())
+                 throw new InterruptedException("تم إلغاء تحليل الصفحة السابقة");
+             try {
+-                JSONObject candidate=executeAnalysisWithYouTubeClients(pageUrl,client);
++                YoutubeDLRequest request=SLTubeAnalysisRequest.create(getApplicationContext(),pageUrl);
++                if(useSession) applySessionOptions(request,pageUrl);
++                YoutubeDLResponse response=runAnalysisRequest(request,"satlink-sltube-analysis-"+java.util.UUID.randomUUID());
++                if(response.getExitCode()!=0) throw new IllegalStateException("فشل طلب المحرك");
++                JSONObject candidate=parseResponseJson(response.getOut());
++                candidate.put("_satlink_browser_session",useSession);
+                 FormatSelectionPolicy.Score score=extractionScore(candidate);
+-                JSONArray candidateFormats=candidate.optJSONArray("formats");
+-                if(candidateFormats!=null) for(int i=0;i<candidateFormats.length();i++) {
+-                    JSONObject format=candidateFormats.optJSONObject(i);
+-                    if(format!=null && "none".equalsIgnoreCase(format.optString("vcodec","none"))
+-                            && FormatSelectionPolicy.present(format.optString("acodec","none"))
+-                            && format.optString("url","").startsWith("http")) audioFallbacks.add(format);
+-                }
+-                if(score.hasMedia() && (best==null || score.compareTo(bestScore)>0)) {
+-                    best=candidate;bestScore=score;
+-                }
+-                if(score.hasVideoAndAudio() && score.videoCount>=3 && score.maxHeight>=expectedHeight) break;
+-            } catch(Throwable error) { lastError=error; Log.w(TAG,"YouTube analysis attempt failed",error); }
+-        }
+-        if(best!=null) {
+-            if(bestScore.audioCount==0 && !audioFallbacks.isEmpty()) {
+-                JSONArray formats=best.optJSONArray("formats");
+-                if(formats==null) {formats=new JSONArray();formats.put(new JSONObject(best.toString()));}
+-                for(JSONObject audio:audioFallbacks) formats.put(audio);
+-                best.put("formats",formats);
+-            }
+-            return best;
+-        }
+-        if(lastError instanceof Exception) throw (Exception)lastError;
+-        throw new IllegalStateException("لم يرجع يوتيوب فيديو أو صوتاً قابلاً للتنزيل",lastError);
++                Log.i(TAG,"SL.Tube analysis profile="+(useSession?"browser-session":"direct-url")
++                        +" videoFormats="+score.videoCount+" audioFormats="+score.audioCount+" maxHeight="+score.maxHeight);
++                if(score.hasMedia() && (best==null || score.compareTo(bestScore)>0)) {best=candidate;bestScore=score;}
++                if(!useSession && score.videoCount>0 && score.maxHeight>360) break;
++            } catch(Exception error) {lastError=error;Log.w(TAG,"SL.Tube analysis profile failed",error);}
++        }
++        if(best!=null) return best;
++        if(lastError!=null) throw lastError;
++        throw new IllegalStateException("لم يرجع المحرك صيغ فيديو أو صوت قابلة للتنزيل");
+     }
+ 
+     private void stopActiveAnalysis() {
+@@ -903,7 +879,7 @@
+         }
+     }
+ 
+-    private JSONObject executeAnalysisWithYouTubeClients(String pageUrl, String extractorArgs) throws Exception {
++    private JSONObject executeAnalysis(String pageUrl) throws Exception {
+         YoutubeDLRequest request = new YoutubeDLRequest(pageUrl);
+         request.addOption("--dump-single-json");
+         request.addOption("--format", "bestvideo+bestaudio/best/bestvideo/bestaudio");
+@@ -917,37 +893,6 @@
+         request.addOption("--extractor-retries", "2");
+         EngineRuntimeOptions.apply(getApplicationContext(), request);
+         applySessionOptions(request, pageUrl);
+-        if (!TextUtils.isEmpty(extractorArgs)) request.addOption("--extractor-args", extractorArgs);
+-
+-        String processId = "satlink-youtube-analysis-" + System.currentTimeMillis();
+-        YoutubeDLResponse response = runAnalysisRequest(request, processId);
+-        return parseResponseJson(response.getOut());
+-    }
+-
+-    private JSONObject executeAnalysis(String pageUrl, boolean skipYouTubeWebpage) throws Exception {
+-        YoutubeDLRequest request = new YoutubeDLRequest(pageUrl);
+-        request.addOption("--dump-single-json");
+-        request.addOption("--format", "bestvideo+bestaudio/best/bestvideo/bestaudio");
+-        request.addOption("--skip-download");
+-        request.addOption("--no-playlist");
+-        request.addOption("--ignore-config");
+-        request.addOption("--geo-bypass");
+-        request.addOption("--legacy-server-connect");
+-        request.addOption("--socket-timeout", "25");
+-        request.addOption("--retries", "1");
+-        request.addOption("--extractor-retries", "2");
+-        EngineRuntimeOptions.apply(getApplicationContext(), request);
+-        applySessionOptions(request, pageUrl);
+-
+-        if (isYouTubeUrl(pageUrl)) {
+-            if (skipYouTubeWebpage) {
+-                request.addOption("--extractor-args",
+-                        "youtube:player_client=android_vr,android,web;player_skip=webpage");
+-            } else {
+-                request.addOption("--extractor-args",
+-                        "youtube:player_client=android_vr,android,web");
+-            }
+-        }
+ 
+         String processId = "satlink-analysis-" + System.currentTimeMillis();
+         YoutubeDLResponse response = runAnalysisRequest(request, processId);
+@@ -1140,7 +1085,7 @@
+ 
+         JSONArray formats = root.optJSONArray("formats");
+         if (formats == null) {
+-            if (TextUtils.isEmpty(root.optString("url", ""))) return result;
++            if (TextUtils.isEmpty(root.optString("format_id", ""))) return result;
+             formats = new JSONArray();
+             formats.put(root);
+         }
+@@ -1158,10 +1103,8 @@
+             }
+ 
+             String formatId = format.optString("format_id", "");
+-            String mediaUrl = format.optString("url", "");
+-            String mediaExt = format.optString("ext", "").toLowerCase(Locale.US);
+-            if (!(mediaUrl.startsWith("http://") || mediaUrl.startsWith("https://"))
+-                    || mediaExt.matches("mhtml|jpg|png|webp")) continue;
++            if (!formatId.matches("[A-Za-z0-9_.:-]+")
++                    || "images".equalsIgnoreCase(format.optString("vcodec"))) continue;
+             String url = format.optString("url", "");
+             String ext = format.optString("ext", "");
+             String vcodec = format.optString("vcodec", "none");
+@@ -1177,6 +1120,7 @@
+                 MediaFormatItem item = new MediaFormatItem();
+                 item.type = MediaFormatItem.TYPE_VIDEO;
+                 item.sourceUrl = result.sourceUrl;
++                item.useBrowserSession = root.optBoolean("_satlink_browser_session", true);
+                 item.directUrl = url;
+                 item.formatId = formatId;
+                 item.ext = ext;
+@@ -1193,8 +1137,8 @@
+                 item.dynamicRange = format.optString("dynamic_range", "");
+                 item.protocol = format.optString("protocol", "");
+ 
+-                String key = item.height + "|" + Math.round(item.fps) + "|" + item.ext + "|" + item.videoCodec + "|" + item.hasAudio;
+-                if (isSupportedModernVideo(item) && videoKeys.add(key)) {
++                String key = item.formatId;
++                if (videoKeys.add(key)) {
+                     result.videos.add(item);
+                 }
+             }
+@@ -1203,6 +1147,7 @@
+                 MediaFormatItem item = new MediaFormatItem();
+                 item.type = MediaFormatItem.TYPE_AUDIO;
+                 item.sourceUrl = result.sourceUrl;
++                item.useBrowserSession = root.optBoolean("_satlink_browser_session", true);
+                 item.directUrl = url;
+                 item.formatId = formatId;
+                 item.ext = ext;
+@@ -1233,19 +1178,6 @@
+         Collections.sort(sourceAudios, (left, right) ->
+                 Double.compare(right.bitrate, left.bitrate));
+ 
+-        // Keep one clean entry per modern container/codec/resolution/fps combination.
+-        Map<String, MediaFormatItem> cleanVideos = new LinkedHashMap<>();
+-        for (MediaFormatItem item : result.videos) {
+-            String key = item.ext + "|" + item.videoCodec + "|" + item.height + "|" + Math.round(item.fps);
+-            MediaFormatItem previous = cleanVideos.get(key);
+-            if (previous == null || (!previous.hasAudio && item.hasAudio)
+-                    || (previous.hasAudio == item.hasAudio && item.bitrate > previous.bitrate)) {
+-                cleanVideos.put(key, item);
+-            }
+-        }
+-        result.videos.clear();
+-        result.videos.addAll(cleanVideos.values());
+-
+         // SL.Tube pairs an exact audio format and preserves container compatibility.
+         for (MediaFormatItem video : result.videos) {
+             if (video.hasAudio || sourceAudios.isEmpty()) continue;
+@@ -1285,7 +1217,9 @@
+                 MediaFormatItem item = new MediaFormatItem();
+                 item.type = MediaFormatItem.TYPE_AUDIO;
+                 item.sourceUrl = result.sourceUrl;
++                item.useBrowserSession = root.optBoolean("_satlink_browser_session", true);
+                 item.directUrl = bestSource.directUrl;
++                item.useBrowserSession = bestSource.useBrowserSession;
+                 item.formatId = "bestaudio/best";
+                 item.ext = "mp3";
+                 item.bitrate = quality;
+@@ -1876,6 +1810,7 @@
+         intent.putExtra(MediaDownloadService.EXTRA_DIRECT_URL, item.directUrl);
+         intent.putExtra(MediaDownloadService.EXTRA_DIRECT_AUDIO_URL, item.directAudioUrl);
+         intent.putExtra(MediaDownloadService.EXTRA_FORMAT_ID, item.formatId);
++        intent.putExtra(MediaDownloadService.EXTRA_USE_BROWSER_SESSION, item.useBrowserSession);
+         intent.putExtra(MediaDownloadService.EXTRA_MANIFEST, item.protocol != null && (item.protocol.contains("m3u8") || item.protocol.contains("dash")));
+         intent.putExtra(MediaDownloadService.EXTRA_MEDIA_TYPE,
+                 item.type == MediaFormatItem.TYPE_AUDIO
+@@ -1890,9 +1825,9 @@
+                         (TextUtils.isEmpty(item.ext) ? "mp4" : item.ext));
+         intent.putExtra(MediaDownloadService.EXTRA_TITLE, captureTitle.getText().toString());
+         intent.putExtra(MediaDownloadService.EXTRA_ESTIMATED_SIZE, item.sizeBytes);
+-        intent.putExtra(MediaDownloadService.EXTRA_COOKIE_FILE, latestCookieFilePath);
+-        intent.putExtra(MediaDownloadService.EXTRA_COOKIE_HEADER, latestCookieHeader);
+-        intent.putExtra(MediaDownloadService.EXTRA_USER_AGENT, latestUserAgent);
++        intent.putExtra(MediaDownloadService.EXTRA_COOKIE_FILE, item.useBrowserSession ? latestCookieFilePath : "");
++        intent.putExtra(MediaDownloadService.EXTRA_COOKIE_HEADER, item.useBrowserSession ? latestCookieHeader : "");
++        intent.putExtra(MediaDownloadService.EXTRA_USER_AGENT, item.useBrowserSession ? latestUserAgent : "");
+         return intent;
+     }
+ 
+@@ -3397,6 +3332,7 @@
+         long sizeBytes;
+         boolean sizeEstimated;
+         boolean capturedDirect;
++        boolean useBrowserSession = true;
+         boolean hasAudio;
+     }
+ 
+--- a/app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java
+@@ -73,6 +73,7 @@
+     public static final String EXTRA_OUTPUT_EXT = "output_ext";
+     public static final String EXTRA_TITLE = "title";
+     public static final String EXTRA_ESTIMATED_SIZE = "estimated_size";
++    public static final String EXTRA_USE_BROWSER_SESSION = "use_browser_session";
+     public static final String EXTRA_MANIFEST = "manifest_source";
+     public static final String EXTRA_CAPTURED_DIRECT = "captured_direct";
+     public static final String EXTRA_VIDEO_CODEC = "video_codec";
+@@ -286,13 +287,11 @@
+                 if (firstError instanceof Exception) throw (Exception) firstError;
+                 throw new Exception(firstError);
+             }
+-            task.message = "يوتيوب حدّد الطلب الأول — إعادة المحاولة بجلسة بديلة...";
++            task.message = "يوتيوب حدّد الطلب الأول — إعادة المحاولة بنفس إعدادات التحليل...";
+             updateNotification(task);
+             broadcast(task);
+             task.processId = "satlink-service-retry-" + task.taskId + "-" + System.currentTimeMillis();
+             YoutubeDLRequest retry = buildRequest(task, workDir);
+-            retry.addOption("--extractor-args",
+-                    "youtube:player_client=android_vr");
+             YoutubeDL.getInstance().execute(retry, task.processId, progressCallback(task));
+         }
+     }
+@@ -458,14 +457,14 @@
+ 
+         EngineRuntimeOptions.apply(getApplicationContext(), request);
+         request.addOption("--extractor-retries", "5");
+-        if (!TextUtils.isEmpty(task.sourceUrl)) {
++        if (task.useBrowserSession && !TextUtils.isEmpty(task.sourceUrl)) {
+             request.addOption("--referer", task.sourceUrl);
+         }
+-        if (!TextUtils.isEmpty(task.userAgent)) {
++        if (task.useBrowserSession && !TextUtils.isEmpty(task.userAgent)) {
+             request.addOption("--user-agent", task.userAgent);
+         }
+         applyTaskCookies(request, task);
+-        if (isYouTubeTask(task)) {
++        if (task.useBrowserSession && isYouTubeTask(task)) {
+             request.addOption("--add-header", "Origin:https://www.youtube.com");
+             request.addOption("--add-header", "Accept-Language:en-US,en;q=0.9");
+         }
+@@ -515,7 +514,7 @@
+     }
+ 
+     private static void applyTaskCookies(YoutubeDLRequest request, TaskState task) {
+-        if (request == null || task == null) return;
++        if (request == null || task == null || !task.useBrowserSession) return;
+         if (!TextUtils.isEmpty(task.cookieFile) && new File(task.cookieFile).isFile()) {
+             request.addOption("--cookies", task.cookieFile);
+         } else if (!TextUtils.isEmpty(task.cookieHeader)) {
+@@ -1010,6 +1009,7 @@
+         int audioQuality;
+         boolean hasAudio;
+         boolean capturedDirect;
++        boolean useBrowserSession = true;
+         boolean manifest;
+         String videoCodec;
+         String audioCodec;
+@@ -1059,6 +1059,7 @@
+             task.audioQuality = intent.getIntExtra(EXTRA_AUDIO_QUALITY, 320);
+             task.hasAudio = intent.getBooleanExtra(EXTRA_HAS_AUDIO, false);
+             task.capturedDirect = intent.getBooleanExtra(EXTRA_CAPTURED_DIRECT, false);
++            task.useBrowserSession = intent.getBooleanExtra(EXTRA_USE_BROWSER_SESSION, true);
+             task.manifest = intent.getBooleanExtra(EXTRA_MANIFEST, false);
+             task.videoCodec = intent.getStringExtra(EXTRA_VIDEO_CODEC);
+             task.audioCodec = intent.getStringExtra(EXTRA_AUDIO_CODEC);
+@@ -1086,6 +1087,7 @@
+             intent.putExtra(EXTRA_HAS_AUDIO, hasAudio);
+             intent.putExtra(EXTRA_CAPTURED_DIRECT, capturedDirect);
+             intent.putExtra(EXTRA_MANIFEST, manifest);
++            intent.putExtra(EXTRA_USE_BROWSER_SESSION, useBrowserSession);
+             intent.putExtra(EXTRA_VIDEO_CODEC, videoCodec);
+             intent.putExtra(EXTRA_AUDIO_CODEC, audioCodec);
+             intent.putExtra(EXTRA_ESTIMATED_SIZE, estimatedSize);
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/SLTubeAnalysisRequest.java
+@@ -0,0 +1,21 @@
++package com.satlink.geckoviewtest;
++
++import android.content.Context;
++import com.yausername.youtubedl_android.YoutubeDLRequest;
++
++/** Matches SL.Tube DownloadRequestFactory.info + VrkaDownloadManager.analyze. */
++final class SLTubeAnalysisRequest {
++    private SLTubeAnalysisRequest() { }
++    static YoutubeDLRequest create(Context context, String pageUrl) {
++        YoutubeDLRequest request = new YoutubeDLRequest(pageUrl);
++        request.addOption("--no-warnings");
++        request.addOption("--legacy-server-connect");
++        request.addOption("--no-playlist");
++        EngineRuntimeOptions.apply(context, request);
++        request.addOption("--dump-single-json");
++        request.addOption("--skip-download");
++        request.addOption("--socket-timeout", "20");
++        request.addOption("--retries", "1");
++        return request;
++    }
++}
+--- /dev/null
++++ b/docs/history/TEST_REPORT_1.9.5.md
+@@ -0,0 +1,48 @@
++# تقرير فحص دمج SL.Tube في SatLink Browser PRO 1.9.5
++
++التاريخ: 2026-10-04
++
++## المصادر التي فُحصت
++
++- SL.Tube-4.5.3-sltube.3-source-unbuilt.zip: أحدث مصدر مطابق وجد في الملفات.
++- SatLinkBrowser-PRO-1.9.4-reviewed-source.zip: مصدر المشروع الهدف.
++- روجعت ملفات المحرك وطلبات التحليل والتنزيل واختيار الصيغ وإضافة الالتقاط في SL.Tube. المشروعان يستعملان library/ffmpeg 0.18.1؛ لا يوجد محرك NewPipe في مسار التحليل المرجعي.
++
++## ما نُقل وكُيّف
++
++ملف yt-dlp 2026.08.19 نُقل بدون تعديل، ويحتوي yt_dlp_ejs وcore.min.js وlib.min.js. SHA-256:
++
++`1fa6733c37ea6fb51c99ad8fe785e7b7e5f3246c9b980230329d4fb72ed8d4d6`
++
++كُيّفت إعدادات QuickJS/EJS وlegacy-server-connect، وقراءة HLS master، واختيار صيغة فيديو مع صيغة صوت متوافقة. لم تُنسخ أخطاء المسار المرجعي التي كانت قد تحوّل URI لجزء TS داخل media playlist إلى بطاقة جودة أو تنقل أبعاد المشغل إلى كل طلب شبكة. يعتمد المشروع على الأبعاد المعلنة لكل جودة، ويعزل النتائج حسب الصفحة والتبويب.
++
++أضيف تثبيت محرك موحّد قبل جاهزية الالتقاط وخدمة التنزيل، مع منع الرجوع إلى إصدار أقدم والتحقق والتراجع عند الفشل. بقي التحديث التلقائي الحالي للمحرك مفعلاً. لم تُنقل شاشة SL.Tube أو تاريخ تنزيلاته أو كامل مدير تحديث إضافاته.
++
++## فحوص نفذت ونجحت
++
++- capture.test.cjs: الإرسال المبكر والتلقائي، جدولة DOM، MKV/TS، Content-Range، جلسات الإطارات، وتنظيف التنقل وعزل الشبكة مجهولة التبويب.
++- player_metadata.test.cjs: الدقة/الفريمات/الحجم والترميز من JSON، عدم اعتبار signatureCipher المشفر رابطاً، ودمج سبعة طلبات أجزاء في جودة واحدة مع صوتها، واستبعاد UMP.
++- hls.test.cjs: قوائم 360p و1080p60 و4K، روابط نسبية وموقعة، مجموعات صوت، محدد الجودة، عدم تحويل الأجزاء إلى خيارات، الحفاظ على جلسة الطلب، عدم تكرار القراءة لكل variant، ومنع دخول نتيجة قائمة قديمة لصفحة جديدة.
++- format_rules_test.py: دوال Java الفعلية لصيغ MKV/TS/AV1 وتصحيح 1080p60.
++- format_parser_test.py: تشغيل parseFormats الكامل ببدائل JSON للقراءة؛ ترتيب 8K ثم 4K ثم 1080p، اختيار الصوت المحدد، الحاوية المتوافقة وMKV عند الحاجة، أربع وجهات MP3، صوت الفيديو المدمج، استبعاد المعاينة وDRM، وعلامة الحجم التقريبي.
++- download_plan_test.py: خطة بيانات التنزيل المباشر من روابط الشبكة الفعلية، دمج مسارين، MP3 من فيديو بصوت، روابط التوقيع، ومسار QuickJS.
++- download_request_test.py: تشغيل buildRequest وTaskState الفعليين ببدائل Android صغيرة؛ صيغة الفيديو+الصوت الدقيقة، تجديد رابط الصفحة، جلسة المتصفح، EJS، قائمة HLS موقعة بلا امتداد، الدقة المختارة، حفظ بيانات الإيقاف والاستئناف، استخراج MP3 وخطة MKV.
++- bundled_engine_test.py: تشغيل مثبت المحرك الفعلي على الملف المنقول؛ تطابق البايتات وSHA-256، تثبيت جديد، ترقية، إبقاء الأحدث، استعادة السابق عند فشل التحقق، رفض ملف تالف، وتنظيف الملفات المؤقتة.
++- شغّل Python المضيف ملف المحرك الحقيقي بواسطة --version وأرجع 2026.08.19. تحقق وجود ملفات EJS داخل أرشيف المحرك.
++- تحليل قواعد Java بجميع الملفات نجح؛ node --check لكل JavaScript نجح؛ XML ومعرفات R.id ومراجع ملفات manifest نجحت.
++
++## حدود الفحص الفعلية
++
++محاولة `bash gradlew :app:assembleDebug --console=plain` توقفت عند تنزيل Gradle 8.11.1 برسالة Network is unreachable، قبل تجميع أندرويد. لا يوجد APK جديد في الحزمة.
++
++اختبارات Java تستعمل بدائل صغيرة لـAndroid/JSON/YoutubeDLRequest وتنفذ المنطق الإنتاجي، وليست تحقق أنواع Android/GeckoView كاملاً. تنفيذ --version تم على Python المضيف، وليس على هاتف. لم يحصل استخراج حي للفيديو في الصورة، أو تنزيل/دمج فعلي على أندرويد. اختبارات SL.Tube التاريخية الواردة داخل مشروعه ليست نتائج تحقق لهذا الدمج.
++
++لا يمكن إعلان خلو التطبيق من كل خطأ أو تأكيد حل مشكلة 360p على الهاتف قبل البناء والتجربة الحية. ملفات المصدر والاختبارات وتقرير الحدود مرفقة كاملة.
++
++## مراجع
++
++- المصدر المرجعي المحلي: SL.Tube-4.5.3-sltube.3-source-unbuilt.zip.
++- مكتبة المحرك الرسمية: https://github.com/yausername/youtubedl-android
++- دليل EJS الرسمي: https://github.com/yt-dlp/yt-dlp/wiki/EJS
++
++فروق هذا الدمج عن 1.9.4 موجودة في SLTUBE_INTEGRATION.patch.
+--- a/tests/download_request_test.py
++++ b/tests/download_request_test.py
+@@ -39,6 +39,12 @@
+    check(request.options.get("-f").equals("137+140"),"Exact audio/video pair was modified");
+    check(request.options.get("--remote-components").equals("ejs:github"),"SL.Tube EJS setup missing");
+    check(request.options.get("--user-agent").equals("BrowserUA"),"Browser session UA lost");
++   task.useBrowserSession=false;
++   var anonymous=TaskState.fromIntent(task.toIntent(service,"resume"));
++   request=service.buildRequest(anonymous,root.toFile());
++   check(!anonymous.useBrowserSession,"Successful anonymous profile lost on resume");
++   check(!request.options.containsKey("--user-agent") && !request.options.containsKey("--referer") && !request.options.containsKey("--add-header") && !request.options.containsKey("--cookies"),"Anonymous analysis profile became authenticated at download");
++   task.useBrowserSession=true;
+    task.capturedDirect=true;task.manifest=true;task.directUrl="https://cdn.test/manifest?sig=token";task.formatId="bestvideo[height=2160]+bestaudio/best[height=2160]";
+    var restored=TaskState.fromIntent(task.toIntent(service,"resume"));
+    check(restored.manifest && restored.capturedDirect,"Manifest flag not retained across pause/resume");
+--- a/tests/format_parser_test.py
++++ b/tests/format_parser_test.py
+@@ -39,7 +39,7 @@
+   formats.put(video("ts","ts","avc1",480,true));
+   formats.put(new JSONObject().put("format_id","140").put("url","https://cdn.test/audio.m4a").put("ext","m4a").put("vcodec","none").put("acodec","mp4a.40.2").put("abr",128).put("filesize",10000));
+   formats.put(video("sb","mhtml","images",9000,false));
+-  formats.put(new JSONObject().put("format_id","fake").put("vcodec","avc1").put("ext","mp4").put("height",10000));
++  formats.put(new JSONObject().put("format_id","invalid/id").put("vcodec","avc1").put("ext","mp4").put("height",10000));
+   var parsed=parser.parseFormats(new JSONObject().put("title","Fixture").put("duration",120).put("formats",formats));
+   check(parsed.videos.size()==6,"Lost real containers or included storyboards/unresolved entries");
+   check(parsed.videos.get(0).height==4320,"Highest available resolution is not first");
+@@ -53,6 +53,15 @@
+   check(progressive.audios.size()==4,"Progressive video with sound must provide MP3 extraction");
+   var onlyImages=parser.parseFormats(new JSONObject().put("formats",new JSONArray().put(video("sb","mhtml","images",9000,false))));
+   check(onlyImages.videos.isEmpty() && onlyImages.audios.isEmpty(),"Images must not count as downloadable media");
++  JSONArray allFormats=new JSONArray();
++  for(int i=0;i<37;i++)allFormats.put(video("variant-"+i,i%2==0?"mp4":"webm",i%2==0?"av01":"vp9",i<3?2160:1080,false));
++  allFormats.put(new JSONObject().put("format_id","audio").put("url","https://cdn.test/audio.m4a").put("ext","m4a").put("vcodec","none").put("acodec","mp4a.40.2"));
++  var all=parser.parseFormats(new JSONObject().put("_satlink_browser_session",false).put("formats",allFormats));
++  check(all.videos.size()==37,"Independent yt-dlp IDs collapsed into fewer cards");
++  check(all.videos.get(0).height==2160 && !all.videos.get(0).useBrowserSession,"Anonymous 4K profile was not retained");
++  check(!all.audios.get(0).useBrowserSession,"MP3 switched the successful profile");
++  var fragment=parser.parseFormats(new JSONObject().put("formats",new JSONArray().put(video("fragment-4k","mp4","av01",2160,false).put("url","").put("protocol","http_dash_segments"))));
++  check(fragment.videos.size()==1 && fragment.videos.get(0).sourceUrl.contains("youtube.com"),"Fragment-backed format must download by page and ID");
+   var estimated=parser.parseFormats(new JSONObject().put("formats",new JSONArray().put(video("approx","mp4","avc1",720,true).put("filesize",0).put("filesize_approx",200000))));
+   check(estimated.videos.get(0).sizeEstimated,"filesize_approx must not be presented as exact");
+   var protectedRows=parser.parseFormats(new JSONObject().put("formats",new JSONArray().put(video("drm","mp4","avc1",2160,true).put("has_drm",true))));
+--- /dev/null
++++ b/tests/reference/DownloadRequestFactory.kt
+@@ -0,0 +1,203 @@
++package com.mvrk.vrka
++
++import com.yausername.youtubedl_android.YoutubeDLRequest
++import java.io.File
++
++internal object DownloadRequestFactory {
++    private const val outputMarker = "__VRKA_OUTPUT__"
++    private var nativeLibraryDir: String? = null
++
++    fun initNativeLibraryDir(dir: String?) {
++        nativeLibraryDir = dir
++    }
++
++    fun getQuickJsPath(): String? {
++        val f = nativeLibraryDir?.let { File(it, "libqjs.so") }
++        return if (f != null && f.exists()) f.absolutePath else null
++    }
++
++    private fun addJsRuntime(request: YoutubeDLRequest) {
++        val qjsPath = getQuickJsPath()
++        if (qjsPath != null) {
++            request.addOption("--js-runtimes", "quickjs:$qjsPath")
++        }
++        request.addOption("--remote-components", "ejs:github")
++    }
++
++    fun info(request: DownloadRequest): YoutubeDLRequest =
++        YoutubeDLRequest(request.resolvedMediaUrl ?: request.url).apply {
++            addOption("--no-warnings")
++            addOption("--legacy-server-connect")
++            if (!request.isPlaylist) addOption("--no-playlist")
++            addJsRuntime(this)
++            addSessionContext(request)
++        }
++
++    fun download(
++        job: DownloadJob,
++        stagingDirectory: File,
++        recoveryAttempt: Boolean = false,
++    ): YoutubeDLRequest {
++        val options = job.request
++        val source = options.resolvedMediaUrl ?: options.url
++        return YoutubeDLRequest(source).apply {
++            addOption("--newline")
++            addOption("--progress")
++            addOption("--no-mtime")
++            addOption("--no-overwrites")
++            addOption("--legacy-server-connect")
++            addOption("--concurrent-fragments", "4")
++            addOption("--print", "before_dl:__VRKA_TITLE__%(title)s")
++            addOption("--print", "after_move:$outputMarker%(filepath)s")
++            val stagingTemplate = if (options.isPlaylist) {
++                "%(playlist_index|0)03d-%(title).96B.%(ext)s"
++            } else {
++                "media.%(ext)s"
++            }
++            addOption("-o", File(stagingDirectory, stagingTemplate).absolutePath)
++
++            if (options.isPlaylist) {
++                options.playlistStart?.let { addOption("--playlist-start", it) }
++                options.playlistEnd?.let { addOption("--playlist-end", it) }
++            } else {
++                addOption("--no-playlist")
++            }
++
++            if (options.mode == MediaMode.AUDIO) {
++                val format = when (options.audioFormat) {
++                    AudioFormat.OPUS -> "bestaudio[acodec^=opus]/bestaudio/best"
++                    else -> "bestaudio/best"
++                }
++                addOption("-f", if (options.mode == MediaMode.AUDIO && options.resolvedMediaUrl == null && !options.isPlaylist) options.selectedFormat ?: format else format)
++                addOption("--extract-audio")
++                addOption("--audio-format", options.audioFormat.codec)
++                if (options.audioFormat == AudioFormat.MP3) {
++                    val bitrate = options.mp3Bitrate.coerceIn(128, 320)
++                    addOption("--audio-quality", "${bitrate}K")
++                }
++                if (options.embedThumbnail && options.audioFormat != AudioFormat.WAV) addOption("--embed-thumbnail")
++            } else {
++                val format = if (options.selectedFormat != null && options.resolvedMediaUrl == null && !options.isPlaylist) {
++                    options.selectedFormat
++                } else if (options.resolvedMediaUrl != null) {
++                    "bestvideo+bestaudio/best"
++                } else {
++                    buildVideoFormat(options.quality.height, options.prefer60Fps)
++                }
++                addOption("-f", format)
++                if (options.prefer60Fps) {
++                    addOption("-S", "res,fps")
++                }
++                addOption("--merge-output-format", options.selectedContainer ?: "mp4")
++            }
++
++            if (options.embedMetadata) addOption("--embed-metadata")
++            if (options.downloadSubtitles) {
++                addOption("--write-subs")
++                if (options.automaticCaptions) addOption("--write-auto-subs")
++                addOption("--sub-langs", options.subtitleLanguages.ifBlank { "en.*" })
++                if (options.mode == MediaMode.VIDEO && options.embedSubtitles) {
++                    addOption("--embed-subs")
++                }
++            }
++            if (options.sponsorBlock) {
++                addOption(
++                    "--sponsorblock-remove",
++                    options.sponsorCategories.ifBlank { "sponsor" },
++                )
++            }
++
++            trimSection(options)?.let {
++                addOption("--download-sections", it)
++                addOption("--force-keyframes-at-cuts")
++            }
++
++            addJsRuntime(this)
++            if (recoveryAttempt) {
++                addOption("--extractor-args", "generic:impersonate")
++            }
++            val effectiveHeaders = HeaderValidation.resolveEffectiveHeaders(options)
++            if (recoveryAttempt || options.resolvedMediaUrl != null) {
++                if (effectiveHeaders.keys.none { it.equals("User-Agent", true) }) {
++                    addOption("--user-agent", DESKTOP_USER_AGENT)
++                }
++                if (effectiveHeaders.keys.none { it.equals("Referer", true) }) {
++                    addOption("--referer", options.url)
++                }
++            }
++            addSessionContext(options)
++            if (options.customArguments.isNotEmpty()) {
++                addCommands(safeCustomArguments(options).take(40))
++            }
++        }
++    }
++
++    fun outputPaths(responseText: String): List<String> =
++        responseText.lineSequence()
++            .map(String::trim)
++            .filter { it.startsWith(outputMarker) }
++            .map { it.removePrefix(outputMarker).trim() }
++            .filter(String::isNotEmpty)
++            .distinct()
++            .toList()
++
++    private fun YoutubeDLRequest.addSessionContext(request: DownloadRequest) {
++        val effectiveHeaders = HeaderValidation.resolveEffectiveHeaders(request)
++        effectiveHeaders.forEach { (name, value) ->
++            addCommands(listOf("--add-header", "$name:$value"))
++        }
++    }
++
++    private fun safeCustomArguments(request: DownloadRequest): List<String> {
++        if (request.mode == MediaMode.AUDIO) return request.customArguments
++        val optionsWithValues = setOf(
++            "-f",
++            "--format",
++            "--audio-format",
++            "--audio-quality",
++            "--merge-output-format",
++            "--remux-video",
++            "--recode-video",
++        )
++        val flags = setOf("-x", "--extract-audio")
++        val result = mutableListOf<String>()
++        var skipValue = false
++        request.customArguments.forEach { argument ->
++            if (skipValue) {
++                skipValue = false
++            } else if (argument in optionsWithValues) {
++                skipValue = true
++            } else if (argument in flags || optionsWithValues.any { argument.startsWith("$it=") }) {
++                Unit
++            } else {
++                result += argument
++            }
++        }
++        return result
++    }
++
++    private fun trimSection(request: DownloadRequest): String? {
++        val start = request.trimStart.trim()
++        val end = request.trimEnd.trim()
++        if (start.isEmpty() && end.isEmpty()) return null
++        return "*${start.ifEmpty { "0" }}-${end.ifEmpty { "inf" }}"
++    }
++
++    fun buildVideoFormat(height: Int?, prefer60Fps: Boolean): String {
++        val heightFilter = if (height != null && height > 0) "[height<=$height]" else ""
++        val tiers = mutableListOf<String>()
++        if (prefer60Fps) {
++            tiers.add("bestvideo$heightFilter[fps>=60]+bestaudio")
++        }
++        tiers.add("bestvideo$heightFilter+bestaudio")
++        if (heightFilter.isNotEmpty()) {
++            tiers.add("best$heightFilter")
++        }
++        tiers.add("best")
++        return tiers.joinToString("/")
++    }
++
++    internal const val DESKTOP_USER_AGENT =
++        "Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 " +
++            "(KHTML, like Gecko) Chrome/138.0 Mobile Safari/537.36"
++}
+--- /dev/null
++++ b/tests/reference/VrkaDownloadManager.kt
+@@ -0,0 +1,1003 @@
++package com.mvrk.vrka
++
++import android.content.Context
++import android.media.MediaMetadataRetriever
++import android.content.Intent
++import android.net.Uri
++import android.util.Log
++import com.mvrk.vrka.engine.*
++import com.yausername.ffmpeg.FFmpeg
++import com.yausername.youtubedl_android.YoutubeDL
++import kotlinx.coroutines.CompletableDeferred
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.SupervisorJob
++import kotlinx.coroutines.channels.Channel
++import kotlinx.coroutines.flow.MutableStateFlow
++import kotlinx.coroutines.flow.StateFlow
++import kotlinx.coroutines.flow.asStateFlow
++import kotlinx.coroutines.launch
++import kotlinx.coroutines.ensureActive
++import java.io.File
++import java.io.FileOutputStream
++import java.io.IOException
++import java.util.UUID
++import java.util.concurrent.ConcurrentHashMap
++import java.util.concurrent.atomic.AtomicBoolean
++
++data class ActiveFallbackState(
++    val jobId: String,
++    val job: DownloadJob,
++    val engine: FallbackEngine,
++    val isVisible: Boolean = true,
++)
++
++class DownloadExecutionException(
++    message: String,
++    val exitCode: Int,
++    val outputTail: List<String>,
++    val transferStarted: Boolean,
++) : RuntimeException(message)
++
++class VrkaDownloadManager(
++    private val context: Context,
++    val settingsRepository: SettingsRepository,
++    private val scope: CoroutineScope,
++) {
++    private val queue = Channel<String>(Channel.UNLIMITED)
++    private val persistRequests = Channel<Unit>(Channel.CONFLATED)
++    private val cancelled = ConcurrentHashMap.newKeySet<String>()
++    private val activeFallbackEngines = ConcurrentHashMap<String, FallbackEngine>()
++    private val initialized = AtomicBoolean(false)
++    private val historyReady = CompletableDeferred<Unit>()
++    private val store = JobStore(context)
++    private val publisher = OutputPublisher(context, settingsRepository)
++    private val stagingRoot by lazy { File(context.getExternalFilesDir(null), "staging") }
++    private val speedPattern = Regex("""\bat\s+([^\s]+/s)""", RegexOption.IGNORE_CASE)
++
++    private val _jobs = MutableStateFlow<List<DownloadJob>>(emptyList())
++    val jobs: StateFlow<List<DownloadJob>> = _jobs.asStateFlow()
++    val sharedUrl = MutableStateFlow("")
++
++    private val _activeFallback = MutableStateFlow<ActiveFallbackState?>(null)
++    val activeFallback: StateFlow<ActiveFallbackState?> = _activeFallback.asStateFlow()
++
++    private val _runtime = MutableStateFlow(RuntimeStatus())
++    val runtime: StateFlow<RuntimeStatus> = _runtime.asStateFlow()
++
++    val diagnosticStore = DiagnosticStore(context, scope)
++    val diagnostics: StateFlow<List<DiagnosticEntry>> = diagnosticStore.entries
++
++    val componentUpdateManager = ComponentUpdateManager.getInstance(context)
++
++    fun clearDiagnostics() {
++        scope.launch(Dispatchers.IO) {
++            diagnosticStore.clear()
++        }
++    }
++
++    fun dismissFallbackView() {
++        _activeFallback.value = _activeFallback.value?.copy(isVisible = false)
++    }
++
++    fun showFallbackView(jobId: String) {
++        val current = _activeFallback.value
++        if (current != null && current.jobId == jobId) {
++            _activeFallback.value = current.copy(isVisible = true)
++        }
++    }
++
++    init {
++        scope.launch(Dispatchers.IO) {
++            val loaded = runCatching { store.load() }.getOrDefault(emptyList())
++            synchronized(_jobs) {
++                _jobs.value = (_jobs.value + loaded).distinctBy { it.id }.sortedByDescending(DownloadJob::createdAt)
++            }
++            historyReady.complete(Unit)
++            for (ignored in persistRequests) {
++                store.save(_jobs.value)
++            }
++        }
++        scope.launch(Dispatchers.IO) {
++            historyReady.await()
++            for (jobId in queue) process(jobId)
++        }
++    }
++
++    suspend fun analyze(request: DownloadRequest, processId: String): MediaAnalysis = kotlinx.coroutines.withContext(Dispatchers.IO) {
++        require(isHttpUrl(request.url)) { "أدخل رابط http أو https صالحًا" }
++        ensureInitialized()
++        kotlinx.coroutines.currentCoroutineContext().ensureActive()
++        val probe = DownloadRequestFactory.info(request.copy(isPlaylist = false)).apply {
++            addOption("--dump-single-json")
++            addOption("--skip-download")
++            addOption("--socket-timeout", "20")
++            addOption("--retries", "1")
++        }
++        val result = YoutubeDL.getInstance().execute(probe, processId) { _, _, _ -> }
++        check(result.exitCode == 0) { "تعذر تحليل الرابط؛ تحقق من الاتصال أو حدّث مكون yt-dlp" }
++        MediaFormats.parse(result.out)
++    }
++
++    fun cancelAnalysis(processId: String) {
++        runCatching { YoutubeDL.getInstance().destroyProcessById(processId) }
++    }
++
++    fun enqueue(request: DownloadRequest): String {
++        require(isHttpUrl(request.url)) { "Enter a valid http or https URL." }
++        val id = UUID.randomUUID().toString()
++        val job = DownloadJob(id = id, request = request)
++        mutate(persist = true) { listOf(job) + it }
++        queue.trySend(id)
++        return id
++    }
++
++    fun retry(jobId: String): String? {
++        val previous = _jobs.value.firstOrNull { it.id == jobId } ?: return null
++        if (!previous.state.isTerminal) return null
++        val id = UUID.randomUUID().toString()
++        val request = previous.request.copy(
++            resolvedMediaUrl = null,
++            resolvedHeaders = emptyMap(),
++        )
++        val replacement = DownloadJob(
++            id = id,
++            request = request,
++            title = previous.title,
++            detail = "Queued retry",
++            attempt = previous.attempt + 1,
++        )
++        mutate(persist = true) { listOf(replacement) + it }
++        queue.trySend(id)
++        return id
++    }
++
++    fun cancel(jobId: String) {
++        val job = _jobs.value.firstOrNull { it.id == jobId } ?: return
++        if (job.state.isTerminal) return
++        cancelled += jobId
++        activeFallbackEngines.remove(jobId)?.cancel()
++        if (_activeFallback.value?.jobId == jobId) {
++            _activeFallback.value = null
++        }
++        YoutubeDL.getInstance().destroyProcessById(jobId)
++        update(
++            jobId,
++            state = JobState.CANCELLED,
++            detail = "Cancelled",
++            error = "",
++            persist = true,
++        )
++        cleanupStaging(jobId)
++    }
++
++    fun setJobDestination(jobId: String, treeUri: String) {
++        val job = current(jobId) ?: return
++        val updated = job.copy(
++            request = job.request.copy(destinationTreeUri = treeUri),
++            state = JobState.PREPARING,
++            detail = "Folder selected; resuming",
++            updatedAt = System.currentTimeMillis(),
++        )
++        replace(updated, persist = true)
++        queue.trySend(jobId)
++    }
++
++    fun deleteJob(jobId: String) {
++        val job = _jobs.value.firstOrNull { it.id == jobId } ?: return
++        if (!job.state.isTerminal) return
++        scope.launch(Dispatchers.IO) {
++            job.outputUris.forEach(publisher::delete)
++            mutate(persist = true) { jobs -> jobs.filterNot { it.id == jobId } }
++        }
++    }
++
++    fun clearFinished() {
++        scope.launch(Dispatchers.IO) {
++            mutate(persist = true) { list -> list.filterNot { it.state.isTerminal } }
++        }
++    }
++
++    fun updateRuntime(channel: UpdatePreference) {
++        if (_runtime.value.busy) return
++        scope.launch(Dispatchers.IO) {
++            _runtime.value = _runtime.value.copy(busy = true, message = "Updating yt-dlp")
++            runCatching {
++                ensureInitialized()
++                val updater = SecureComponentUpdater(context)
++                val targetTag = updater.fetchLatestReleaseTag(channel)
++                val postVersion = updater.updateYtDlp(channel, targetTag).getOrThrow()
++                val version = normalizedVersion(postVersion)
++                _runtime.value = RuntimeStatus(
++                    initialized = true,
++                    version = version,
++                    message = "yt-dlp " + version + " ready",
++                )
++            }.onFailure { error ->
++                Log.e("VRKA", "Runtime update failed", error)
++                val bundled = runCatching {
++                    YoutubeDL.getInstance().versionName(context)
++                }.getOrNull().orEmpty()
++                _runtime.value = RuntimeStatus(
++                    initialized = initialized.get(),
++                    version = bundled,
++                    message = "Update failed; known-good runtime retained: " + safeError(error),
++                )
++            }
++        }
++    }
++
++    fun openOutput(uriText: String) {
++        val uri = Uri.parse(uriText)
++        val intent = Intent(Intent.ACTION_VIEW).apply {
++            data = uri
++            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
++        }
++        runCatching { context.startActivity(intent) }
++    }
++
++    fun shareOutput(uriText: String) {
++        val uri = Uri.parse(uriText)
++        val intent = Intent.createChooser(
++            Intent(Intent.ACTION_SEND).apply {
++                type = context.contentResolver.getType(uri) ?: "*/*"
++                putExtra(Intent.EXTRA_STREAM, uri)
++                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
++            },
++            "Share with",
++        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
++        runCatching { context.startActivity(intent) }
++    }
++
++    private suspend fun process(jobId: String) {
++        if (isCancelled(jobId)) return
++        val currentJobInitial = current(jobId) ?: return
++        val saveMode = settingsRepository.settings.value.saveLocationMode
++        val hasExplicitDest = currentJobInitial.request.destinationTreeUri != null
++
++        if (saveMode == SaveLocationMode.ASK_EVERY_TIME && !hasExplicitDest) {
++            update(
++                jobId,
++                state = JobState.WAITING_FOR_USER,
++                detail = "Choose download location to start",
++                persist = true,
++            )
++            return
++        }
++
++        val targetTreeUri = currentJobInitial.request.destinationTreeUri?.takeIf { it.isNotBlank() }
++            ?: settingsRepository.settings.value.outputTreeUri.takeIf { it.isNotBlank() }
++        if (!targetTreeUri.isNullOrBlank()) {
++            val treeUri = Uri.parse(targetTreeUri)
++            if (!OutputPublisher.hasPersistedTreePermission(context, treeUri)) {
++                Log.w("VRKA", "Tree permission not granted or revoked for $targetTreeUri")
++                update(
++                    jobId,
++                    state = JobState.WAITING_FOR_USER,
++                    detail = "Download location unavailable; choose location",
++                    persist = true,
++                )
++                return
++            }
++        }
++
++        var currentStage = "Direct Extraction"
++        update(jobId, state = JobState.PREPARING, detail = "Starting runtime", persist = true)
++        DownloadService.start(context)
++        try {
++            ensureInitialized()
++            var job = current(jobId) ?: return
++            if (isCancelled(jobId)) return
++            val forceBrowserDiscovery = job.request.forceBrowserDiscovery
++
++            val metadata = if (forceBrowserDiscovery) null else runCatching {
++                YoutubeDL.getInstance().getInfo(DownloadRequestFactory.info(job.request))
++            }.getOrNull()
++            if (isCancelled(jobId)) return
++            if (metadata != null) {
++                val title = metadata.title?.take(180).orEmpty()
++                if (title.isNotBlank()) {
++                    update(jobId, title = title, detail = "Source ready", persist = true)
++                }
++            }
++
++            job = current(jobId) ?: return
++            var failure = if (forceBrowserDiscovery) {
++                RuntimeException("Manual browser discovery requested")
++            } else {
++                runCatching { downloadOnce(job) }.exceptionOrNull()
++            }
++            if (failure != null && !forceBrowserDiscovery) {
++                Log.e("VRKA", "Direct attempt failed: ${safeError(failure)}")
++            }
++
++            val priorCategories = mutableListOf<FailureCategory>()
++            if (failure != null) {
++                val firstCategory = classifyDownloadError(failure.message.orEmpty())
++                if (firstCategory != FailureCategory.UNKNOWN) {
++                    priorCategories.add(firstCategory)
++                }
++            }
++
++            val execFailure = failure as? DownloadExecutionException
++            val initialTransferStarted = execFailure?.transferStarted == true || job.progress > 0f
++
++            // Direct recovery retry: only retry if category in (CLOUDFLARE, HTTP) and transfer has not started
++            if (
++                failure != null &&
++                !forceBrowserDiscovery &&
++                job.request.resolvedMediaUrl == null &&
++                !initialTransferStarted &&
++                !isCancelled(jobId) &&
++                shouldRetryDirect(failure)
++            ) {
++                currentStage = "Direct Recovery"
++                cleanupStaging(job.id)
++                update(
++                    job.id,
++                    state = JobState.PREPARING,
++                    detail = "Retrying direct extraction",
++                    persist = true,
++                )
++                failure = runCatching { downloadOnce(job, recoveryAttempt = true) }.exceptionOrNull()
++                if (failure != null) {
++                    Log.e("VRKA", "Direct recovery failed: ${safeError(failure)}")
++                    val retryCategory = classifyDownloadError(failure.message.orEmpty())
++                    if (retryCategory != FailureCategory.UNKNOWN) {
++                        priorCategories.add(retryCategory)
++                    }
++                }
++            }
++
++            // Failure classification and browser-fallback eligibility
++            if (failure != null && job.request.resolvedMediaUrl == null && !isCancelled(jobId)) {
++                val errorMessage = failure.message.orEmpty()
++                val latestExecFailure = failure as? DownloadExecutionException
++                val outputTailText = latestExecFailure?.outputTail?.joinToString("\n").orEmpty()
++                val transferStarted = latestExecFailure?.transferStarted == true ||
++                    job.progress > 0f ||
++                    isTransferFailureAfterResolution(outputTailText, hasTransferStarted = false)
++
++                val (category, isRecoverable) = classifyAndCheckRecoverable(
++                    errorMessage = errorMessage,
++                    targetUrl = job.request.url,
++                    executionOutput = outputTailText,
++                    hasResolvedMediaUrl = false,
++                    hasTransferStarted = transferStarted,
++                    priorCategories = priorCategories,
++                )
++                Log.i("VRKA", "Failure classified: category=$category, recoverable=$isRecoverable, transferStarted=$transferStarted, nativeTarget=${isYtdlpNativeTarget(job.request.url)}")
++
++                if (forceBrowserDiscovery || isRecoverable) {
++                    // Automatic browser fallback
++                    currentStage = "Browser Fallback"
++                    update(
++                        jobId,
++                        state = JobState.BROWSER_FALLBACK,
++                        detail = if (forceBrowserDiscovery) {
++                            "Open the site, choose a server, then play the video"
++                        } else {
++                            "Direct extraction failed ($category); starting browser fallback"
++                        },
++                        error = "",
++                        persist = true,
++                    )
++
++                    val engine = FallbackEngine(
++                        context = context,
++                        taskId = jobId,
++                        targetUrl = job.request.url,
++                    )
++                    activeFallbackEngines[jobId] = engine
++                    _activeFallback.value = ActiveFallbackState(jobId, job, engine, isVisible = true)
++
++                    try {
++                        val result = engine.execute()
++                        when (result) {
++                            is FallbackResult.Success -> {
++                                val bundle = result.bundle
++                                // Dismiss fallback view; transfer proceeds in queue
++                                engine.dismiss()
++                                activeFallbackEngines.remove(jobId)
++                                _activeFallback.value = null
++
++                                val headers = buildMap {
++                                    if (bundle.referer.isNotBlank()) put("Referer", bundle.referer)
++                                    if (bundle.origin.isNotBlank()) put("Origin", bundle.origin)
++                                    if (bundle.userAgent.isNotBlank()) put("User-Agent", bundle.userAgent)
++                                    putAll(bundle.headers)
++                                }
++                                val updated = job.copy(
++                                    request = job.request.copy(
++                                        resolvedMediaUrl = bundle.mediaUrl,
++                                        resolvedHeaders = headers,
++                                    ),
++                                    state = JobState.PREPARING,
++                                    detail = "${bundle.mediaKind.value.uppercase()} candidate selected; downloading",
++                                    updatedAt = System.currentTimeMillis(),
++                                )
++                                replace(updated, persist = true)
++                                DownloadService.start(context)
++
++                                // Resume download with the same task (native replay)
++                                job = current(jobId) ?: return
++                                currentStage = "Native Replay"
++                                Log.i("VRKA", "Resuming downloadOnce (native replay) for job $jobId with resolved media: ${bundle.mediaUrl}")
++                                failure = runCatching { downloadOnce(job) }.exceptionOrNull()
++                                if (failure != null) {
++                                    Log.w("VRKA", "Native replay failed: ${failure.message}")
++                                    val replayReason = classifyNativeReplayFailure(failure.message ?: "")
++                                    val eligible = isEligibleForGeckoTransport(
++                                        reason = replayReason,
++                                        isBrowserDerivedCandidate = true,
++                                    )
++                                    if (eligible && !isCancelled(jobId)) {
++                                        currentStage = "Gecko Transport"
++                                        Log.i("VRKA", "Native replay failed with $replayReason; activating GeckoWebExecutor fallback transport for job $jobId")
++                                        failure = runCatching {
++                                            downloadViaGeckoTransport(job, bundle, stagingDirectory(job.id))
++                                        }.exceptionOrNull()
++                                        if (failure != null) {
++                                            Log.e("VRKA", "GeckoWebExecutor transport transfer failed: ${failure.message}", failure)
++                                        }
++                                    }
++                                }
++                            }
++                            is FallbackResult.Failed -> {
++                                Log.e("VRKA", "Browser fallback failed: ${result.reason}")
++                                failure = RuntimeException(result.reason.ifBlank { "Browser fallback could not find a media stream" })
++                            }
++                            is FallbackResult.Cancelled -> {
++                                // Cancellation handled below
++                                return
++                            }
++                        }
++                    } finally {
++                        engine.cleanup()
++                        activeFallbackEngines.remove(jobId)
++                        _activeFallback.value = null
++                    }
++                } else {
++                    // Terminal failure — NOT eligible for fallback
++                    Log.i("VRKA", "Failure is terminal ($category); no fallback")
++                }
++            }
++
++            if (failure != null) throw failure
++        } catch (error: Throwable) {
++            Log.e("VRKA", "Download processing for $jobId failed: ${error.message}", error)
++            if (!isCancelled(jobId)) {
++                val failureMsg = safeError(error)
++                val fallbackFailed = currentStage == "Browser Fallback" || failureMsg.contains("browser fallback", ignoreCase = true)
++                val failureDetail = if (fallbackFailed) {
++                    "Browser fallback could not find a media stream"
++                } else {
++                    "Download failed"
++                }
++                update(
++                    jobId,
++                    state = JobState.FAILED,
++                    detail = failureDetail,
++                    error = failureMsg,
++                    persist = true,
++                )
++                val currentJob = current(jobId)
++                val stage = if (currentJob?.detail?.contains("Publishing", ignoreCase = true) == true) {
++                    "Publishing"
++                } else {
++                    currentStage
++                }
++                val categoryName = if (fallbackFailed) {
++                    FailureCategory.BROWSER_RECOVERABLE.name
++                } else {
++                    classifyDownloadError(error.message.orEmpty()).name
++                }
++                val tailOutput = (error as? DownloadExecutionException)?.outputTail?.takeLast(30)?.joinToString("\n")
++                    ?: error.message.orEmpty().take(2000)
++                diagnosticStore.record(
++                    DiagnosticEntry(
++                        jobId = jobId,
++                        title = currentJob?.title?.ifBlank { currentJob.request.url }.orEmpty(),
++                        stage = stage,
++                        failureCategory = categoryName,
++                        summary = failureMsg,
++                        detail = tailOutput,
++                        url = currentJob?.request?.url.orEmpty(),
++                        quality = currentJob?.request?.quality?.label.orEmpty(),
++                        acquisitionMethod = if (currentJob?.request?.resolvedMediaUrl != null) "Browser Fallback" else "Native yt-dlp",
++                    )
++                )
++            }
++            cleanupStaging(jobId)
++        } finally {
++            activeFallbackEngines.remove(jobId)?.cancel()
++            DownloadService.stopIfIdle(context)
++        }
++    }
++
++    private fun downloadOnce(job: DownloadJob, recoveryAttempt: Boolean = false) {
++        if (isCancelled(job.id)) return
++        check(job.request.selectedFormat == null || job.request.resolvedMediaUrl == null) {
++            "الصيغة المختارة تخص الرابط الأصلي. أعد تحليل الرابط أو استخدم الاختيار التلقائي مع المتصفح."
++        }
++        val directory = stagingDirectory(job.id)
++        update(
++            job.id,
++            state = JobState.DOWNLOADING,
++            detail = "Downloading",
++            error = "",
++            persist = true,
++        )
++        var lastUiUpdate = 0L
++        val outputLines = mutableListOf<String>()
++        var transferStarted = false
++
++        val response = try {
++            YoutubeDL.getInstance().execute(
++                DownloadRequestFactory.download(job, directory, recoveryAttempt),
++                job.id,
++            ) { progress, eta, line ->
++                outputLines.add(line)
++                if (outputLines.size > 200) {
++                    outputLines.removeAt(0)
++                }
++
++                val isCommandLineEcho = line.startsWith("[debug]", ignoreCase = true) ||
++                    line.contains("--print", ignoreCase = true) ||
++                    line.contains("before_dl:", ignoreCase = true) ||
++                    line.contains("%(title)s", ignoreCase = true)
++
++                if (!isCommandLineEcho && (TRANSFER_STARTED_MARKERS.any { line.contains(it, ignoreCase = true) } || progress > 0f)) {
++                    transferStarted = true
++                }
++
++                if (!isCommandLineEcho && line.contains("__VRKA_TITLE__", ignoreCase = true)) {
++                    val parsedTitle = line.substringAfter("__VRKA_TITLE__").substringAfter("__vrka_title__").trim()
++                    if (parsedTitle.isNotBlank()) {
++                        update(job.id, title = parsedTitle)
++                    }
++                }
++
++                val now = System.currentTimeMillis()
++                if (now - lastUiUpdate >= 250 || progress >= 100f) {
++                    lastUiUpdate = now
++                    val detail = when {
++                        line.contains("[Merger]", true) ||
++                            line.contains("[ExtractAudio]", true) ||
++                            line.contains("[Metadata]", true) -> "Post-processing"
++                        else -> "Downloading"
++                    }
++                    update(
++                        job.id,
++                        state = if (detail == "Post-processing") {
++                            JobState.POSTPROCESSING
++                        } else {
++                            JobState.DOWNLOADING
++                        },
++                        progress = progress.coerceIn(0f, 100f),
++                        speed = speedPattern.find(line)?.groupValues?.getOrNull(1).orEmpty(),
++                        etaSeconds = eta.takeIf { it >= 0 },
++                        detail = detail,
++                    )
++                }
++            }
++        } catch (e: Exception) {
++            val tail = outputLines.takeLast(50)
++            val combined = (tail + listOfNotNull(e.message)).joinToString("\n")
++            if (TRANSFER_STARTED_MARKERS.any { combined.contains(it, ignoreCase = true) }) {
++                transferStarted = true
++            }
++            throw DownloadExecutionException(
++                message = e.message ?: "yt-dlp execution failed",
++                exitCode = -1,
++                outputTail = tail,
++                transferStarted = transferStarted,
++            )
++        }
++
++        if (isCancelled(job.id)) return
++        if (response.exitCode != 0) {
++            val errText = response.err.ifBlank { "yt-dlp exited with code " + response.exitCode }
++            val tail = (outputLines + response.out.lines()).filter { it.isNotBlank() }.takeLast(50)
++            val combined = (tail + errText).joinToString("\n")
++            if (TRANSFER_STARTED_MARKERS.any { combined.contains(it, ignoreCase = true) }) {
++                transferStarted = true
++            }
++            throw DownloadExecutionException(
++                message = errText,
++                exitCode = response.exitCode,
++                outputTail = tail,
++                transferStarted = transferStarted,
++            )
++        }
++        update(
++            job.id,
++            state = JobState.POSTPROCESSING,
++            progress = 100f,
++            detail = "Publishing to Downloads",
++            persist = true,
++        )
++        var outputs = DownloadRequestFactory.outputPaths(response.out)
++            .map(::File)
++            .filter(File::isFile)
++        if (outputs.isEmpty()) {
++            outputs = directory.walkTopDown()
++                .filter { it.isFile && !it.name.endsWith(".part") }
++                .sortedBy(File::lastModified)
++                .toList()
++        }
++        check(outputs.isNotEmpty()) { "yt-dlp completed but produced no output file." }
++        if (job.request.mode == MediaMode.VIDEO) {
++            requireVideoStreams(job, outputs)
++        } else {
++            requireAudioStreams(job, outputs)
++        }
++        val published = outputs.mapIndexed { index, file ->
++            val outputName = preferredOutputName(job, file, index, outputs.size)
++            publisher.publish(file, outputName, destinationTreeUri = job.request.destinationTreeUri).toString()
++        }
++        val isOpus = job.request.mode == MediaMode.AUDIO && job.request.audioFormat == AudioFormat.OPUS
++        val transcoded = isOpus && outputLines.any { it.contains("libopus", ignoreCase = true) || it.contains("Converting audio", ignoreCase = true) }
++        val doneDetail = if (isOpus) {
++            if (transcoded) "Saved (transcoded to Opus)" else "Saved (native Opus stream copy)"
++        } else if (published.size == 1) {
++            "Saved to Downloads/VRKA"
++        } else {
++            "Saved " + published.size + " files"
++        }
++        update(
++            job.id,
++            state = JobState.DONE,
++            progress = 100f,
++            detail = doneDetail,
++            outputUris = published,
++            error = "",
++            persist = true,
++        )
++        cleanupStaging(job.id)
++    }
++
++    private fun downloadViaGeckoTransport(
++        job: DownloadJob,
++        bundle: HandoffBundle,
++        directory: File,
++    ) {
++        if (isCancelled(job.id)) return
++        directory.mkdirs()
++
++        update(
++            job.id,
++            state = JobState.DOWNLOADING,
++            detail = "Downloading via browser network",
++            error = "",
++            persist = true,
++        )
++
++        val runtime = GeckoRuntimeManager.getInstance(context).runtime
++        val transport = GeckoWebExecutorTransport(runtime)
++
++        val headers = buildMap {
++            putAll(job.request.customHeaders)
++            if (job.request.referer.isNotBlank()) put("Referer", job.request.referer)
++            if (job.request.origin.isNotBlank()) put("Origin", job.request.origin)
++            if (bundle.referer.isNotBlank()) put("Referer", bundle.referer)
++            if (bundle.origin.isNotBlank()) put("Origin", bundle.origin)
++            if (bundle.userAgent.isNotBlank()) put("User-Agent", bundle.userAgent)
++            putAll(bundle.headers)
++        }
++
++        val isHls = bundle.mediaKind == CandidateKind.HLS || MediaAssembly.isHlsPlaylist(bundle.mediaUrl)
++        val isDash = bundle.mediaKind == CandidateKind.DASH || MediaAssembly.isDashManifest(bundle.mediaUrl)
++        val outputFile: File
++
++        if (isHls || isDash) {
++            val segments: List<String>
++            if (isHls) {
++                Log.i("VRKA", "Gecko transport downloading HLS playlist for job ${job.id}")
++                val playlistRequest = GeckoTransportRequest(url = bundle.mediaUrl, headers = headers)
++                val playlistResponse = transport.fetch(playlistRequest)
++                val playlistContent = playlistResponse.body?.bufferedReader()?.use { it.readText() }
++                    ?: throw IOException("Empty playlist response from ${bundle.mediaUrl}")
++
++                var variantUrl = bundle.mediaUrl
++                var variantContent = playlistContent
++
++                if (MediaAssembly.isMasterPlaylist(playlistContent)) {
++                    val variants = MediaAssembly.parseMasterPlaylist(playlistContent, bundle.mediaUrl)
++                    val selected = MediaAssembly.selectVariant(variants, job.request.quality.height)
++                        ?: throw IOException("No suitable variant stream found in master playlist")
++                    Log.i("VRKA", "Selected HLS variant: $selected")
++                    variantUrl = selected
++                    val variantResponse = transport.fetch(GeckoTransportRequest(url = selected, headers = headers))
++                    variantContent = variantResponse.body?.bufferedReader()?.use { it.readText() }
++                        ?: throw IOException("Empty variant playlist response from $selected")
++                }
++
++                segments = MediaAssembly.parseVariantSegments(variantContent, variantUrl)
++            } else {
++                Log.i("VRKA", "Gecko transport downloading DASH manifest for job ${job.id}")
++                val mpdRequest = GeckoTransportRequest(url = bundle.mediaUrl, headers = headers)
++                val mpdResponse = transport.fetch(mpdRequest)
++                val mpdContent = mpdResponse.body?.bufferedReader()?.use { it.readText() }
++                    ?: throw IOException("Empty DASH manifest response from ${bundle.mediaUrl}")
++                segments = MediaAssembly.parseDashSegments(mpdContent, bundle.mediaUrl)
++            }
++
++            if (segments.isEmpty()) {
++                throw IOException("No media segments found in manifest")
++            }
++
++            Log.i("VRKA", "Gecko transport transferring ${segments.size} segments concurrently for job ${job.id}")
++            val stagingFile = File(directory, "assembled_media.ts")
++            var lastUiUpdate = 0L
++            kotlinx.coroutines.runBlocking(Dispatchers.IO) {
++                ConcurrentTransferEngine.downloadHlsSegments(
++                    transport = transport,
++                    segments = segments,
++                    headers = headers,
++                    outputFile = stagingFile,
++                    directory = directory,
++                    maxWorkers = 4,
++                    isCancelled = { isCancelled(job.id) },
++                    onProgress = { completed, total ->
++                        val now = System.currentTimeMillis()
++                        if (now - lastUiUpdate >= 250 || completed >= total) {
++                            lastUiUpdate = now
++                            val progress = ((completed.toFloat() / total) * 100f).coerceIn(0f, 100f)
++                            update(
++                                job.id,
++                                progress = progress,
++                                detail = "Downloading segment $completed/$total",
++                            )
++                        }
++                    }
++                )
++            }
++            outputFile = stagingFile
++        } else {
++            Log.i("VRKA", "Gecko transport downloading direct media for job ${job.id}")
++            val directFile = File(directory, "media.mp4")
++            var lastUiUpdate = 0L
++            kotlinx.coroutines.runBlocking(Dispatchers.IO) {
++                ConcurrentTransferEngine.downloadDirectMedia(
++                    transport = transport,
++                    url = bundle.mediaUrl,
++                    headers = headers,
++                    destinationFile = directFile,
++                    directory = directory,
++                    maxWorkers = 4,
++                    isCancelled = { isCancelled(job.id) },
++                    onProgress = { written, total ->
++                        val now = System.currentTimeMillis()
++                        if (now - lastUiUpdate >= 250 || (total > 0 && written >= total)) {
++                            lastUiUpdate = now
++                            val progress = if (total > 0) ((written.toFloat() / total) * 100f).coerceIn(0f, 100f) else 50f
++                            update(
++                                job.id,
++                                progress = progress,
++                                detail = "Downloading via browser network",
++                            )
++                        }
++                    }
++                )
++            }
++            outputFile = directFile
++        }
++
++        if (isCancelled(job.id)) return
++
++        update(
++            job.id,
++            state = JobState.POSTPROCESSING,
++            progress = 100f,
++            detail = "Publishing to Downloads",
++            persist = true,
++        )
++
++        val outputs = listOf(outputFile)
++        if (job.request.mode == MediaMode.VIDEO) {
++            requireVideoStreams(job, outputs)
++        } else {
++            requireAudioStreams(job, outputs)
++        }
++        val published = outputs.mapIndexed { index, file ->
++            val outputName = preferredOutputName(job, file, index, outputs.size)
++            publisher.publish(file, outputName, destinationTreeUri = job.request.destinationTreeUri).toString()
++        }
++
++        update(
++            job.id,
++            state = JobState.DONE,
++            progress = 100f,
++            detail = if (published.size == 1) "Saved to Downloads/VRKA" else "Saved ${published.size} files",
++            outputUris = published,
++            error = "",
++            persist = true,
++        )
++        cleanupStaging(job.id)
++    }
++
++    private fun requireAudioStreams(job: DownloadJob, outputs: List<File>) {
++        val expectedBitrate = if (job.request.audioFormat == AudioFormat.MP3) job.request.mp3Bitrate else null
++        outputs.forEach { file ->
++            val info = AudioValidator.validateAudioOutput(file, job.request.audioFormat, expectedBitrate, context)
++            Log.i("VRKA", "Audio validation passed for ${file.name}: format=${job.request.audioFormat}, codec=${info.codecName}, duration=${info.durationMs}ms")
++        }
++    }
++
++    private fun requireVideoStreams(job: DownloadJob, outputs: List<File>) {
++        if (job.request.mode != MediaMode.VIDEO) return
++        outputs.forEach { file ->
++            val media = runCatching {
++                val retriever = MediaMetadataRetriever()
++                try {
++                    retriever.setDataSource(file.absolutePath)
++                    val width = retriever
++                        .extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
++                        ?.toIntOrNull()
++                    val height = retriever
++                        .extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
++                        ?.toIntOrNull()
++                    Triple(
++                        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) == "yes" ||
++                            width?.let { it > 0 } == true,
++                        width,
++                        height,
++                    )
++                } finally {
++                    retriever.release()
++                }
++            }.getOrDefault(Triple(false, null, null))
++            check(media.first) {
++                "Video mode produced no video stream; refusing to publish an audio-only file."
++            }
++            job.request.quality.height?.let { cap ->
++                check(media.third == null || media.third!! <= cap) {
++                    "Downloaded video exceeds the requested ${cap}p quality cap."
++                }
++            }
++        }
++    }
++
++    private fun preferredOutputName(job: DownloadJob, file: File, index: Int, total: Int): String {
++        val title = job.title
++            .trim()
++            .takeIf { it.isNotBlank() && it != "Browser verification" }
++        val host = runCatching { Uri.parse(job.request.url).host.orEmpty().removePrefix("www.") }
++            .getOrDefault("")
++            .takeIf(String::isNotBlank)
++        val stem = title ?: host ?: "VRKA-${job.id.take(8)}"
++        val suffix = if (total > 1) " ${index + 1}" else ""
++        val extension = file.extension
++        return if (extension.isBlank()) stem + suffix else "$stem$suffix.$extension"
++    }
++
++    private fun ensureInitialized() {
++        if (initialized.get()) return
++        synchronized(initialized) {
++            if (initialized.get()) return
++            _runtime.value = RuntimeStatus(busy = true, message = "Preparing yt-dlp and FFmpeg")
++            YoutubeDL.getInstance().init(context)
++            FFmpeg.getInstance().init(context)
++            DownloadRequestFactory.initNativeLibraryDir(context.applicationInfo.nativeLibraryDir)
++            initialized.set(true)
++            val version = normalizedVersion(
++                YoutubeDL.getInstance().versionName(context).orEmpty(),
++            )
++            _runtime.value = RuntimeStatus(
++                initialized = true,
++                version = version,
++                message = "yt-dlp " + version + " ready",
++            )
++        }
++    }
++
++    private fun stagingDirectory(jobId: String): File {
++        stagingRoot.mkdirs()
++        return File(stagingRoot, jobId).apply { mkdirs() }
++    }
++
++    private fun cleanupStaging(jobId: String) {
++        val child = File(stagingRoot, jobId)
++        val rootPath = stagingRoot.absoluteFile.toPath().normalize()
++        val childPath = child.absoluteFile.toPath().normalize()
++        if (childPath.startsWith(rootPath) && childPath != rootPath) {
++            runCatching { child.deleteRecursively() }
++        }
++    }
++
++    private fun current(jobId: String): DownloadJob? =
++        _jobs.value.firstOrNull { it.id == jobId }
++
++    private fun isCancelled(jobId: String): Boolean =
++        jobId in cancelled || current(jobId)?.state == JobState.CANCELLED
++
++    private fun replace(job: DownloadJob, persist: Boolean) {
++        mutate(persist) { list -> list.map { if (it.id == job.id) job else it } }
++    }
++
++    private fun update(
++        jobId: String,
++        state: JobState? = null,
++        title: String? = null,
++        detail: String? = null,
++        progress: Float? = null,
++        speed: String? = null,
++        etaSeconds: Long? = null,
++        outputUris: List<String>? = null,
++        error: String? = null,
++        persist: Boolean = false,
++    ) {
++        mutate(persist) { list ->
++            list.map { job ->
++                if (job.id != jobId) job else job.copy(
++                    state = state ?: job.state,
++                    title = title ?: job.title,
++                    detail = detail ?: job.detail,
++                    progress = progress ?: job.progress,
++                    speed = speed ?: job.speed,
++                    etaSeconds = etaSeconds ?: job.etaSeconds,
++                    outputUris = outputUris ?: job.outputUris,
++                    error = error ?: job.error,
++                    updatedAt = System.currentTimeMillis(),
++                )
++            }
++        }
++    }
++
++    private fun mutate(persist: Boolean, transform: (List<DownloadJob>) -> List<DownloadJob>) {
++        synchronized(_jobs) {
++            _jobs.value = transform(_jobs.value)
++            if (persist) persistRequests.trySend(Unit)
++        }
++    }
++
++    private fun normalizedVersion(value: String): String =
++        value.removePrefix("yt-dlp ").trim()
++
++    private fun shouldRetryDirect(error: Throwable): Boolean {
++        val message = error.message.orEmpty().lowercase()
++        val category = classifyDownloadError(message)
++        if (category !in setOf(FailureCategory.CLOUDFLARE, FailureCategory.HTTP)) {
++            return false
++        }
++        val nonRecoverableNetworkErrors = listOf(
++            "timed out",
++            "timeout",
++            "network is unreachable",
++            "unable to resolve host",
++            "name or service not known",
++        )
++        return nonRecoverableNetworkErrors.none(message::contains)
++    }
++
++    private fun safeError(error: Throwable): String {
++        val raw = (error.message ?: error::class.java.simpleName)
++        val (_, guidance) = formatDownloadError(raw)
++        val text = if (guidance.isNotBlank() && guidance != raw) {
++            guidance
++        } else {
++            raw.lineSequence().toList().takeLast(2).joinToString(" ")
++        }
++        val redactedText = HeaderValidation.redactSensitiveHeaderInText(text)
++        return redactedText
++            .replace(Regex("""(?i)(cookie|authorization|proxy-authorization|token|signature|key|secret)=?[^\s&]*"""), "$1=[REDACTED]")
++            .replace(Regex("""https?://[^\s]+"""), "[private URL]")
++            .take(320)
++            .ifBlank { "The operation failed." }
++    }
++
++    private fun isHttpUrl(value: String): Boolean =
++        runCatching {
++            val uri = Uri.parse(value.trim())
++            uri.scheme in setOf("http", "https") && !uri.host.isNullOrBlank()
++        }.getOrDefault(false)
++
++    companion object {
++        fun create(context: Context): VrkaDownloadManager {
++            val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
++            val settings = SettingsRepository(context.applicationContext, scope)
++            return VrkaDownloadManager(context.applicationContext, settings, scope)
++        }
++    }
++}
+--- /dev/null
++++ b/tests/sltube_analysis_test.py
+@@ -0,0 +1,63 @@
++"""Compare actual SL.Tube option literals, then execute production YouTube routing."""
++from pathlib import Path
++import re,subprocess,tempfile
++root=Path(__file__).resolve().parents[1];base=root/'app/src/main/java/com/satlink/geckoviewtest'
++# Retained independent reference snapshots make this test runnable from the delivered project.
++ref=root/'tests/reference'
++expected={}
++for name in ['DownloadRequestFactory.kt','VrkaDownloadManager.kt']:
++ s=(ref/name).read_text()
++ if name.startswith('DownloadRequest'):
++  blocks=[s[s.index('    private fun addJsRuntime'):s.index('    fun info')],s[s.index('    fun info'):s.index('    fun download')]]
++ else:blocks=[s[s.index('    suspend fun analyze'):s.index('    fun cancelAnalysis')]]
++ for block in blocks:
++  for key,value in re.findall(r'addOption\("([^"]+)"(?:,\s*"([^"]*)")?\)',block):
++   if '$' not in value:expected[key]=value
++parts=[]
++for name in ['SLTubeAnalysisRequest.java','EngineRuntimeOptions.java','FormatSelectionPolicy.java']:
++ s=(base/name).read_text();s=re.sub(r'^package .*;\n|^import .*;\n','',s,flags=re.M);parts.append(s)
++s=(base/'MainActivity.java').read_text();routing=s[s.index('    private FormatSelectionPolicy.Score extractionScore'):s.index('    private void stopActiveAnalysis')]
++import json
++expected_java=''.join('expected.put('+json.dumps(k)+','+json.dumps(v)+');' for k,v in expected.items())
++source='''import java.util.*;import java.io.*;
++class SLTubeAnalysisTest {
++ int captureRequestSerial=1;static final String TAG="test";
++ final Context context=new Context();final List<YoutubeDLRequest> executed=new ArrayList<>();final Deque<Object> responses=new ArrayDeque<>();final Map<String,JSONObject> json=new HashMap<>();
++ Context getApplicationContext(){return context;}
++ static int numberToInt(Object value){return value instanceof Number?((Number)value).intValue():0;}
++ void applySessionOptions(YoutubeDLRequest request,String page){request.addOption("--cookies","test-private-cookie-file");}
++ YoutubeDLResponse runAnalysisRequest(YoutubeDLRequest request,String id)throws Exception{executed.add(request);Object next=responses.removeFirst();if(next instanceof Exception)throw (Exception)next;return (YoutubeDLResponse)next;}
++ JSONObject parseResponseJson(String out){return json.get(out);}
++'''+routing+'''
++ static void check(boolean value,String message){if(!value)throw new AssertionError(message);}
++ static JSONObject response(int height,int count){JSONArray formats=new JSONArray();for(int i=0;i<count;i++)formats.put(new JSONObject().put("format_id","v-"+i).put("url","https://cdn.test/v"+i).put("vcodec","av01").put("acodec","none").put("height",height).put("ext","mp4"));return new JSONObject().put("formats",formats);}
++ public static void main(String[] args)throws Exception{
++  Context context=new Context();YoutubeDLRequest request=SLTubeAnalysisRequest.create(context,"https://m.youtube.com/watch?v=KxV33MvXzBw");Map<String,String> expected=new LinkedHashMap<>();
++'''+expected_java+'''
++  check(request.options.equals(expected),"Request differs from actual SL.Tube direct analysis flags: "+request.options.keySet());
++  check(!request.options.containsKey("--extractor-args") && !request.options.containsKey("--format") && !request.options.containsKey("--cookies") && !request.options.containsKey("--user-agent"),"Direct request has extra filtering or browser session");
++  var direct=new SLTubeAnalysisTest();direct.json.put("high",response(2160,37));direct.responses.add(new YoutubeDLResponse("high"));
++  var result=direct.executeYouTubeAnalysis("https://m.youtube.com/watch?v=KxV33MvXzBw");
++  check(direct.executed.size()==1 && !result.optBoolean("_satlink_browser_session",true),"Successful direct 4K unexpectedly retried with browser cookies");
++  check(result.optJSONArray("formats").length()==37,"Production routing reduced 37 formats");
++  var recovery=new SLTubeAnalysisTest();recovery.json.put("low",response(360,1));recovery.json.put("high",response(2160,37));recovery.responses.add(new YoutubeDLResponse("low"));recovery.responses.add(new YoutubeDLResponse("high"));
++  result=recovery.executeYouTubeAnalysis("https://m.youtube.com/watch?v=KxV33MvXzBw");
++  check(recovery.executed.size()==2 && recovery.executed.get(1).options.containsKey("--cookies"),"Browser-session recovery missing");
++  check(result.optBoolean("_satlink_browser_session",false) && result.optJSONArray("formats").length()==37,"Higher recovery response or profile lost");
++  var failedRecovery=new SLTubeAnalysisTest();failedRecovery.json.put("low",response(360,1));failedRecovery.responses.add(new YoutubeDLResponse("low"));failedRecovery.responses.add(new IOException("temporary failure"));
++  result=failedRecovery.executeYouTubeAnalysis("https://m.youtube.com/watch?v=KxV33MvXzBw");check(!result.optBoolean("_satlink_browser_session",true),"Failed recovery overwrote usable direct response");
++  var fragments=FormatSelectionPolicy.score(List.of(new FormatSelectionPolicy.Format("313","","webm","vp9","none",2160)));
++  check(fragments.maxHeight==2160,"Fragment-backed format ignored by response selection");
++  System.out.println("PASS exact SL.Tube request parity and production routing: anonymous first, 37 synthetic video IDs preserved, 4K retained, session recovery, correct download profile, no forced client/filter, fragment-backed format score");
++ }
++}
++class Context {ApplicationInfo getApplicationInfo(){return new ApplicationInfo();}}
++class ApplicationInfo {String nativeLibraryDir="/test/no/native/runtime";}
++class YoutubeDLRequest {final Map<String,String> options=new LinkedHashMap<>();YoutubeDLRequest(String url){}void addOption(String k){options.put(k,"");}void addOption(String k,String v){options.put(k,v);}}
++class YoutubeDLResponse {final String out;YoutubeDLResponse(String s){out=s;}String getOut(){return out;}int getExitCode(){return 0;}}
++class Log {static void i(String tag,String s){}static void w(String tag,String s,Exception e){}}
++class JSONObject {final Map<String,Object> values=new HashMap<>();JSONObject put(String k,Object v){values.put(k,v);return this;}Object opt(String k){return values.get(k);}String optString(String k){return optString(k,"");}String optString(String k,String d){Object v=values.get(k);return v==null?d:v.toString();}boolean optBoolean(String k,boolean d){Object v=values.get(k);return v instanceof Boolean?(Boolean)v:d;}JSONArray optJSONArray(String k){return (JSONArray)values.get(k);}}
++class JSONArray {final List<JSONObject> rows=new ArrayList<>();JSONArray put(JSONObject v){rows.add(v);return this;}int length(){return rows.size();}JSONObject optJSONObject(int i){return rows.get(i);}}
++'''+''.join(parts)
++with tempfile.TemporaryDirectory() as tmp:
++ p=Path(tmp)/'SLTubeAnalysisTest.java';p.write_text(source);subprocess.run(['java',str(p)],check=True)

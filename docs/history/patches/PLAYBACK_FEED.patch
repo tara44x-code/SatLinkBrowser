@@ -1,0 +1,768 @@
+--- a/README_AR.md
++++ b/README_AR.md
+@@ -1,8 +1,18 @@
+-# SatLink Browser PRO 1.9.7 — المواقع والمشاركة
++# SatLink Browser PRO 1.9.8 — إيقاف التشغيل والتقاط مقطع الصفحة الرئيسية
+ 
+ مشروع المصدر الكامل المعدّل. هذه الحزمة لا تحتوي APK مبنياً؛ نتائج الفحص وحدوده داخل TEST_REPORT_AR.md.
+ 
+-## التغييرات
++## التغييرات الحالية
++
++- إيقاف مشغّل المتصفح قبل رجوع السجل، وعند الانتقال للرئيسية أو التنزيلات أو بقية الواجهات، وعند مغادرة التطبيق. تستخدم الجلسة الإيقاف والكتم والتعليق، وتصل رسالة إيقاف لجميع إطارات الصفحة.
++- منع إعادة التشغيل التلقائي للمشغّل المصغّر بعد الرجوع. العودة إلى المتصفح تتيح التشغيل دون استدعاء play؛ يبدأ المستخدم التشغيل من الصفحة.
++- زر الرجوع مع عدم وجود سجل يرجع لرئيسية التطبيق، والرجوع من رئيسية التطبيق لا يعيد فتح الفيديو.
++- تيك توك داخل الصفحة الرئيسية: تحديد منشور المشغّل الظاهر من الرابط الموجود في حاويته أو معرّف الفيديو الموجود فعلياً عليها. يُفصل رابط المنشور عن عنوان الصفحة الرئيسية، ويُرسل رابط المنشور للمحرك. لا يُرسل جذر tiktok.com إلى المحرك كمقطع.
++- عند تبديل الفيديو بنفس الصفحة، تُمسح بيانات المقطع السابق، بما فيها الطلبات الملتقطة وطلبات worker المطابقة للصفحة، وتُلغى نتائج التحليل القديمة.
++- قراءة أبعاد الفيديو الذي عرضه المشغّل فعلياً وإشارة وجود الصوت عندما يوفّرها Gecko؛ لا تُخترع معلومات الترميز أو الصوت المفقودة.
++- إصلاح شارة الإصدار؛ كانت ثابتة على PRO 1.9.3، وأصبحت تقرأ رقم الإصدار من التطبيق المبني.
++
++## التغييرات المحفوظة من 1.9.7
+ 
+ - استقبال روابط text/plain من قائمة مشاركة أندرويد. اختر SatLink Browser PRO بعد مشاركة رابط تيك توك أو غيره؛ يفتح الرابط وخيارات التحميل، ثم تختار الجودة قبل التنزيل.
+ - قراءة الرابط من النص المرفق معه، مع دعم الروابط المختصرة والحفاظ على معاملات الرابط الموقّعة. يدعم تشغيل التطبيق لأول مرة واستقبال مشاركة جديدة وهو مفتوح، ويزيل بيانات جلسة الرابط السابق.
+@@ -25,7 +35,7 @@
+ - لينكس/macOS: bash BUILD-SATLINK.sh.
+ - المخرج عند نجاح البناء: app/build/outputs/apk/debug/app-debug.apk.
+ 
+-الإصدار 197 / PRO 1.9.7 Share & Sites. تحديث تطبيق مثبت يتطلب مفتاح التوقيع نفسه.
++الإصدار 198 / PRO 1.9.8 Playback & Feed. تحديث تطبيق مثبت يتطلب مفتاح التوقيع نفسه.
+ 
+ ## الفحص
+ 
+--- a/TEST_OUTPUT.txt
++++ b/TEST_OUTPUT.txt
+@@ -11,6 +11,9 @@
+ 
+ $ node tests/site_metadata.test.cjs
+ PASS TikTok passive fixtures: current post only, all supplied variants, dimensions, bitrate, muxed AAC, hvc1 exception, signed URL, metadata precedence, background-music isolation
++
++$ node tests/active_feed.test.cjs
++PASS real feed/content integration: visible post on TikTok root, current JSON only, metadata, hidden media pause, back mini-player pause, no auto-resume, explicit user play, feed-switch isolation
+ 
+ $ python3 tests/format_rules_test.py
+ PASS Java format rules: real MKV/TS, AV1 MP4, audio separation, 1080p60 label
+@@ -39,5 +42,8 @@
+ $ python3 tests/site_analysis_test.py
+ PASS production site routing: original post, all formats, anonymous profile, session retry, master fallback, passive variant preservation, cancellation
+ 
+-$ java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java app/src/main/java/com/satlink/geckoviewtest/CapturedDownloadPlan.java app/src/main/java/com/satlink/geckoviewtest/EngineBootstrap.java app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java app/src/main/java/com/satlink/geckoviewtest/MainActivity.java app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java app/src/main/java/com/satlink/geckoviewtest/SLTubeAnalysisRequest.java app/src/main/java/com/satlink/geckoviewtest/SharedUrlParser.java
++$ python3 tests/playback_test.py
++PASS production playback and target selection: home/history/app pause, late autoplay blocked, no resume play, home back, active feed post, root rejected, short links, YouTube preserved
++
++$ java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/ActiveMediaPage.java app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java app/src/main/java/com/satlink/geckoviewtest/CapturedDownloadPlan.java app/src/main/java/com/satlink/geckoviewtest/EngineBootstrap.java app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java app/src/main/java/com/satlink/geckoviewtest/MainActivity.java app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java app/src/main/java/com/satlink/geckoviewtest/SLTubeAnalysisRequest.java app/src/main/java/com/satlink/geckoviewtest/SharedUrlParser.java
+ PASS Java syntax (not Android compilation)
+--- a/TEST_REPORT_AR.md
++++ b/TEST_REPORT_AR.md
+@@ -1,10 +1,10 @@
+-# فحص PRO 1.9.7 Share & Sites
++# فحص PRO 1.9.8 Playback & Feed
+ 
+ التاريخ: 2026-10-05.
+ 
+ ## النتيجة
+ 
+-نجحت 13 مجموعة فحص. كل المخرجات محفوظة في TEST_OUTPUT.txt. لا يوجد APK مبني أو تأكيد تشغيل حي على هاتف ضمن هذه الحزمة.
++نجحت 15 مجموعة فحص. كل المخرجات محفوظة في TEST_OUTPUT.txt. لا يوجد APK مبني أو تأكيد تشغيل حي على هاتف ضمن هذه الحزمة.
+ 
+ ## التغطية
+ 
+@@ -20,7 +20,9 @@
+ 10. sltube_analysis_test.py: خيارات طلب يوتيوب والمقارنة المرجعية مع SL.Tube، الإبقاء على الرد الأعلى والجلسة التي نجحت، و37 معرّف صيغة مصطنعاً.
+ 11. share_test.py: تنفيذ معالج المشاركة من المصدر عند البدء وأثناء تشغيل التطبيق، نصوص عربية، رابط مختصر، معاملات موقّعة، ClipData، إزالة جلسة قديمة، ورفض المدخل غير الصالح. وفحص intent-filter في AndroidManifest.
+ 12. site_analysis_test.py: تنفيذ توجيه تحليل المواقع من المصدر، المنشور الأصلي أولاً، جلسة احتياطية، master playlist، الحفاظ على كل النسخ الاحتياطية وعدم اختزالها إلى ملف CDN واحد، وإلغاء الصفحة السابقة. وفحص ملفات المواقع العامة التي تُرجع حاوية فيديو دون ترميز معروف؛ تبقى قابلة للاختيار دون ادعاء وجود الصوت.
+-13. ValidateJava.java: صياغة كل ملفات Java فقط، دون Android SDK أو فحص ربط الاعتماديات.
++13. active_feed.test.cjs: تنفيذ سكربت المحتوى مع محدد المشغّل الظاهر على صفحة تيك توك الرئيسية. فحص إرسال رابط المنشور، اختيار بيانات المنشور الحالي وحده، إيقاف autoplay أثناء الإخفاء وبعد الرجوع، عدم التشغيل عند العودة، التشغيل بعد تفاعل المستخدم، ومسح المقطع السابق عند تغيير المصدر.
++14. playback_test.py: تنفيذ دوال إيقاف وتشغيل واجهة المتصفح ومعالج الرجوع من المصدر مع بدائل صغيرة لواجهات Android/Gecko. فحص الرئيسية والرجوع بالسجل وعدم وجود سجل والخروج للخلفية وحجب حدث تشغيل متأخر واختيار رابط المنشور بدلاً من الجذر. لا يمثل ربطاً بمكتبة GeckoView على الهاتف.
++15. ValidateJava.java: صياغة كل ملفات Java فقط، دون Android SDK أو فحص ربط الاعتماديات.
+ 
+ ## بناء أندرويد وحدود التحقق
+ 
+@@ -28,4 +30,17 @@
+ 
+ لم يكتمل بناء أندرويد، ولم يتم تشغيل التطبيق على هاتف أو تنزيل ملف حي من تيك توك. البيانات المصطنعة تؤكد سلوك الدوال تحت الاختبار؛ لا تؤكد أن رابطاً حياً يعرض الدقات نفسها، ولا أن كل موقع تدعمه الخدمة حالياً. المحرك يحدد الصيغ التي يوفرها الموقع، والالتقاط الاحتياطي يتطلب بيانات فعلية من الصفحة.
+ 
+-MULTISITE_SHARE.patch يحتوي الفرق عن مصدر PRO 1.9.6 السابق.
++PLAYBACK_FEED.patch يحتوي الفرق عن مصدر PRO 1.9.7 السابق.
++
++## الدليل المرسل
++
++تمت معاينة الصورة والفيديو المحليين المرفقين. الصورة تعرض ERROR: Unsupported URL: https://www.tiktok.com/، والفيديو يوضح استمرار مشغّل يوتيوب بعد الرجوع إلى الصفحة الرئيسية للموقع، ثم طلب التقاط تيك توك من عنوان الجذر. هذا الخطأ المحدد ليس تشخيص DRM؛ إصلاحه مرتبط بهدف التحليل وهوية المقطع وإيقاف المشغّل.
++
++## مراجع واجهات Gecko المستخدمة
++
++- https://mozilla.github.io/geckoview/javadoc/mozilla-central/org/mozilla/geckoview/GeckoSession.html
++- https://mozilla.github.io/geckoview/javadoc/mozilla-central/org/mozilla/geckoview/MediaSession.html
++- https://mozilla.github.io/geckoview/javadoc/mozilla-central/org/mozilla/geckoview/GeckoSessionSettings.html
++
++المشروع يثبت GeckoView 150.0.20260511200624. لم يكتمل ربط Android بهذا الاعتماد في البيئة الحالية؛ فحص الصياغة وبدائل الاختبار لا يستبدلان ذلك.
++
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -10,8 +10,8 @@
+         applicationId 'com.satlink.geckoviewtest'
+         minSdk 26
+         targetSdk 36
+-        versionCode 197
+-        versionName 'PRO 1.9.7 Share & Sites'
++        versionCode 198
++        versionName 'PRO 1.9.8 Playback & Feed'
+ 
+         ndk {
+             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
+--- /dev/null
++++ b/app/src/main/assets/media_capture/active_post.js
+@@ -0,0 +1,53 @@
++(function(root) {
++  function isTikTok(url) {
++    try {return /(^|\.)tiktok\.com$/i.test(new URL(url).hostname);} catch (_) {return false;}
++  }
++  function postUrl(url, base) {
++    try {
++      const u=new URL(url,base);
++      if(!isTikTok(u.href) || !/^https?:$/.test(u.protocol) || !/^\/@[^/]+\/video\/\d+\/?$/.test(u.pathname)) return '';
++      u.hash=''; return u.href;
++    } catch (_) {return '';}
++  }
++  function visibleVideo(doc, viewport={}) {
++    let best=null, score=-1;
++    const width=viewport.innerWidth||doc.documentElement?.clientWidth||0;
++    const height=viewport.innerHeight||doc.documentElement?.clientHeight||0;
++    for(const video of doc.querySelectorAll('video')) {
++      const r=video.getBoundingClientRect?.();
++      if(!r || r.width<=0 || r.height<=0) continue;
++      const area=Math.max(0,Math.min(r.right,width||r.right)-Math.max(r.left,0))
++        *Math.max(0,Math.min(r.bottom,height||r.bottom)-Math.max(r.top,0));
++      if(area<=0) continue;
++      const next=(video.paused===false && !video.ended?1e12:0)+area;
++      if(next>score) {score=next;best=video;}
++    }
++    return best;
++  }
++  function resolve(doc,pageUrl,viewport={}) {
++    if(!isTikTok(pageUrl)) return {url:'',video:null};
++    const video=visibleVideo(doc,viewport);
++    const direct=postUrl(pageUrl,pageUrl);
++    if(direct) return {url:direct,video};
++    if(!video) return {url:'',video:null};
++    // Search only the visible player's nearest container, not all recommended links.
++    let node=video;
++    for(let depth=0;node && depth<10;depth++,node=node.parentElement) {
++      const candidates=new Map();
++      for(const a of node.querySelectorAll?.('a[href]')||[]) {
++        const url=postUrl(a.href,pageUrl);
++        if(url) candidates.set(new URL(url).pathname,url);
++      }
++      if(candidates.size===1) return {url:candidates.values().next().value,video};
++      if(candidates.size>1) break;
++      for(const key of ['data-video-id','data-item-id','data-id']) {
++        const id=node.getAttribute?.(key)||'';
++        if(/^\d{15,25}$/.test(id)) return {url:'https://www.tiktok.com/@_/video/'+id,video};
++      }
++    }
++    return {url:'',video};
++  }
++  const api={isTikTok,postUrl,visibleVideo,resolve};
++  root.SatLinkActivePost=api;
++  if(typeof module!=='undefined' && module.exports) module.exports=api;
++})(globalThis);
+--- a/app/src/main/assets/media_capture/background.js
++++ b/app/src/main/assets/media_capture/background.js
+@@ -172,7 +172,7 @@
+   const now = Date.now();
+   const merged = new Map();
+   const metadataByItag = new Map();
+-  const activeVideoId = SatLinkMedia.query(top.pageUrl, "v");
++  const activeVideoId = SatLinkMedia.query(top.pageUrl, "v") || (()=>{try{return new URL(top.activePostUrl||top.pageUrl).pathname.match(/\/video\/(\d+)/)?.[1]||'';}catch(_){return '';}})();
+   const frames = frameSnapshotsByTab.get(tabId);
+   let duration = Number(top.duration) || 0;
+ 
+@@ -223,6 +223,8 @@
+     await browser.runtime.sendNativeMessage('satlink_capture', {
+       action: 'captureResult',
+       pageUrl: top.pageUrl || '',
++      activePostUrl: top.activePostUrl || '',
++      activeMediaKey: top.activeMediaKey || '',
+       title: top.title || '',
+       userAgent: top.userAgent || '',
+       duration,
+@@ -324,6 +326,8 @@
+   }
+   const snapshot = {
+     pageUrl: message.pageUrl || '',
++    activePostUrl: message.activePostUrl || '',
++    activeMediaKey: message.activeMediaKey || '',
+     title: message.title || '',
+     userAgent: message.userAgent || '',
+     duration: Number(message.duration) || 0,
+@@ -332,8 +336,11 @@
+     isTopFrame
+   };
+   const oldTop = topSnapshotByTab.get(tabId);
+-  if (isTopFrame && oldTop && oldTop.pageUrl !== snapshot.pageUrl) {
++  if (isTopFrame && oldTop && (oldTop.pageUrl !== snapshot.pageUrl || oldTop.activePostUrl !== snapshot.activePostUrl || oldTop.activeMediaKey !== snapshot.activeMediaKey)) {
+     clearHls(tabId);
++    for(const [key,item] of unattributedNetwork) {
++      if(belongsToSnapshot(item,oldTop,frames)) unattributedNetwork.delete(key);
++    }
+     frames.clear();
+     networkByTab.delete(tabId);
+   }
+--- a/app/src/main/assets/media_capture/capture.js
++++ b/app/src/main/assets/media_capture/capture.js
+@@ -4,6 +4,10 @@
+   let sendTimer = null;
+   let scanTimer = null;
+   let currentPage = location.href;
++  let activePostUrl = '';
++  let activeMediaKey = '';
++  let playbackAllowed = true;
++  let userPlaybackRequired = false;
+   let navigationCutoff = 0;
+   let navigationPending = false;
+   let lastPayload = '';
+@@ -69,7 +73,7 @@
+         const text = String(script.textContent || '');
+         if (!text || text.length > 4_000_000 || scannedScripts.get(script) === text) continue;
+         scannedScripts.set(script, text);
+-        for (const item of SatLinkMedia.formatsFromText(text, location.href)) {
++        for (const item of SatLinkMedia.formatsFromText(text, location.href, activePostUrl)) {
+           const key = item.url || `metadata:${item.itag}`;
+           const enriched = SatLinkMedia.merge(found.get(key), item);
+           if (JSON.stringify(found.get(key)) !== JSON.stringify(enriched)) {
+@@ -99,11 +103,28 @@
+       lastPayload = '';
+       sendSession();
+     }
++    const active=typeof SatLinkActivePost==='undefined'?{url:'',video:null}:SatLinkActivePost.resolve(document,location.href,window);
++    const nextMediaKey=active.url || active.video ? active.url+'|'+(active.video?.currentSrc||active.video?.src||'') : '';
++    if(nextMediaKey!==activeMediaKey) {
++      activeMediaKey=nextMediaKey;
++      activePostUrl=active.url;
++      found.clear(); scannedScripts=new WeakMap(); lastPayload='';
++      navigationCutoff=typeof performance.now==='function'?performance.now():0;
++    }
+     document.querySelectorAll('iframe[src], embed[src], object[data]').forEach(el =>
+       addPageCandidate(el.src || el.data, el.tagName.toLowerCase()));
+ 
+     document.querySelectorAll('video, audio').forEach(el => {
+-      add(el.currentSrc || el.src, el.getAttribute('type') || '', el.tagName.toLowerCase());
++      if(typeof SatLinkActivePost!=='undefined' && SatLinkActivePost.isTikTok(location.href) && active.video && el!==active.video) return;
++      const src=el.currentSrc || el.src;
++      const mime=el.getAttribute('type') || (el.tagName.toLowerCase()==='video'?'video/unknown':'audio/unknown');
++      add(src, mime, el.tagName.toLowerCase());
++      const previous=found.get(absolute(src));
++      if(previous && el.videoWidth>0 && el.videoHeight>0) {
++        const data={width:el.videoWidth,height:el.videoHeight,duration:SatLinkMedia.positive(el.duration)};
++        if(typeof el.mozHasAudio==='boolean') data.hasAudio=el.mozHasAudio;
++        found.set(absolute(src),SatLinkMedia.merge(previous,data));
++      }
+       add(el.getAttribute('data-src'), el.getAttribute('type') || '', `${el.tagName.toLowerCase()}:data-src`);
+       el.querySelectorAll('source').forEach(s => add(s.src || s.getAttribute('data-src'), s.type || '', 'source'));
+     });
+@@ -145,6 +166,8 @@
+       userAgent: navigator.userAgent || '',
+       duration: pageDuration(),
+       isTopFrame: window.top === window,
++      activePostUrl,
++      activeMediaKey,
+       items: Array.from(found.values()).slice(-1000)
+     };
+     const fingerprint = JSON.stringify(payload);
+@@ -187,11 +210,29 @@
+     performanceObserver.observe({ type: 'resource', buffered: true });
+   } catch (_) {}
+ 
++  function pauseAllMedia() {
++    document.querySelectorAll('video, audio').forEach(el=>{ try {el.pause();} catch (_) {} });
++  }
++  document.addEventListener('play',event=>{
++    if(!playbackAllowed || userPlaybackRequired) { try {event.target.pause();} catch (_) {} }
++  },true);
++  for(const name of ['pointerdown','keydown']) {
++    document.addEventListener(name,event=>{
++      if(playbackAllowed && event.isTrusted) userPlaybackRequired=false;
++    },true);
++  }
++
+   let nativePort = null;
+   try {
+     nativePort = browser.runtime.connectNative('satlink_capture');
+     nativePort.onMessage.addListener(message => {
+-      if (message && message.action === 'scanMedia') send();
++      if (!message) return;
++      if (message.action === 'scanMedia') send();
++      if (message.action === 'pauseMedia') { userPlaybackRequired=true; pauseAllMedia(); }
++      if (message.action === 'setPlaybackAllowed') {
++        playbackAllowed=message.allowed===true;
++        if(!playbackAllowed) {userPlaybackRequired=true;pauseAllMedia();}
++      }
+     });
+   } catch (_) {}
+ 
+--- a/app/src/main/assets/media_capture/manifest.json
++++ b/app/src/main/assets/media_capture/manifest.json
+@@ -1,7 +1,7 @@
+ {
+   "manifest_version": 2,
+   "name": "SatLink Media Capture",
+-  "version": "1.6",
++  "version": "1.8",
+   "description": "Captures top-page and iframe media while preserving the active browser session.",
+   "browser_specific_settings": {
+     "gecko": {
+@@ -22,6 +22,7 @@
+       ],
+       "js": [
+         "media_metadata.js",
++        "active_post.js",
+         "capture.js"
+       ],
+       "run_at": "document_start",
+--- a/app/src/main/assets/media_capture/media_metadata.js
++++ b/app/src/main/assets/media_capture/media_metadata.js
+@@ -67,7 +67,7 @@
+     }
+     return null;
+   }
+-  function formatsFromText(text,pageUrl) {
++  function formatsFromText(text,pageUrl,activePostUrl='') {
+     const roots=[];
+     try { roots.push(JSON.parse(text)); } catch (_) {}
+     const assignment=/["']?ytInitialPlayerResponse["']?\s*(?:=|:)\s*(\{)/g;
+@@ -78,10 +78,10 @@
+     const formats=[]; let visited=0;
+     const activeId=query(pageUrl,'v') || (()=>{try{return new URL(pageUrl).pathname.match(/\/(?:shorts|embed)\/([^/?]+)/)?.[1]||'';}catch(_){return '';}})();
+     let tikTokId='', tikTokPage=false;
+-    try { const u=new URL(pageUrl); tikTokPage=/(^|\.)tiktok\.com$/i.test(u.hostname); tikTokId=u.pathname.match(/\/video\/(\d+)/)?.[1]||''; } catch (_) {}
++    try { const u=new URL(pageUrl); tikTokPage=/(^|\.)tiktok\.com$/i.test(u.hostname); tikTokId=u.pathname.match(/\/video\/(\d+)/)?.[1]||''; if(tikTokPage && !tikTokId && activePostUrl) {const active=new URL(activePostUrl); if(/(^|\.)tiktok\.com$/i.test(active.hostname)) tikTokId=active.pathname.match(/\/video\/(\d+)/)?.[1]||'';} } catch (_) {}
+     function tikTokFormats(item) {
+       const video=item.video, id=String(item.id||item.aweme_id||'');
+-      if(!id || (tikTokId && id!==tikTokId) || !video || typeof video!=='object') return false;
++      if(!tikTokId || !id || id!==tikTokId || !video || typeof video!=='object') return false;
+       const duration=positive(video.duration), width=positive(video.width), height=positive(video.height);
+       function addAddress(address, extra={}) {
+         const urls=typeof address==='string'?[address]:Array.isArray(address)?address.map(x=>x?.src):address?.UrlList||[];
+--- /dev/null
++++ b/app/src/main/java/com/satlink/geckoviewtest/ActiveMediaPage.java
+@@ -0,0 +1,41 @@
++package com.satlink.geckoviewtest;
++
++import java.net.URI;
++import java.util.Locale;
++
++/** Keeps the browser document URL separate from the current feed video's post URL. */
++final class ActiveMediaPage {
++    static String validTikTokPost(String value) {
++        try {
++            URI u=new URI(value);
++            if (web(u) && tikTok(u.getHost()) && u.getPath().matches("/@[^/]+/video/\\d+/?")) return value;
++        } catch (Exception ignored) { }
++        return "";
++    }
++
++    static String resolve(String page, String activePost) {
++        if (page == null) return "";
++        try {
++            URI u=new URI(page);
++            if (!tikTok(u.getHost())) return page;
++            String direct=validTikTokPost(page);
++            if (!direct.isEmpty()) return direct;
++            String active=validTikTokPost(activePost);
++            if (!active.isEmpty()) return active;
++            String host=u.getHost().toLowerCase(Locale.ROOT);
++            if (web(u) && (host.equals("vm.tiktok.com") || host.equals("vt.tiktok.com"))
++                    && u.getPath()!=null && u.getPath().length()>1) return page;
++            return ""; // The root/profile/feed page is not the currently playing post.
++        } catch (Exception ignored) {return page;}
++    }
++
++    private static boolean web(URI u) {
++        return u.getRawUserInfo()==null && ("https".equalsIgnoreCase(u.getScheme()) || "http".equalsIgnoreCase(u.getScheme()));
++    }
++
++    private static boolean tikTok(String host) {
++        if(host==null) return false;
++        String h=host.toLowerCase(Locale.ROOT);
++        return h.equals("tiktok.com") || h.endsWith(".tiktok.com");
++    }
++}
+--- a/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
+@@ -54,6 +54,7 @@
+ import org.mozilla.geckoview.GeckoResult;
+ import org.mozilla.geckoview.GeckoRuntime;
+ import org.mozilla.geckoview.GeckoSession;
++import org.mozilla.geckoview.MediaSession;
+ import org.mozilla.geckoview.GeckoView;
+ import org.mozilla.geckoview.WebExtension;
+ import org.mozilla.geckoview.WebExtensionController;
+@@ -165,6 +166,11 @@
+     private volatile String preferredPlayerPageUrl;
+     private volatile String latestUserAgent = "Mozilla/5.0 (Android 14; Mobile; rv:150.0) Gecko/150.0 Firefox/150.0";
+     private boolean sharedNavigationPending;
++    private boolean activityForeground = true;
++    private boolean browserCanGoBack;
++    private MediaSession browserMediaControl;
++    private String latestActivePostUrl = "";
++    private String latestActiveMediaKey = "";
+     private volatile String latestCookieFilePath;
+     private String latestCookieContents = "";
+     private volatile String latestCookieHeader;
+@@ -182,6 +188,11 @@
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_main);
++        try {
++            String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
++            TextView badge = findViewById(R.id.proVersionBadge);
++            if (version != null) badge.setText(version.replaceFirst("^(PRO \\S+).*", "$1"));
++        } catch (Exception error) {Log.w(TAG, "Could not read app version", error);}
+         registerDownloadReceiver();
+         requestNotificationPermissionIfNeeded();
+ 
+@@ -238,6 +249,16 @@
+         configureExtensionPrompts();
+ 
+         session = new GeckoSession();
++        session.getSettings().setSuspendMediaWhenInactive(true);
++        browserMediaControl = new MediaSession(session);
++        session.setMediaSessionDelegate(new MediaSession.Delegate() {
++            @Override public void onActivated(GeckoSession tab, MediaSession media) {
++                if (!activityForeground || !"browser".equals(activeScreen)) {media.pause();media.muteAudio(true);}
++            }
++            @Override public void onPlay(GeckoSession tab, MediaSession media) {
++                if (!activityForeground || !"browser".equals(activeScreen)) {media.pause();media.muteAudio(true);}
++            }
++        });
+         session.setContentDelegate(new BrowserContentDelegate());
+         session.setNavigationDelegate(new BrowserNavigationDelegate());
+         session.setProgressDelegate(new BrowserProgressDelegate());
+@@ -310,7 +331,7 @@
+             return false;
+         });
+ 
+-        backButton.setOnClickListener(v -> session.goBack());
++        backButton.setOnClickListener(v -> goBackInBrowser());
+ 
+         renderShortcuts();
+         if (savedInstanceState == null && handleSharedLink(getIntent())) return;
+@@ -342,6 +363,8 @@
+         closeCapturePanel();
+         lastCapturedItems = null;
+         lastPlayerFormats = null;
++        latestActivePostUrl = "";
++        latestActiveMediaKey = "";
+         capturedDurationSeconds = 0;
+         latestCookieHeader = "";
+         latestCookieFilePath = "";
+@@ -717,6 +740,16 @@
+             if (!TextUtils.isEmpty(activePage) && !activePage.equals(incomingPage)) return;
+             pendingPageUrl = normalizePageUrl(json.optString("pageUrl", addressBar.getText().toString().trim()));
+             pendingPageTitle = json.optString("title", "");
++            String activePost = ActiveMediaPage.validTikTokPost(json.optString("activePostUrl", ""));
++            String mediaKey = json.optString("activeMediaKey", "");
++            if (!activePost.equals(latestActivePostUrl) || !mediaKey.equals(latestActiveMediaKey)) {
++                latestActivePostUrl = activePost;
++                latestActiveMediaKey = mediaKey;
++                captureRequestSerial++;
++                stopActiveAnalysis();
++                detailedFormatsShown = false;
++                lastQuickRender = 0;
++            }
+             lastCapturedItems = json.optJSONArray("items");
+             lastPlayerFormats = json.optJSONArray("playerFormats");
+             capturedDurationSeconds = numberToDouble(json.opt("duration"));
+@@ -785,7 +818,12 @@
+     }
+ 
+     private void analyzePage(String pageUrl) {
+-        final String normalizedPageUrl = normalizePageUrl(pageUrl);
++        final String normalizedPageUrl = normalizePageUrl(ActiveMediaPage.resolve(pageUrl, latestActivePostUrl));
++        if (TextUtils.isEmpty(normalizedPageUrl)) {
++            captureStatus.setText("جاري تحديد رابط المقطع الظاهر. افتح المقطع أو شارك رابطه مع التطبيق إذا لم يظهر.");
++            analysisProgress.setVisibility(View.GONE);
++            return;
++        }
+         if (isFinishing() || isDestroyed() || TextUtils.isEmpty(normalizedPageUrl) || !engineReady.get() || capturePanel.getVisibility() != View.VISIBLE
+                 || analyzedRequestSerial == captureRequestSerial || analyzing.getAndSet(true)) {
+             return;
+@@ -2142,12 +2180,54 @@
+         favoritesOverlay.setVisibility(View.GONE);
+     }
+ 
++    private void sendPlaybackMessage(String action, boolean allowed) {
++        JSONObject message = new JSONObject();
++        try {message.put("action", action);message.put("allowed", allowed);} catch (Exception ignored) { }
++        for (WebExtension.Port port : new ArrayList<>(capturePorts)) {
++            try {port.postMessage(message);} catch (Throwable error) {capturePorts.remove(port);}
++        }
++    }
++
++    private void pauseBrowserMedia() {
++        if (browserMediaControl != null) browserMediaControl.pause();
++        sendPlaybackMessage("pauseMedia", false);
++    }
++
++    private void updateBrowserPlayback() {
++        boolean allowed = activityForeground && "browser".equals(activeScreen);
++        if (!allowed) pauseBrowserMedia();
++        if (browserMediaControl != null) browserMediaControl.muteAudio(!allowed);
++        sendPlaybackMessage("setPlaybackAllowed", allowed);
++        if (session != null) session.setActive(allowed);
++    }
++
++    private void goBackInBrowser() {
++        pauseBrowserMedia();
++        if (browserCanGoBack) session.goBack();
++        else showHomeScreen();
++    }
++
++    @Override
++    protected void onPause() {
++        activityForeground = false;
++        updateBrowserPlayback();
++        super.onPause();
++    }
++
++    @Override
++    protected void onResume() {
++        super.onResume();
++        activityForeground = true;
++        updateBrowserPlayback();
++    }
++
+     private void showHomeScreen() {
+         closeCapturePanel();
+         hideAllOverlays();
+         homeOverlay.setVisibility(View.VISIBLE);
+         captureButton.setVisibility(View.GONE);
+         activeScreen = "home";
++        updateBrowserPlayback();
+         setSelectedNav(navHome);
+         renderShortcuts();
+     }
+@@ -2156,6 +2236,7 @@
+         hideAllOverlays();
+         captureButton.setVisibility(View.GONE);
+         activeScreen = "browser";
++        updateBrowserPlayback();
+         clearSelectedNav();
+     }
+ 
+@@ -2165,6 +2246,7 @@
+         downloadsOverlay.setVisibility(View.VISIBLE);
+         captureButton.setVisibility(View.GONE);
+         activeScreen = "downloads";
++        updateBrowserPlayback();
+         setSelectedNav(navDownloads);
+         refreshDownloads();
+     }
+@@ -2175,6 +2257,7 @@
+         extensionsOverlay.setVisibility(View.VISIBLE);
+         captureButton.setVisibility(View.GONE);
+         activeScreen = "extensions";
++        updateBrowserPlayback();
+         setSelectedNav(navExtensions);
+         refreshExtensions();
+     }
+@@ -2185,6 +2268,7 @@
+         tabsOverlay.setVisibility(View.VISIBLE);
+         captureButton.setVisibility(View.GONE);
+         activeScreen = "tabs";
++        updateBrowserPlayback();
+         setSelectedNav(navTabs);
+         renderTabs();
+     }
+@@ -2195,6 +2279,7 @@
+         favoritesOverlay.setVisibility(View.VISIBLE);
+         captureButton.setVisibility(View.GONE);
+         activeScreen = "favorites";
++        updateBrowserPlayback();
+         clearSelectedNav();
+         favoritesSearch.setText("");
+         renderFavorites("");
+@@ -3123,12 +3208,15 @@
+     public void onBackPressed() {
+         if (capturePanel.getVisibility() == View.VISIBLE) {
+             closeCapturePanel();
++        } else if ("home".equals(activeScreen)) {
++            pauseBrowserMedia();
++            moveTaskToBack(true);
+         } else if (!"browser".equals(activeScreen)) {
+             String url = addressBar.getText().toString().trim();
+             if (!TextUtils.isEmpty(url) && !"about:blank".equals(url)) showBrowserScreen();
+             else showHomeScreen();
+         } else {
+-            session.goBack();
++            goBackInBrowser();
+         }
+     }
+ 
+@@ -3292,6 +3380,7 @@
+         public void onConnect(WebExtension.Port port) {
+             capturePort = port;
+             capturePorts.add(port);
++            updateBrowserPlayback();
+         }
+ 
+         @Override
+@@ -3321,6 +3410,8 @@
+                     else { captureRequestSerial++; stopActiveAnalysis(); detailedFormatsShown = false; }
+                     lastCapturedItems = null;
+                     lastPlayerFormats = null;
++                    latestActivePostUrl = "";
++                    latestActiveMediaKey = "";
+                     capturedDurationSeconds = 0;
+                     preferredPlayerPageUrl = "";
+                     latestCookieHeader = "";
+@@ -3334,8 +3425,9 @@
+ 
+         @Override
+         public void onCanGoBack(GeckoSession session, boolean canGoBack) {
+-            backButton.setEnabled(canGoBack);
+-            backButton.setAlpha(canGoBack ? 1f : 0.45f);
++            browserCanGoBack = canGoBack;
++            backButton.setEnabled(true);
++            backButton.setAlpha(1f);
+         }
+     }
+ 
+--- a/app/src/main/res/layout/activity_main.xml
++++ b/app/src/main/res/layout/activity_main.xml
+@@ -40,13 +40,14 @@
+                 android:textStyle="bold" />
+ 
+             <TextView
++                android:id="@+id/proVersionBadge"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_marginStart="7dp"
+                 android:background="@drawable/pro_badge_background"
+                 android:paddingHorizontal="7dp"
+                 android:paddingVertical="3dp"
+-                android:text="PRO 1.9.3"
++                android:text="PRO"
+                 android:textColor="#FF4B9F"
+                 android:textSize="10sp"
+                 android:textStyle="bold" />
+--- /dev/null
++++ b/tests/active_feed.test.cjs
+@@ -0,0 +1,42 @@
++const assert=require('node:assert/strict');
++const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
++const assets=path.join(__dirname,'../app/src/main/assets/media_capture');
++const post=require(path.join(assets,'active_post.js'));
++const media=require(path.join(assets,'media_metadata.js'));
++const rect={width:400,height:700,left:0,right:400,top:0,bottom:700};
++const current='https://www.tiktok.com/@owner/video/7654321098765432101';
++const other='https://www.tiktok.com/@other/video/7654321098765432102';
++function container(links){return {querySelectorAll(){return links.map(href=>({href}));},getAttribute(){return '';},parentElement:null};}
++function video(url,links,paused=false,r=rect){return {paused,ended:false,currentSrc:url,src:url,tagName:'VIDEO',videoWidth:1080,videoHeight:1920,duration:22,mozHasAudio:true,getBoundingClientRect(){return r;},getAttribute(){return '';},querySelectorAll(){return [];},parentElement:container(links),pause(){this.paused=true;this.pauses=(this.pauses||0)+1;}};}
++const playing=video('https://cdn.test/play/first',[current]);
++const offscreen=video('https://cdn.test/other',[other],false,{...rect,top:900,bottom:1600});
++const doc={documentElement:{clientWidth:400,clientHeight:800},querySelectorAll(){return [offscreen,playing];}};
++assert.equal(post.resolve(doc,'https://www.tiktok.com/',{innerWidth:400,innerHeight:800}).url,current);
++assert.equal(post.resolve(doc,'https://www.tiktok.com/@direct/video/123').url,'https://www.tiktok.com/@direct/video/123');
++assert.equal(post.resolve({...doc,querySelectorAll(){return [video('blob:test',[current,other])];}},'https://www.tiktok.com/').url,'','Ambiguous recommendations cannot select a random post');
++assert.equal(post.postUrl('https://tiktok.com.fake/@owner/video/123'),'');
++const raw={items:[{id:'7654321098765432101',video:{playAddr:'https://cdn.test/one',width:1080,height:1920}},{id:'7654321098765432102',video:{playAddr:'https://cdn.test/two',width:720,height:1280}}]};
++assert.equal(media.formatsFromText(JSON.stringify(raw),'https://www.tiktok.com/').length,0,'Root page must not capture every recommendation');
++const selected=media.formatsFromText(JSON.stringify(raw),'https://www.tiktok.com/',current);
++assert.equal(selected.length,1);assert.equal(selected[0].url,'https://cdn.test/one');
++// Execute the real content script with the active-post resolver and its native port.
++let active=playing, receiver;const sent=[],events={},timers=[];
++const document={baseURI:'https://www.tiktok.com/',title:'TikTok',hidden:false,scripts:[],documentElement:{},
++ querySelectorAll(selector){if(selector==='video' || selector==='video, audio')return [active];return [];},
++ addEventListener(name,fn){(events[name]??=[]).push(fn);}};
++const window={innerWidth:400,innerHeight:800,addEventListener(){}};window.top=window;
++const context=vm.createContext({document,window,location:{href:document.baseURI,hostname:'www.tiktok.com'},navigator:{userAgent:'Test'},URL,URLSearchParams,Map,Set,WeakMap,Number,Date,performance:{now(){return 100;},getEntriesByType(){return [];}},setTimeout(fn){timers.push(fn);return timers.length;},setInterval(){},clearTimeout(){},browser:{runtime:{sendMessage(p){sent.push(p);return Promise.resolve();},connectNative(){return {onMessage:{addListener(fn){receiver=fn;}}};},sendNativeMessage(){return Promise.resolve();}}}});
++for(const name of ['media_metadata.js','active_post.js','capture.js'])vm.runInContext(fs.readFileSync(path.join(assets,name),'utf8'),context);
++assert.equal(sent.find(x=>x.action==='pageSnapshot').activePostUrl,current);
++assert(sent.find(x=>x.action==='pageSnapshot').items.some(x=>x.width===1080 && x.hasAudio===true),'Rendered video facts missing');
++receiver({action:'setPlaybackAllowed',allowed:false});assert.equal(active.paused,true);
++active.paused=false;events.play.forEach(fn=>fn({target:active}));assert.equal(active.paused,true,'Hidden autoplay must be paused');
++receiver({action:'setPlaybackAllowed',allowed:true});const pauses=active.pauses;assert.equal(active.pauses,pauses);
++active.paused=false;events.play.forEach(fn=>fn({target:active}));assert.equal(active.paused,true,'Returning to browser cannot auto-play the paused video');
++events.pointerdown.forEach(fn=>fn({isTrusted:true}));active.paused=false;events.play.forEach(fn=>fn({target:active}));assert.equal(active.paused,false,'User playback must still work');
++receiver({action:'pauseMedia'});active.paused=false;events.play.forEach(fn=>fn({target:active}));assert.equal(active.paused,true,'History back must stop a returning mini-player');
++active=video('https://cdn.test/play/second',[other]);receiver({action:'scanMedia'});
++const latest=sent.filter(x=>x.action==='pageSnapshot').at(-1);assert.equal(latest.activePostUrl,other);assert(!latest.items.some(x=>x.url.includes('/first')),'Feed switch leaked old media');
++active=video('https://cdn.test/play/third',[]);receiver({action:'scanMedia'});
++const unidentified=sent.filter(x=>x.action==='pageSnapshot').at(-1);assert.equal(unidentified.activePostUrl,'');assert(!unidentified.items.some(x=>x.url.includes('/second')),'Unresolved player switch retained previous media');
++console.log('PASS real feed/content integration: visible post on TikTok root, current JSON only, metadata, hidden media pause, back mini-player pause, no auto-resume, explicit user play, feed-switch isolation');
+--- a/tests/capture.test.cjs
++++ b/tests/capture.test.cjs
+@@ -61,6 +61,12 @@
+   await h.tick(); assert.equal(sent.at(-1).items.length,0,'navigation clears old requests');
+   request.listeners[0]({url:'https://cdn.test/live.ts',tabId:1,type:'media'});
+   removed.listeners[0](1); assert.equal(h.timers.size,0);
++  const feed={action:'pageSnapshot',pageUrl:'https://www.tiktok.com/',isTopFrame:true,activePostUrl:'https://www.tiktok.com/@u/video/123',items:[{url:'https://cdn.test/post123.mp4',type:'video',videoId:'123'}]};
++  await messages.listeners[0](feed,{tab:{id:3},frameId:0});
++  request.listeners[0]({url:'https://cdn.test/old-worker.mp4',tabId:-1,type:'media',documentUrl:feed.pageUrl});
++  await h.tick();assert.equal(sent.at(-1).activePostUrl,feed.activePostUrl);
++  await messages.listeners[0]({...feed,activePostUrl:'https://www.tiktok.com/@u/video/456',items:[{url:'https://cdn.test/post456.mp4',type:'video',videoId:'456'}]},{tab:{id:3},frameId:0});
++  await h.tick();assert(sent.at(-1).items.every(x=>!x.url.includes('123') && !x.url.includes('old-worker')),'Same-page feed change leaked previous media');
+   console.log('PASS background: MKV/TS, 4GiB sizes, headers, bounded flush, tab isolation, navigation cleanup');
+ }
+ async function contentTests() {
+--- /dev/null
++++ b/tests/playback_test.py
+@@ -0,0 +1,46 @@
++from pathlib import Path
++import re,subprocess,tempfile
++root=Path(__file__).resolve().parents[1];base=root/'app/src/main/java/com/satlink/geckoviewtest'
++s=(base/'MainActivity.java').read_text()
++methods=s[s.index('    private void sendPlaybackMessage'):s.index('    private void showHomeScreen')]
++back=s[s.index('    @Override\n    public void onBackPressed'):s.index('    @Override\n    protected void onDestroy')]
++delegate=s[s.index('        session.setMediaSessionDelegate(new MediaSession.Delegate()'):s.index('        session.setContentDelegate')]
++page=re.sub(r'^package .*;\n|^import .*;\n','',(base/'ActiveMediaPage.java').read_text(),flags=re.M)
++source='''import java.util.*;import java.net.URI;
++class PlaybackTest extends Activity {
++ boolean activityForeground=true,browserCanGoBack=true;String activeScreen="browser";final GeckoSession session=new GeckoSession();final MediaSession browserMediaControl=new MediaSession(session);final List<WebExtension.Port>capturePorts=new ArrayList<>();final View capturePanel=new View();final Text addressBar=new Text();int homes=0;boolean movedBack;
++ void showHomeScreen(){homes++;activeScreen="home";updateBrowserPlayback();}void showBrowserScreen(){activeScreen="browser";updateBrowserPlayback();}void closeCapturePanel(){capturePanel.visibility=8;}
++ boolean moveTaskToBack(boolean b){movedBack=b;return b;}
++ void initializeDelegate(){
++'''+delegate+'''}
++'''+methods+back+'''
++ static void check(boolean v,String m){if(!v)throw new AssertionError(m);}
++ public static void main(String[] a){
++ var app=new PlaybackTest();var port=new WebExtension.Port();app.capturePorts.add(port);app.initializeDelegate();
++ app.showHomeScreen();check(!app.session.active && app.browserMediaControl.muted && app.browserMediaControl.pauses==1,"Home did not suspend, mute and pause page");
++ check(port.messages.stream().anyMatch(x->"pauseMedia".equals(x.data.get("action"))),"DOM frames did not receive pause");
++ var late=new MediaSession(app.session);app.session.delegate.onPlay(app.session,late);check(late.pauses==1 && late.muted,"Hidden late autoplay bypassed guard");
++ app.showBrowserScreen();check(app.session.active && !app.browserMediaControl.muted,"Browser not reactivated");check(app.browserMediaControl.plays==0,"Returning to browser resumed video");
++ app.goBackInBrowser();check(app.session.backs==1 && app.browserMediaControl.pauses==2,"History back didn't pause media first");
++ app.browserCanGoBack=false;app.goBackInBrowser();check(app.activeScreen.equals("home"),"Back with no history failed to show home");
++ app.onBackPressed();check(app.movedBack && app.activeScreen.equals("home"),"Home back reopened browser");
++ app.showBrowserScreen();app.onPause();check(!app.session.active && app.browserMediaControl.muted,"Leaving app kept media running");app.onResume();check(app.session.active && app.browserMediaControl.plays==0,"Activity resume auto-played");
++ check(ActiveMediaPage.resolve("https://www.tiktok.com/", "https://www.tiktok.com/@u/video/123").endsWith("/123"),"Root instead of visible post selected");
++ check(ActiveMediaPage.resolve("https://www.tiktok.com/", "").isEmpty(),"Unsupported root sent to engine");
++ check(ActiveMediaPage.resolve("https://vm.tiktok.com/AB/", "").equals("https://vm.tiktok.com/AB/"),"Short URL blocked");
++ check(ActiveMediaPage.validTikTokPost("https://tiktok.com.fake/@u/video/123").isEmpty(),"Unrelated host accepted");
++ check(ActiveMediaPage.resolve("https://youtube.com/watch?v=123", "https://www.tiktok.com/@u/video/123").contains("youtube.com"),"TikTok state changed YouTube routing");
++ System.out.println("PASS production playback and target selection: home/history/app pause, late autoplay blocked, no resume play, home back, active feed post, root rejected, short links, YouTube preserved");
++ }
++}
++class Activity{protected void onPause(){}protected void onResume(){}public void onBackPressed(){}}
++class GeckoSession{boolean active=true;int backs;MediaSession.Delegate delegate;void setActive(boolean b){active=b;}void goBack(){backs++;}void setMediaSessionDelegate(MediaSession.Delegate d){delegate=d;}}
++class MediaSession{int pauses,plays;boolean muted;MediaSession(GeckoSession s){}void pause(){pauses++;}void play(){plays++;}void muteAudio(boolean b){muted=b;}interface Delegate{default void onActivated(GeckoSession t,MediaSession m){}default void onPlay(GeckoSession t,MediaSession m){}}}
++class JSONObject{Map<String,Object>data=new HashMap<>();JSONObject put(String k,Object v){data.put(k,v);return this;}}
++class WebExtension{static class Port{List<JSONObject>messages=new ArrayList<>();void postMessage(JSONObject m){messages.add(m);}}}
++class View{static int VISIBLE=0;int visibility=8;int getVisibility(){return visibility;}}
++class Text{String getText(){return "https://site.test/";}}
++class TextUtils{static boolean isEmpty(String v){return v==null||v.isEmpty();}}
++'''+page
++with tempfile.TemporaryDirectory() as tmp:
++ p=Path(tmp)/'PlaybackTest.java';p.write_text(source);subprocess.run(['java',str(p)],check=True)
+--- a/tests/share_test.py
++++ b/tests/share_test.py
+@@ -9,7 +9,7 @@
+ source=imports+'''\nclass ShareTest extends Activity {
+  Object lastCapturedItems="old",lastPlayerFormats="old";double capturedDurationSeconds=99;
+  String latestCookieHeader="old",latestCookieFilePath="old",latestOrigin="old",latestUserAgent="old",preferredPlayerPageUrl="old",pendingPageTitle="old",pendingPageUrl="";
+- boolean sharedNavigationPending;int scans=0,closed=0;String opened="";
++ String latestActivePostUrl="old-post",latestActiveMediaKey="old-media";boolean sharedNavigationPending;int scans=0,closed=0;String opened="";
+  void closeCapturePanel(){closed++;sharedNavigationPending=false;}void openUrl(String url){opened=url;}
+  void requestMediaScan(){scans++;}String normalizePageUrl(String url){return url;}
+ '''+methods+'''

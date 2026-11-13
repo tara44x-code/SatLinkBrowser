@@ -1,0 +1,121 @@
+--- a/app/src/main/assets/media_capture/fullscreen_fit.js
++++ b/app/src/main/assets/media_capture/fullscreen_fit.js
+@@ -4,6 +4,9 @@
+   let root = null, video = null, button = null, observer = null, timer = null;
+   let cover = true;
+   let hideButtonTimer = null;
++  let holdTimer = null, gesture = null, suppressClick = false;
++  // Relative coordinates survive fullscreen re-entry and rotation in this page.
++  let buttonPosition = {x: 1, y: 0.5};
+   const originals = new Map();
+   const fullscreen = () => document.fullscreenElement || document.mozFullScreenElement;
+   function showFitButton() {
+@@ -11,6 +14,7 @@
+     if (hideButtonTimer !== null) clearTimeout(hideButtonTimer);
+     button.style.setProperty('visibility', 'visible', 'important');
+     button.style.setProperty('pointer-events', 'auto', 'important');
++    if (gesture) { hideButtonTimer = null; return; }
+     hideButtonTimer = setTimeout(() => {
+       hideButtonTimer = null;
+       if (!button) return;
+@@ -18,6 +22,68 @@
+       button.style.setProperty('visibility', 'hidden', 'important');
+       button.style.setProperty('pointer-events', 'none', 'important');
+     }, 2000);
++  }
++  function positionFitButton() {
++    if (!button) return;
++    const rect = button.getBoundingClientRect();
++    const width = window.innerWidth || document.documentElement.clientWidth;
++    const height = window.innerHeight || document.documentElement.clientHeight;
++    const margin = 8;
++    const x = Math.max(0, width - rect.width - margin * 2);
++    const y = Math.max(0, height - rect.height - margin * 2);
++    const values = {right:'auto',
++      left:Math.min(margin, Math.max(0, width - rect.width)) + buttonPosition.x * x + 'px',
++      top:Math.min(margin, Math.max(0, height - rect.height)) + buttonPosition.y * y + 'px'};
++    for (const [name, value] of Object.entries(values)) {
++      if (button.style.getPropertyValue(name) !== value || button.style.getPropertyPriority(name) !== 'important')
++        button.style.setProperty(name, value, 'important');
++    }
++  }
++  function cancelHold() {
++    if (holdTimer !== null) clearTimeout(holdTimer);
++    holdTimer = null;
++  }
++  function finishDrag(e) {
++    if (!gesture || e.pointerId !== gesture.id) return;
++    cancelHold();
++    if (gesture.dragging || gesture.moved) suppressClick = true;
++    const id = gesture.id;
++    gesture = null;
++    try { button.releasePointerCapture(id); } catch (_) {}
++    showFitButton();
++  }
++  function installButtonDrag() {
++    button.addEventListener('pointerdown', e => {
++      if (gesture || e.isPrimary === false || (e.button !== undefined && e.button !== 0)) return;
++      e.stopPropagation(); suppressClick = false;
++      const rect = button.getBoundingClientRect();
++      gesture = {id:e.pointerId, x:e.clientX, y:e.clientY, left:rect.left, top:rect.top, dragging:false, moved:false};
++      showFitButton();
++      try { button.setPointerCapture(e.pointerId); } catch (_) {}
++      holdTimer = setTimeout(() => {
++        holdTimer = null;
++        if (gesture) { gesture.dragging = true; suppressClick = true; }
++      }, 450);
++    });
++    button.addEventListener('pointermove', e => {
++      if (!gesture || e.pointerId !== gesture.id) return;
++      e.stopPropagation();
++      const dx = e.clientX - gesture.x, dy = e.clientY - gesture.y;
++      if (!gesture.dragging) {
++        if (Math.hypot(dx, dy) > 8) { gesture.moved = true; cancelHold(); }
++        return;
++      }
++      e.preventDefault();
++      const rect = button.getBoundingClientRect();
++      const width = window.innerWidth || document.documentElement.clientWidth;
++      const height = window.innerHeight || document.documentElement.clientHeight;
++      const x = Math.max(0, width - rect.width - 16), y = Math.max(0, height - rect.height - 16);
++      buttonPosition = {x:x ? Math.max(0, Math.min(1, (gesture.left + dx - 8) / x)) : 0,
++        y:y ? Math.max(0, Math.min(1, (gesture.top + dy - 8) / y)) : 0};
++      positionFitButton();
++    });
++    for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) button.addEventListener(name, finishDrag);
++    button.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); });
+   }
+   function set(element, name, value) {
+     let saved = originals.get(element);
+@@ -30,6 +96,7 @@
+       element.style.setProperty(name, value, 'important');
+   }
+   function restore() {
++    cancelHold(); gesture = null; suppressClick = false;
+     if (hideButtonTimer !== null) clearTimeout(hideButtonTimer);
+     hideButtonTimer = null;
+     if (observer) observer.disconnect();
+@@ -89,8 +156,13 @@
+     if (!button && root.tagName !== 'VIDEO' && !/^(IFRAME|EMBED|OBJECT)$/.test(root.tagName)) {
+       button = document.createElement('button');
+       button.type = 'button'; button.setAttribute('data-satlink-fullscreen-fit', '');
+-      button.style.cssText = 'position:fixed!important;top:12px!important;right:12px!important;z-index:2147483647!important;width:auto!important;height:auto!important;padding:8px 12px!important;background:rgba(0,0,0,.65)!important;color:white!important;border:1px solid #aaa!important;border-radius:8px!important;font:14px sans-serif!important;cursor:pointer!important;';
+-      button.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); toggle(); });
++      button.style.cssText = 'position:fixed!important;z-index:2147483647!important;width:auto!important;height:auto!important;max-width:100vw!important;box-sizing:border-box!important;touch-action:none!important;user-select:none!important;padding:8px 12px!important;background:rgba(0,0,0,.65)!important;color:white!important;border:1px solid #aaa!important;border-radius:8px!important;font:14px sans-serif!important;cursor:pointer!important;';
++      button.addEventListener('click', e => {
++        e.preventDefault(); e.stopPropagation();
++        if (suppressClick && e.detail !== 0) { suppressClick = false; return; }
++        toggle();
++      });
++      installButtonDrag();
+       root.appendChild(button);
+       showFitButton();
+     }
+@@ -98,6 +170,7 @@
+       const label = cover ? 'عرض كامل' : 'ملء الشاشة';
+       if (button.textContent !== label) button.textContent = label;
+       button.setAttribute('aria-label', label); button.title = 'SatLink: ' + label + ' (Z)';
++      positionFitButton();
+     }
+   }
+   function toggle() { if (video) { cover = !cover; update(); showFitButton(); } }

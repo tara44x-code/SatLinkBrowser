@@ -1,0 +1,115 @@
+--- a/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
++++ b/app/src/main/java/com/satlink/geckoviewtest/MainActivity.java
+@@ -250,12 +250,18 @@
+ 
+         session = new GeckoSession();
+         session.getSettings().setSuspendMediaWhenInactive(true);
+-        browserMediaControl = new MediaSession(session);
+         session.setMediaSessionDelegate(new MediaSession.Delegate() {
+             @Override public void onActivated(GeckoSession tab, MediaSession media) {
+-                if (!activityForeground || !"browser".equals(activeScreen)) {media.pause();media.muteAudio(true);}
++                browserMediaControl = media;
++                boolean allowed = activityForeground && "browser".equals(activeScreen);
++                media.muteAudio(!allowed);
++                if (!allowed) media.pause();
++            }
++            @Override public void onDeactivated(GeckoSession tab, MediaSession media) {
++                if (browserMediaControl == media) browserMediaControl = null;
+             }
+             @Override public void onPlay(GeckoSession tab, MediaSession media) {
++                browserMediaControl = media;
+                 if (!activityForeground || !"browser".equals(activeScreen)) {media.pause();media.muteAudio(true);}
+             }
+         });
+--- a/tests/playback_test.py
++++ b/tests/playback_test.py
+@@ -4,11 +4,11 @@
+ s=(base/'MainActivity.java').read_text()
+ methods=s[s.index('    private void sendPlaybackMessage'):s.index('    private void showHomeScreen')]
+ back=s[s.index('    @Override\n    public void onBackPressed'):s.index('    @Override\n    protected void onDestroy')]
+-delegate=s[s.index('        session.setMediaSessionDelegate(new MediaSession.Delegate()'):s.index('        session.setContentDelegate')]
++delegate=s[s.index('        session = new GeckoSession();'):s.index('        session.setContentDelegate')]
+ page=re.sub(r'^package .*;\n|^import .*;\n','',(base/'ActiveMediaPage.java').read_text(),flags=re.M)
+ source='''import java.util.*;import java.net.URI;
+ class PlaybackTest extends Activity {
+- boolean activityForeground=true,browserCanGoBack=true;String activeScreen="browser";final GeckoSession session=new GeckoSession();final MediaSession browserMediaControl=new MediaSession(session);final List<WebExtension.Port>capturePorts=new ArrayList<>();final View capturePanel=new View();final Text addressBar=new Text();int homes=0;boolean movedBack;
++ boolean activityForeground=true,browserCanGoBack=true;String activeScreen="browser";GeckoSession session;MediaSession browserMediaControl;final List<WebExtension.Port>capturePorts=new ArrayList<>();final View capturePanel=new View();final Text addressBar=new Text();int homes=0;boolean movedBack;
+  void showHomeScreen(){homes++;activeScreen="home";updateBrowserPlayback();}void showBrowserScreen(){activeScreen="browser";updateBrowserPlayback();}void closeCapturePanel(){capturePanel.visibility=8;}
+  boolean moveTaskToBack(boolean b){movedBack=b;return b;}
+  void initializeDelegate(){
+@@ -17,25 +17,32 @@
+  static void check(boolean v,String m){if(!v)throw new AssertionError(m);}
+  public static void main(String[] a){
+  var app=new PlaybackTest();var port=new WebExtension.Port();app.capturePorts.add(port);app.initializeDelegate();
++ app.showHomeScreen();check(app.browserMediaControl==null && !app.session.active,"No-media home failed");
++ app.showBrowserScreen();var original=MediaSession.createForEngine(app.session);app.session.delegate.onActivated(app.session,original);
++ check(app.browserMediaControl==original,"Engine session not retained");
+  app.showHomeScreen();check(!app.session.active && app.browserMediaControl.muted && app.browserMediaControl.pauses==1,"Home did not suspend, mute and pause page");
+  check(port.messages.stream().anyMatch(x->"pauseMedia".equals(x.data.get("action"))),"DOM frames did not receive pause");
+- var late=new MediaSession(app.session);app.session.delegate.onPlay(app.session,late);check(late.pauses==1 && late.muted,"Hidden late autoplay bypassed guard");
++ var late=MediaSession.createForEngine(app.session);app.session.delegate.onPlay(app.session,late);check(late.pauses==1 && late.muted,"Hidden late autoplay bypassed guard");
+  app.showBrowserScreen();check(app.session.active && !app.browserMediaControl.muted,"Browser not reactivated");check(app.browserMediaControl.plays==0,"Returning to browser resumed video");
+- app.goBackInBrowser();check(app.session.backs==1 && app.browserMediaControl.pauses==2,"History back didn't pause media first");
++ int beforeBack=app.browserMediaControl.pauses;app.goBackInBrowser();check(app.session.backs==1 && app.browserMediaControl.pauses==beforeBack+1,"History back didn't pause media first");
+  app.browserCanGoBack=false;app.goBackInBrowser();check(app.activeScreen.equals("home"),"Back with no history failed to show home");
+  app.onBackPressed();check(app.movedBack && app.activeScreen.equals("home"),"Home back reopened browser");
+  app.showBrowserScreen();app.onPause();check(!app.session.active && app.browserMediaControl.muted,"Leaving app kept media running");app.onResume();check(app.session.active && app.browserMediaControl.plays==0,"Activity resume auto-played");
++ app.session.delegate.onDeactivated(app.session,original);check(app.browserMediaControl==late,"Old deactivation cleared the new session");
++ app.session.delegate.onDeactivated(app.session,late);check(app.browserMediaControl==null,"Deactivated session retained");
++ app.showHomeScreen();var replacement=MediaSession.createForEngine(app.session);app.session.delegate.onActivated(app.session,replacement);check(replacement.muted && replacement.pauses==1,"Hidden activation not stopped");
++ app.showBrowserScreen();check(!replacement.muted && replacement.plays==0,"Reactivation auto-played or stayed muted");
+  check(ActiveMediaPage.resolve("https://www.tiktok.com/", "https://www.tiktok.com/@u/video/123").endsWith("/123"),"Root instead of visible post selected");
+  check(ActiveMediaPage.resolve("https://www.tiktok.com/", "").isEmpty(),"Unsupported root sent to engine");
+  check(ActiveMediaPage.resolve("https://vm.tiktok.com/AB/", "").equals("https://vm.tiktok.com/AB/"),"Short URL blocked");
+  check(ActiveMediaPage.validTikTokPost("https://tiktok.com.fake/@u/video/123").isEmpty(),"Unrelated host accepted");
+  check(ActiveMediaPage.resolve("https://youtube.com/watch?v=123", "https://www.tiktok.com/@u/video/123").contains("youtube.com"),"TikTok state changed YouTube routing");
+- System.out.println("PASS production playback and target selection: home/history/app pause, late autoplay blocked, no resume play, home back, active feed post, root rejected, short links, YouTube preserved");
++ System.out.println("PASS production initialization with inaccessible MediaSession constructor, delegate activation/deactivation and playback: home/history/app pause, late autoplay blocked, no resume play, home back, active feed post, root rejected, short links, YouTube preserved");
+  }
+ }
+ class Activity{protected void onPause(){}protected void onResume(){}public void onBackPressed(){}}
+-class GeckoSession{boolean active=true;int backs;MediaSession.Delegate delegate;void setActive(boolean b){active=b;}void goBack(){backs++;}void setMediaSessionDelegate(MediaSession.Delegate d){delegate=d;}}
+-class MediaSession{int pauses,plays;boolean muted;MediaSession(GeckoSession s){}void pause(){pauses++;}void play(){plays++;}void muteAudio(boolean b){muted=b;}interface Delegate{default void onActivated(GeckoSession t,MediaSession m){}default void onPlay(GeckoSession t,MediaSession m){}}}
++class GeckoSession{boolean active=true;int backs;MediaSession.Delegate delegate;void setActive(boolean b){active=b;}void goBack(){backs++;}void setMediaSessionDelegate(MediaSession.Delegate d){delegate=d;}Settings getSettings(){return new Settings();}static class Settings{void setSuspendMediaWhenInactive(boolean v){}}}
++class MediaSession{int pauses,plays;boolean muted;private MediaSession(GeckoSession s){}static MediaSession createForEngine(GeckoSession s){return new MediaSession(s);}void pause(){pauses++;}void play(){plays++;}void muteAudio(boolean b){muted=b;}interface Delegate{default void onActivated(GeckoSession t,MediaSession m){}default void onPlay(GeckoSession t,MediaSession m){}default void onDeactivated(GeckoSession t,MediaSession m){}}}
+ class JSONObject{Map<String,Object>data=new HashMap<>();JSONObject put(String k,Object v){data.put(k,v);return this;}}
+ class WebExtension{static class Port{List<JSONObject>messages=new ArrayList<>();void postMessage(JSONObject m){messages.add(m);}}}
+ class View{static int VISIBLE=0;int visibility=8;int getVisibility(){return visibility;}}
+--- a/README_AR.md
++++ b/README_AR.md
+@@ -1,6 +1,12 @@
+ # SatLink Browser PRO 1.9.8 — إيقاف التشغيل والتقاط مقطع الصفحة الرئيسية
+ 
+ مشروع المصدر الكامل المعدّل. هذه الحزمة لا تحتوي APK مبنياً؛ نتائج الفحص وحدوده داخل TEST_REPORT_AR.md.
++
++## تصحيح خطأ بناء MediaSession
++
++إصلاح ضمن الإصدار 1.9.8 نفسه: أزيل new MediaSession(session) لأن المُنشئ محمي في الاعتماد المستخدم. يُحفظ كائن جلسة الوسائط الذي يمرره Gecko إلى onActivated/onPlay، ويُزال في onDeactivated إن كان الكائن الحالي. لا تُنشأ جلسة بديلة يدوياً.
++
++اختبار playback_test.py أصبح ينفذ تهيئة الجلسة من المصدر أيضاً، مع مُنشئ MediaSession غير قابل للاستدعاء من الاختبار، كي يكشف تكرار هذا الخطأ. نجح الاختبار بعد التصحيح؛ لا يمثل ذلك بناء Android كاملاً.
+ 
+ ## التغييرات الحالية
+ 
+--- a/TEST_REPORT_AR.md
++++ b/TEST_REPORT_AR.md
+@@ -44,3 +44,11 @@
+ 
+ المشروع يثبت GeckoView 150.0.20260511200624. لم يكتمل ربط Android بهذا الاعتماد في البيئة الحالية؛ فحص الصياغة وبدائل الاختبار لا يستبدلان ذلك.
+ 
++
++## تصحيح المُنشئ المحمي — نفس الإصدار 1.9.8
++
++خطأ البناء المرسل من المستخدم: MediaSession(GeckoSession) has protected access in MediaSession. كان الاستدعاء اليدوي في MainActivity.java هو السبب. أزيل، وأصبحت السيطرة عبر كائن MediaSession الذي يستلمه delegate من Gecko.
++
++أضيفت معالجة onDeactivated وتحقق من هوية الكائن عند إزالته، ومنع إعادة التشغيل عند العودة. أعيد اختبار playback_test.py مع تضمين تهيئة الجلسة الحقيقية من المصدر ومُنشئ MediaSession غير متاح للاختبار. نجح، وكذلك فحص صياغة Java. لم يجر بناء Android كامل هنا؛ حجب تنزيل Gradle السابق ما زال حدّ التحقق المعروف.
++
++MEDIA_SESSION_ACCESS_FIX.patch يوضح هذا التصحيح وحده مقارنة بالحزمة السابقة.
+--- a/TEST_OUTPUT.txt
++++ b/TEST_OUTPUT.txt
+@@ -47,3 +47,6 @@
+ 
+ $ java tests/ValidateJava.java app/src/main/java/com/satlink/geckoviewtest/ActiveMediaPage.java app/src/main/java/com/satlink/geckoviewtest/BundledEngineInstaller.java app/src/main/java/com/satlink/geckoviewtest/CapturedDownloadPlan.java app/src/main/java/com/satlink/geckoviewtest/EngineBootstrap.java app/src/main/java/com/satlink/geckoviewtest/EngineRuntimeOptions.java app/src/main/java/com/satlink/geckoviewtest/FormatSelectionPolicy.java app/src/main/java/com/satlink/geckoviewtest/MainActivity.java app/src/main/java/com/satlink/geckoviewtest/MediaDownloadService.java app/src/main/java/com/satlink/geckoviewtest/SLTubeAnalysisRequest.java app/src/main/java/com/satlink/geckoviewtest/SharedUrlParser.java
+ PASS Java syntax (not Android compilation)
++
++MediaSession constructor access fix: targeted regression re-run
++PASS production initialization with inaccessible MediaSession constructor, delegate activation/deactivation and playback: home/history/app pause, late autoplay blocked, no resume play, home back, active feed post, root rejected, short links, YouTube preserved
