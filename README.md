@@ -37,7 +37,7 @@ gradle :app:assembleDebug
 
 كل رفع إلى GitHub يشغّل الاختبارات ويبني APK تلقائياً عبر GitHub Actions (تبويب Actions ← آخر تشغيل ← Artifacts).
 
-> ملف `gradle/wrapper/gradle-wrapper.jar` الحالي ليس النسخة الرسمية من Gradle. يُفضّل إعادة توليده بالأمر `gradle wrapper --gradle-version 8.11.1` قبل الاعتماد على `gradlew`.
+> المشروع لا يتضمن Gradle wrapper (`gradlew`)؛ النسخة القديمة لم تكن الرسمية فحُذفت. سكربتا `BUILD-SATLINK` يستخدمان Gradle المثبت على الجهاز. لإضافة wrapper رسمي: `gradle wrapper --gradle-version 8.11.1`.
 
 ## الاختبارات
 
