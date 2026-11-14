@@ -1,48 +1,22 @@
-name: Build and test
-
+name: Probe aria2c module
 on:
   push:
-    branches: [main]
-  pull_request:
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
+    branches: [probe-aria2c]
 jobs:
-  tests:
+  probe:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Logic tests
-        run: bash tests/run_all.sh
-
-  apk:
-    runs-on: ubuntu-latest
-    needs: tests
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.11.1'
-      - name: Build debug APK
-        run: gradle :app:assembleDebug --console=plain
-      - uses: actions/upload-artifact@v4
-        with:
-          name: SatLinkBrowser-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
+      - run: |
+          set -e
+          base=https://repo1.maven.org/maven2/io/github/junkfood02/youtubedl-android
+          curl -sSfLo a.aar $base/aria2c/0.18.1/aria2c-0.18.1.aar
+          curl -sSfLo l.aar $base/library/0.18.1/library-0.18.1.aar
+          unzip -l a.aar
+          mkdir a l && (cd a && unzip -q ../a.aar) && (cd l && unzip -q ../l.aar)
+          (cd a && unzip -l classes.jar)
+          (cd a && unzip -q classes.jar -d cls && for c in $(find cls -name '*.class'); do javap -p -constants "$c"; done)
+          (cd l && unzip -q classes.jar -d cls && javap -p -constants $(find cls -name 'YoutubeDL.class') | head -80)
+          (cd l && for c in $(find cls -name 'YoutubeDL*.class' -o -name 'Constants*.class'); do echo "== $c"; strings "$c" | grep -i -E 'packages|usr/lib|LD_LIBRARY|aria2|SSL_CERT|python|ffmpeg' ; done)
+          (cd a && for c in $(find cls -name '*.class'); do echo "== $c"; strings "$c" | grep -i -E 'packages|usr|zip|aria2|lib' ; done)
+          (cd a && find jni -type f | xargs ls -la)
+          mkdir z && cd z && unzip -q ../a/jni/arm64-v8a/libaria2c.zip.so && find . | head -40
