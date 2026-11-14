@@ -47,9 +47,22 @@ final class GeneralFileDownloads {
                 GeneralFilePolicy.cookieHeader(cookies,url,System.currentTimeMillis()/1000L));
         String sizeText=size>0?size(size):"يظهر الحجم أثناء التنزيل";
         showingUrl=url;
+        if (name.toLowerCase(Locale.ROOT).endsWith(".torrent") || "application/x-bittorrent".equals(mime)) {
+            AlertDialog torrent=new AlertDialog.Builder(activity)
+                    .setTitle("ملف تورنت")
+                    .setMessage("الاسم: "+name+"\nتنزيل محتوى التورنت داخل التطبيق، أو حفظ ملف .torrent فقط.")
+                    .setNegativeButton("إلغاء",null)
+                    .setNeutralButton("حفظ الملف فقط",(d,which)->enqueue(pending))
+                    .setPositiveButton("تنزيل المحتوى",(d,which)->enqueue(pending.asTorrent(name.replaceFirst("(?i)\\.torrent$",""))))
+                    .create();
+            torrent.setOnDismissListener(d->showingUrl=null);
+            torrent.show();
+            return;
+        }
         AlertDialog dialog=new AlertDialog.Builder(activity)
                 .setTitle("تنزيل ملف")
-                .setMessage("الاسم: "+name+"\nالنوع: "+mime+"\nالحجم: "+sizeText+"\nالحفظ: Downloads/SatLink")
+                .setMessage("الاسم: "+name+"\nالنوع: "+mime+"\nالحجم: "+sizeText+"\nالحفظ: Downloads/SatLink"
+                        +"\nالاتصالات: حتى "+FileDownloadService.connections(activity))
                 .setNegativeButton("إلغاء",null)
                 .setPositiveButton("تنزيل",(d,which)->enqueue(pending))
                 .create();
@@ -73,22 +86,15 @@ final class GeneralFileDownloads {
             return;
         }
         try {
+            if(pending.torrent) {
+                FileDownloadService.startTorrent(activity,pending.url,pending.name,pending.referer,pending.userAgent,pending.cookies);
+                toast("بدأ تنزيل التورنت — تابع التقدم من التنزيلات");
+                return;
+            }
             DownloadManager manager=(DownloadManager)activity.getSystemService(Context.DOWNLOAD_SERVICE);
-            if(manager==null) throw new IllegalStateException("مدير التنزيل غير متاح");
             String name=uniqueName(pending.name,manager);
-            DownloadManager.Request request=new DownloadManager.Request(Uri.parse(pending.url));
-            request.setTitle(name);
-            request.setDescription("SatLink Browser — تنزيل ملف");
-            request.setMimeType(pending.mime);
-            request.setAllowedOverMetered(true);
-            request.setAllowedOverRoaming(true);
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,"SatLink/"+name);
-            if(!pending.userAgent.isEmpty()) request.addRequestHeader("User-Agent",pending.userAgent);
-            if(GeneralFilePolicy.http(pending.referer)) request.addRequestHeader("Referer",pending.referer);
-            if(!pending.cookies.isEmpty()) request.addRequestHeader("Cookie",pending.cookies);
-            manager.enqueue(request);
-            toast("بدأ تنزيل "+name+" — تابع التقدم من إشعار التنزيل");
+            FileDownloadService.startHttp(activity,pending.url,name,pending.mime,pending.referer,pending.userAgent,pending.cookies);
+            toast("بدأ تنزيل "+name+" بـ "+FileDownloadService.connections(activity)+" اتصال كحد أقصى");
         } catch(Exception error) {toast("تعذر بدء تنزيل الملف: "+error.getMessage());}
     }
 
@@ -105,6 +111,7 @@ final class GeneralFileDownloads {
     }
 
     private boolean exists(String name, DownloadManager manager) {
+        if(FileDownloadService.activeNames(activity).contains(name)) return true;
         // Include queued and running files, not only already completed files.
         try(Cursor cursor=manager.query(new DownloadManager.Query())) {
             if(cursor!=null) {
@@ -125,14 +132,17 @@ final class GeneralFileDownloads {
     private void offerMagnet(String url) {
         if(activity.isFinishing() || activity.isDestroyed() || url.equals(showingUrl)) return;
         showingUrl=url;
+        String name=TorrentSupport.displayName(url);
         AlertDialog dialog=new AlertDialog.Builder(activity)
                 .setTitle("رابط تورنت")
-                .setMessage("ملفات .torrent تُنزّل كملفات. رابط magnet يحتاج تطبيق تورنت لتحميل محتوياته.")
+                .setMessage((name.isEmpty()?"":"الاسم: "+name+"\n")+"تنزيل المحتوى داخل التطبيق، أو فتحه بتطبيق تورنت آخر.")
                 .setNegativeButton("إلغاء",null)
-                .setPositiveButton("فتح بتطبيق تورنت",(d,which)->{
+                .setNeutralButton("تطبيق آخر",(d,which)->{
                     try {activity.startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url)));}
                     catch(Exception error) {copyLink(url);}
-                }).create();
+                })
+                .setPositiveButton("تنزيل داخل التطبيق",(d,which)->enqueue(new Pending(url,name.isEmpty()?"Torrent":name,"","","","").asTorrent(name.isEmpty()?"Torrent":name)))
+                .create();
         dialog.setOnDismissListener(d->showingUrl=null);dialog.show();
     }
 
@@ -155,6 +165,12 @@ final class GeneralFileDownloads {
 
     private static final class Pending {
         final String url,name,mime,referer,userAgent,cookies;
+        boolean torrent;
+        Pending asTorrent(String displayName) {
+            Pending copy=new Pending(url,displayName,mime,referer,userAgent,cookies);
+            copy.torrent=true;
+            return copy;
+        }
         Pending(String url,String name,String mime,String referer,String userAgent,String cookies) {
             this.url=url;this.name=name;this.mime=mime;this.referer=referer==null?"":referer;
             this.userAgent=userAgent==null?"":userAgent;this.cookies=cookies;

@@ -4,7 +4,7 @@
 
 An Android browser built on GeckoView with video, audio and file downloading.
 
-الإصدار الحالي / Current version: **1.9.10**
+الإصدار الحالي / Current version: **1.10.0**
 
 > **تنبيه / Status:** هذا مشروع مصدر. لم يُبنَ APK ولم يُختبر على هاتف حقيقي ضمن بيئة التطوير؛ الاختبارات المرفقة تفحص المنطق ببدائل لأندرويد و Gecko. ابنِ التطبيق وجرّبه على جهازك قبل الاعتماد عليه.
 >
@@ -18,7 +18,8 @@ An Android browser built on GeckoView with video, audio and file downloading.
 - **زر الرجوع خطوة بخطوة**: يخرج من ملء الشاشة أولاً، ثم يرجع صفحة في السجل، ثم يرجع للصفحة التي فتحت التبويب، ثم الرئيسية. الخروج من التطبيق بضغطتين من الرئيسية.
 - **التقاط الفيديو والصوت**: قراءة الجودات الفعلية عبر yt-dlp، دمج الفيديو والصوت وتحويل MP3 عبر FFmpeg، إيقاف مؤقت واستكمال.
 - **تنزيل الملفات**: ZIP و RAR و 7z و ISO و APK و XAPK و EXE و PDF وملفات الألعاب والخطوط والترجمة وغيرها، وأي ملف يرسله الموقع كتنزيل، وتنزيلات `blob:` و `data:` التي تُنشئها الصفحة نفسها.
-- **التورنت**: ملفات `.torrent` تُنزّل كملفات. روابط `magnet:` تُفتح بتطبيق تورنت مثبت، وإن لم يوجد يُنسخ الرابط. لا يوجد عميل تورنت مدمج.
+- **محرك تنزيل متعدد الاتصالات**: حتى 32 اتصالاً لكل ملف، مع إيقاف مؤقت واستكمال حتى بعد إغلاق التطبيق.
+- **التورنت**: تنزيل روابط `magnet:` وملفات `.torrent` داخل التطبيق عبر aria2c، أو فتحها بتطبيق تورنت آخر.
 - **ملء الشاشة**: أزرار لمس للرجوع 10 ثوانٍ، تشغيل/إيقاف مؤقت، تقديم 10 ثوانٍ، وسرعة التشغيل؛ شريط صوت وشريط سطوع؛ زر توسيع الصورة.
 
 ## البناء
@@ -33,9 +34,9 @@ An Android browser built on GeckoView with video, audio and file downloading.
 gradle :app:assembleDebug
 ```
 
-الناتج: `app/build/outputs/apk/debug/app-debug.apk`
+الناتج: ملف APK لكل نوع معالج داخل `app/build/outputs/apk/debug/`. أغلب الهواتف: `arm64-v8a`. الهواتف القديمة وكثير من أجهزة TV Box: `armeabi-v7a`.
 
-كل رفع إلى GitHub يشغّل الاختبارات ويبني APK تلقائياً عبر GitHub Actions (تبويب Actions ← آخر تشغيل ← Artifacts).
+كل رفع إلى GitHub يشغّل الاختبارات ويبني APK تلقائياً عبر GitHub Actions (تبويب Actions ← آخر تشغيل ← Artifacts ← `SatLinkBrowser-arm64-v8a` لأغلب الهواتف).
 
 > المشروع لا يتضمن Gradle wrapper (`gradlew`)؛ النسخة القديمة لم تكن الرسمية فحُذفت. سكربتا `BUILD-SATLINK` يستخدمان Gradle المثبت على الجهاز. لإضافة wrapper رسمي: `gradle wrapper --gradle-version 8.11.1`.
 

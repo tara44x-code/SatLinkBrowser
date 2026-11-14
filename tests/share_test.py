@@ -12,6 +12,7 @@ source=imports+'''\nclass ShareTest extends Activity {
  String latestActivePostUrl="old-post",latestActiveMediaKey="old-media";boolean sharedNavigationPending;int scans=0,closed=0;String opened="";
  Object session=new Object();static class BrowserTab{String url="about:blank";}BrowserTab tab=new BrowserTab();BrowserTab findTab(Object s){return tab;}
  String newTab="";void openInNewTab(String u,boolean remember){newTab=u;}File getCacheDir(){return new File(".");}final java.util.concurrent.Executor worker=r->{};static final String TAG="test";
+ int downloadsShown;void showDownloadsScreen(){downloadsShown++;}
  void closeCapturePanel(){closed++;sharedNavigationPending=false;}void openUrl(String url){opened=url;}
  void requestMediaScan(){scans++;}String normalizePageUrl(String url){return url;}
 '''+methods+'''
@@ -36,6 +37,7 @@ source=imports+'''\nclass ShareTest extends Activity {
  check(!app.handleViewLink(view),"Same external link opened twice");
  app.tab.url="https://old.test/";var second=new Intent(Intent.ACTION_VIEW,null);second.data=new Uri("http://next.test/");app.onNewIntent(second);
  check(app.newTab.equals("http://next.test/") && app.opened.equals("https://site.test/page?a=1"),"External link replaced the open page");
+ var fromNotice=new Intent(null,null);fromNotice.open=true;app.onNewIntent(fromNotice);check(app.downloadsShown==1 && !fromNotice.open,"Download notification did not open the downloads screen");
  var odd=new Intent(Intent.ACTION_VIEW,null);odd.data=new Uri("file:///data/x");check(!app.handleViewLink(odd),"Non-web link accepted");
  System.out.println("PASS production share handler: cold/warm intent, caption, short URL, signed query, stale session reset, ClipData, malformed input, single consumption");
  }
@@ -45,7 +47,8 @@ class Uri{String value;Uri(String v){value=v;}public String toString(){return va
 class TextUtils{static boolean isEmpty(String v){return v==null||v.isEmpty();}}
 class Log{static void w(String a,String b){}static void w(String a,String b,Throwable t){}}
 class GeneralFilePolicy{static boolean http(String u){return u!=null&&(u.startsWith("https://")||u.startsWith("http://"));}}
-class Intent {static final String ACTION_SEND="SEND",ACTION_VIEW="VIEW",EXTRA_TEXT="TEXT";Uri data;Uri getData(){return data;}void setData(Uri d){data=d;}String action,text;ClipData clip;Intent(String a,String t){action=a;text=t;}String getAction(){return action;}CharSequence getCharSequenceExtra(String k){return text;}ClipData getClipData(){return clip;}void setAction(String a){action=a;}void removeExtra(String k){text=null;}}
+class FileDownloadService{static final String EXTRA_OPEN_DOWNLOADS="open";}
+class Intent {boolean open;boolean getBooleanExtra(String k,boolean d){return open;}static final String ACTION_SEND="SEND",ACTION_VIEW="VIEW",EXTRA_TEXT="TEXT";Uri data;Uri getData(){return data;}void setData(Uri d){data=d;}String action,text;ClipData clip;Intent(String a,String t){action=a;text=t;}String getAction(){return action;}CharSequence getCharSequenceExtra(String k){return text;}ClipData getClipData(){return clip;}void setAction(String a){action=a;}void removeExtra(String k){if("open".equals(k))open=false;else text=null;}}
 class ClipData {String text;ClipData(String s){text=s;}int getItemCount(){return 1;}ClipData getItemAt(int i){return this;}CharSequence getText(){return text;}}
 class Toast {static final int LENGTH_LONG=1;static Toast makeText(Object c,String s,int t){return new Toast();}void show(){}}
 '''

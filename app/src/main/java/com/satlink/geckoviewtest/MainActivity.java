@@ -130,6 +130,7 @@ public class MainActivity extends Activity {
     private Button refreshPageButton;
     private Button captureButton;
     private View browserHeader;
+    private View browserToolbar;
     private View bottomNavigation;
     private boolean inPageFullscreen = false;
     private FullscreenDisplayControls fullscreenDisplayControls;
@@ -224,6 +225,7 @@ public class MainActivity extends Activity {
         Button goButton = findViewById(R.id.goButton);
         captureButton = findViewById(R.id.captureButton);
         browserHeader = findViewById(R.id.browserHeader);
+        browserToolbar = findViewById(R.id.browserToolbar);
         bottomNavigation = findViewById(R.id.bottomNavigation);
         captureButton.setVisibility(View.GONE);
         Button closeCaptureButton = findViewById(R.id.closeCaptureButton);
@@ -268,6 +270,13 @@ public class MainActivity extends Activity {
         configureExtensionPrompts();
         browserWorkspace = BrowserWorkspace.decode(getSharedPreferences("satlink_browser", MODE_PRIVATE)
                 .getString("workspace", ""));
+        SharedPreferences browserPrefs = getSharedPreferences("satlink_browser", MODE_PRIVATE);
+        if (!browserPrefs.getBoolean("start_on_home_v1", false)) {
+            // A fresh start opens the home screen, not the last page. Can be turned back on in settings.
+            browserWorkspace.restoreTabs = false;
+            browserPrefs.edit().putBoolean("start_on_home_v1", true)
+                    .putString("workspace", browserWorkspace.encode()).apply();
+        }
         forwardPageButton = findViewById(R.id.forwardPageButton);
         forwardPageButton.setOnClickListener(v -> goForwardInBrowser());
 
@@ -355,6 +364,12 @@ public class MainActivity extends Activity {
         renderShortcuts();
         boolean restored = restoreBrowserWorkspace();
         cleanStaleCookieFiles();
+        if (savedInstanceState == null && getIntent() != null
+                && getIntent().getBooleanExtra(FileDownloadService.EXTRA_OPEN_DOWNLOADS, false)) {
+            if (!restored) session.loadUri("about:blank");
+            showDownloadsScreen();
+            return;
+        }
         if (savedInstanceState == null && handleViewLink(getIntent())) return;
         if (savedInstanceState == null && handleSharedLink(getIntent())) return;
         if (!restored) {
@@ -368,6 +383,11 @@ public class MainActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        if (intent != null && intent.getBooleanExtra(FileDownloadService.EXTRA_OPEN_DOWNLOADS, false)) {
+            intent.removeExtra(FileDownloadService.EXTRA_OPEN_DOWNLOADS);
+            showDownloadsScreen();
+            return;
+        }
         if (handleViewLink(intent)) return;
         handleSharedLink(intent);
     }
@@ -857,7 +877,8 @@ public class MainActivity extends Activity {
             updateSessionData(json);
 
             if (capturePanel.getVisibility() != View.VISIBLE) return;
-            if (!TextUtils.isEmpty(pendingPageTitle)) captureTitle.setText(pendingPageTitle);
+            // On YouTube the page title can still be the previous video's; the analysis sets it.
+            if (!TextUtils.isEmpty(pendingPageTitle) && !isYouTubeUrl(pendingPageUrl)) captureTitle.setText(pendingPageTitle);
             long now = android.os.SystemClock.elapsedRealtime();
             if (!detailedFormatsShown && now - lastQuickRender >= 500) {
                 showCapturedFallback(lastCapturedItems);
@@ -1485,7 +1506,29 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * YouTube changes videos without reloading the page, so data read from the page can still
+     * belong to the previous video. Show it only after the real analysis of the current video
+     * failed, and then only items carrying the current video id.
+     */
+    private JSONArray currentVideoItems(JSONArray items) {
+        if (items == null || !isYouTubeUrl(pendingPageUrl)) return items;
+        if (TextUtils.isEmpty(lastAnalysisError) && !engineFailed.get()) return null;
+        String id = Uri.parse(pendingPageUrl).getQueryParameter("v");
+        if (TextUtils.isEmpty(id)) return new JSONArray();
+        JSONArray kept = new JSONArray();
+        for (int i = 0; i < items.length(); i++) {
+            JSONObject item = items.optJSONObject(i);
+            if (item != null && id.equals(item.optString("videoId"))) kept.put(item);
+        }
+        return kept;
+    }
+
     private void showCapturedFallback(JSONArray items) {
+        if (isYouTubeUrl(pendingPageUrl)) {
+            items = currentVideoItems(items);
+            if (items == null) return; // analysis of the current video is still running
+        }
         if (hasStartedCaptureDownload()) return;
         resetFormatLists();
         if (items == null || items.length() == 0) {
@@ -2262,6 +2305,7 @@ public class MainActivity extends Activity {
     }
 
     private void hideAllOverlays() {
+        if (browserToolbar != null) browserToolbar.setVisibility(View.VISIBLE);
         homeOverlay.setVisibility(View.GONE);
         downloadsOverlay.setVisibility(View.GONE);
         extensionsOverlay.setVisibility(View.GONE);
@@ -2374,6 +2418,7 @@ public class MainActivity extends Activity {
         returnToBrowserFromHome = false;
         closeCapturePanel();
         hideAllOverlays();
+        if (browserToolbar != null) browserToolbar.setVisibility(View.GONE);
         homeOverlay.setVisibility(View.VISIBLE);
         captureButton.setVisibility(View.GONE);
         activeScreen = "home";
@@ -2797,6 +2842,12 @@ public class MainActivity extends Activity {
             addMessageCard(downloadsList, "تعذر قراءة مدير التنزيل: " + safeMessage(error));
         }
         Set<String> nativeNames = GeneralDownloadCatalog.representedNames(nativeFiles);
+        for (FileDownloadService.Task task : FileDownloadService.snapshot(this)) {
+            if (FileDownloadService.DONE.equals(task.state)) continue;
+            downloadsList.addView(engineDownloadCard(task));
+            nativeNames.add(task.name);
+            found++;
+        }
         for (GeneralDownloadCatalog.Entry item : nativeFiles) {
             downloadsList.addView(generalDownloadCard(item));
             found++;
@@ -2906,6 +2957,90 @@ public class MainActivity extends Activity {
                 }).show());
         card.addView(actions);
         return card;
+    }
+
+    /** A file or torrent download from the multi-connection engine. */
+    private View engineDownloadCard(FileDownloadService.Task task) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(dp(14), dp(12), dp(14), dp(12));
+        card.setBackground(roundedBackground(0xFF151219, 0xFF8B3FD9, 15));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.setMargins(0, 0, 0, dp(9));card.setLayoutParams(params);
+        boolean torrent = FileDownloadService.KIND_TORRENT.equals(task.kind);
+        TextView title = new TextView(this);
+        title.setText((torrent ? "🧲 " : "") + task.name);
+        title.setTextColor(Color.WHITE);title.setTextSize(14);title.setTypeface(Typeface.DEFAULT_BOLD);
+        card.addView(title);
+        String state;
+        switch (task.state) {
+            case FileDownloadService.QUEUED: state = "بالانتظار"; break;
+            case FileDownloadService.RUNNING: state = torrent && task.total <= 0 ? "جاري جلب معلومات التورنت" : "جاري التنزيل"; break;
+            case FileDownloadService.PAUSED: state = "متوقف مؤقتاً"; break;
+            case FileDownloadService.FAILED: state = "فشل"; break;
+            default: state = task.state;
+        }
+        int percent = task.percent();
+        StringBuilder line = new StringBuilder(state);
+        if (percent >= 0) line.append("  •  ").append(percent).append('%');
+        line.append('\n').append(FileDownloadService.Formats.bytes(task.downloaded));
+        if (task.total > 0) line.append(" / ").append(FileDownloadService.Formats.bytes(task.total));
+        if (FileDownloadService.RUNNING.equals(task.state)) {
+            line.append("  •  ").append(FileDownloadService.Formats.bytes(task.speed)).append("/ث");
+            if (torrent) line.append("  •  ").append(task.connections).append(" نظير، ").append(task.peers).append(" مصدر");
+            else line.append("  •  ").append(task.connections).append(" اتصال");
+            if (task.speed > 0 && task.total > task.downloaded)
+                line.append("  •  ").append(formatEta((task.total - task.downloaded) / task.speed));
+        }
+        if (FileDownloadService.FAILED.equals(task.state) && !TextUtils.isEmpty(task.error)) line.append('\n').append(task.error);
+        TextView status = new TextView(this);
+        status.setText(line.toString());
+        status.setTextColor(0xFFAAA3B2);status.setTextSize(11);status.setPadding(0, dp(5), 0, dp(10));
+        card.addView(status);
+        ProgressBar progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        progress.setMax(100);
+        progress.setIndeterminate(percent < 0 && task.active());
+        if (percent >= 0) progress.setProgress(percent);
+        card.addView(progress, new LinearLayout.LayoutParams(-1, dp(8)));
+        LinearLayout actions = new LinearLayout(this);
+        actions.setOrientation(LinearLayout.HORIZONTAL);actions.setGravity(Gravity.END);
+        actions.setPadding(0, dp(8), 0, 0);
+        if (task.active()) {
+            Button pause = smallDownloadActionButton("إيقاف مؤقت");actions.addView(pause);
+            pause.setOnClickListener(v -> {FileDownloadService.command(this, FileDownloadService.ACTION_PAUSE, task.id);refreshDownloads();});
+        } else {
+            Button resume = smallDownloadActionButton(FileDownloadService.FAILED.equals(task.state) ? "إعادة المحاولة" : "استكمال");
+            actions.addView(resume);
+            resume.setOnClickListener(v -> {FileDownloadService.command(this, FileDownloadService.ACTION_RESUME, task.id);refreshDownloads();});
+        }
+        Button cancel = smallDownloadActionButton("إلغاء");actions.addView(cancel);
+        cancel.setTextColor(0xFFFF7DAA);
+        cancel.setOnClickListener(v -> new AlertDialog.Builder(this)
+                .setTitle("إلغاء التنزيل")
+                .setMessage("إلغاء التنزيل وحذف الجزء المحمّل؟\n" + task.name)
+                .setNegativeButton("رجوع", null)
+                .setPositiveButton("إلغاء التنزيل", (dialog, which) -> {
+                    FileDownloadService.command(this, FileDownloadService.ACTION_CANCEL, task.id);
+                    refreshDownloads();
+                }).show());
+        card.addView(actions);
+        return card;
+    }
+
+    private void showConnectionSetting() {
+        final int[] choices = {1, 4, 8, 16, 32};
+        String[] labels = new String[choices.length];
+        int current = FileDownloadService.connections(this), selected = choices.length - 1;
+        for (int i = 0; i < choices.length; i++) {
+            labels[i] = choices[i] + (choices[i] == 1 ? " اتصال" : " اتصالاً");
+            if (choices[i] == current) selected = i;
+        }
+        new AlertDialog.Builder(this).setTitle("عدد الاتصالات لكل ملف")
+                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
+                    FileDownloadService.setConnections(this, choices[which]);
+                    dialog.dismiss();
+                    Toast.makeText(this, "يطبق على التنزيلات الجديدة والمستكملة. إذا رفض الموقع، قلّل العدد.", Toast.LENGTH_LONG).show();
+                }).setNegativeButton("رجوع", null).show();
     }
 
     private View downloadFileCard(String name, long size, String mime, Uri uri, File legacyFile) {
@@ -3463,7 +3598,8 @@ public class MainActivity extends Activity {
 
     private void showBrowserSettings() {
         String[] items = {"محرك البحث: " + browserWorkspace.engine,
-                "استعادة التبويبات عند التشغيل: " + (browserWorkspace.restoreTabs ? "مفعّلة" : "متوقفة")};
+                "استعادة التبويبات عند التشغيل: " + (browserWorkspace.restoreTabs ? "مفعّلة" : "متوقفة"),
+                "عدد اتصالات تنزيل الملفات: " + FileDownloadService.connections(this)};
         new AlertDialog.Builder(this).setTitle("إعدادات المتصفح").setItems(items,(d,which)->{
             if (which==0) {
                 String[] engines={"Google","Bing","DuckDuckGo"};
@@ -3471,8 +3607,10 @@ public class MainActivity extends Activity {
                 new AlertDialog.Builder(this).setTitle("محرك البحث").setSingleChoiceItems(engines,selected,(choice,index)->{
                     browserWorkspace.engine=engines[index];persistBrowserWorkspace();choice.dismiss();
                 }).setNegativeButton("رجوع",null).show();
-            } else {
+            } else if (which==1) {
                 browserWorkspace.restoreTabs=!browserWorkspace.restoreTabs;persistBrowserWorkspace();showBrowserSettings();
+            } else {
+                showConnectionSetting();
             }
         }).setNegativeButton("إغلاق",null).show();
     }
