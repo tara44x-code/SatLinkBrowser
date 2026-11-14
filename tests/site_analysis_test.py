@@ -6,9 +6,9 @@ s=(base/'MainActivity.java').read_text()
 methods=s[s.index('    private JSONObject executeAnalysis(String pageUrl)'):s.index('    private static String compactEngineOutput')]
 score=s[s.index('    private FormatSelectionPolicy.Score extractionScore'):s.index('    private JSONObject executeYouTubeAnalysis')]
 parts=[]
-for name in ['SLTubeAnalysisRequest.java','EngineRuntimeOptions.java','FormatSelectionPolicy.java']:
+for name in ['SLTubeAnalysisRequest.java','EngineRuntimeOptions.java','FormatSelectionPolicy.java','CapturedMediaFilter.java']:
  parts.append(re.sub(r'^package .*;\n|^import .*;\n','',(base/name).read_text(),flags=re.M))
-source='''import java.util.*;import java.io.*;
+source='''import java.util.*;import java.io.*;import java.net.HttpURLConnection;import java.net.URI;import java.net.URL;import java.util.regex.*;
 class SiteAnalysisTest {
  int captureRequestSerial=1;JSONArray lastCapturedItems=new JSONArray();final List<YoutubeDLRequest> executed=new ArrayList<>();final Deque<Object> responses=new ArrayDeque<>();final Map<String,JSONObject> json=new HashMap<>();
  Context getApplicationContext(){return new Context();}

@@ -4,7 +4,7 @@
 
 An Android browser built on GeckoView with video, audio and file downloading.
 
-الإصدار الحالي / Current version: **1.10.1**
+الإصدار الحالي / Current version: **1.10.2**
 
 > **تنبيه / Status:** هذا مشروع مصدر. لم يُبنَ APK ولم يُختبر على هاتف حقيقي ضمن بيئة التطوير؛ الاختبارات المرفقة تفحص المنطق ببدائل لأندرويد و Gecko. ابنِ التطبيق وجرّبه على جهازك قبل الاعتماد عليه.
 >

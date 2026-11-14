@@ -1084,14 +1084,15 @@ public class MainActivity extends Activity {
         String manifest = strongestManifestUrl(captured);
         if (!TextUtils.isEmpty(manifest) && !manifest.equals(pageUrl)) candidates.add(manifest);
         if (captured != null) {
-            for (int i = captured.length()-1; i >= 0 && candidates.size() < 3; i--) {
+            // Player frames (VideoTube, StreamWish, VidHide...), known players first, ads dropped.
+            List<String> frames = new ArrayList<>();
+            for (int i = captured.length()-1; i >= 0; i--) {
                 JSONObject item = captured.optJSONObject(i);
                 if (item == null || !"page".equals(item.optString("type"))) continue;
                 String url = item.optString("url");
-                if (looksLikeAdUrl(url)) continue;
-                if (url.startsWith("https://") && !url.equals(pageUrl) && !candidates.contains(url))
-                    candidates.add(url);
+                if (!looksLikeAdUrl(url) && !candidates.contains(url)) frames.add(url);
             }
+            candidates.addAll(CapturedMediaFilter.rankPlayerFrames(frames, pageUrl, 5));
         }
         for (String candidate : candidates) {
             if (serial != captureRequestSerial || Thread.currentThread().isInterrupted())
@@ -1212,6 +1213,7 @@ public class MainActivity extends Activity {
         if ("page".equals(type) || "transport".equals(type)) return true;
         String url = item.optString("url", "");
         if (TextUtils.isEmpty(url)) return true;
+        if (rejectJunkMedia(item, url)) return true;
 
         String mediaPath = Uri.parse(url).getPath();
         if (mediaPath != null && mediaPath.toLowerCase(Locale.US).endsWith(".m4s")) return true;
@@ -1253,6 +1255,60 @@ public class MainActivity extends Activity {
         return false;
     }
 
+    /** Sizes learned by asking servers directly; JUNK for files that are not media. */
+    private final Map<String, Long> mediaProbeSizes = new ConcurrentHashMap<>();
+    private final Set<String> mediaProbing = ConcurrentHashMap.newKeySet();
+    private final ExecutorService mediaProber = Executors.newFixedThreadPool(3);
+
+    /**
+     * Hides tiny files (ad placeholders, tracking pixels) and web pages that a page loaded
+     * with a video-like address. A file whose size the page did not report is checked with a
+     * one-byte request first; it appears, with its real size, once the check passes.
+     */
+    private boolean rejectJunkMedia(JSONObject item, String url) {
+        if (isYouTubeUrl(pendingPageUrl)) return false;
+        String mime = item.optString("mime", "");
+        if (CapturedMediaFilter.manifest(url, mime) || !TextUtils.isEmpty(item.optString("masterUrl"))) return false;
+        long size = numberToLong(item.opt("size"));
+        if (CapturedMediaFilter.tooSmall(size)) return true;
+        if (size > 0) return false;
+        Long probed = mediaProbeSizes.get(url);
+        if (probed != null) {
+            if (probed == CapturedMediaFilter.JUNK) return true;
+            if (probed > 0) try { item.put("size", probed); } catch (Exception ignored) { }
+            return false;
+        }
+        scheduleMediaProbe(item, url);
+        return true;
+    }
+
+    private void scheduleMediaProbe(JSONObject item, String url) {
+        if (mediaProbeSizes.size() > 500) mediaProbeSizes.clear();
+        if (!mediaProbing.add(url)) return;
+        final Map<String, String> headers = new LinkedHashMap<>();
+        if (!TextUtils.isEmpty(latestUserAgent)) headers.put("User-Agent", latestUserAgent);
+        String referer = item.optString("referer", "");
+        if (TextUtils.isEmpty(referer)) referer = item.optString("frameUrl", "");
+        if (TextUtils.isEmpty(referer)) referer = pendingPageUrl;
+        if (!TextUtils.isEmpty(referer)) headers.put("Referer", referer);
+        if (!TextUtils.isEmpty(latestCookieHeader)) headers.put("Cookie", latestCookieHeader);
+        final int serial = captureRequestSerial;
+        try {
+            mediaProber.execute(() -> {
+                long verdict = CapturedMediaFilter.probe(url, headers);
+                mediaProbeSizes.put(url, verdict);
+                mediaProbing.remove(url);
+                runOnUiThread(() -> {
+                    if (serial == captureRequestSerial && capturePanel.getVisibility() == View.VISIBLE
+                            && !detailedFormatsShown && !isFinishing())
+                        showCapturedFallback(lastCapturedItems);
+                });
+            });
+        } catch (Throwable rejected) {
+            mediaProbing.remove(url);
+        }
+    }
+
     private static boolean isYouTubeUrl(String url) {
         if (TextUtils.isEmpty(url)) return false;
         String lower = url.toLowerCase(Locale.US);
@@ -1270,7 +1326,7 @@ public class MainActivity extends Activity {
         if (looksLikeYouTubeThrottle(error)) {
             return "يوتيوب حدّد الطلبات مؤقتاً. افتح الفيديو وشغّله ثواني ثم أعد الالتقاط، أو انتظر قليلاً.";
         }
-        return "تعذر تحليل هذا الموقع حالياً. شغّل الفيديو ثم أعد الالتقاط.";
+        return "تعذر تحليل الصفحة. اختر سيرفر مشاهدة وشغّل الفيديو ثواني، ثم اضغط زر الالتقاط.";
     }
 
     private JSONObject parseResponseJson(String output) throws Exception {
@@ -3995,6 +4051,7 @@ public class MainActivity extends Activity {
         worker.shutdownNow();
         engineUpdater.shutdownNow();
         fileSaver.shutdown();
+        mediaProber.shutdownNow();
         stopActiveAnalysis();
         analysisWatchdog.shutdown();
         super.onDestroy();

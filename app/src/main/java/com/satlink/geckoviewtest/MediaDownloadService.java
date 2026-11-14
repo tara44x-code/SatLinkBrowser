@@ -107,6 +107,8 @@ public class MediaDownloadService extends Service {
 
     // Static so the downloads screen can list running video/audio downloads.
     private static final Map<String, TaskState> tasks = new ConcurrentHashMap<>();
+    /** Overall progress across the files of one download (video, then audio). */
+    private final Map<String, DownloadProgressTracker> trackers = new ConcurrentHashMap<>();
 
     /** Read-only view of one video/audio download for the downloads screen. */
     static final class Snapshot {
@@ -227,6 +229,9 @@ public class MediaDownloadService extends Service {
 
             task.resumeRequested = false;
             task.processStopRequested = false;
+            boolean twoFiles = (task.formatId != null && task.formatId.contains("+"))
+                    || !TextUtils.isEmpty(task.directAudioUrl);
+            trackers.put(task.taskId, new DownloadProgressTracker(task.estimatedSize, twoFiles ? 2 : 1));
             task.state = STATE_RUNNING;
             task.message = task.progress > 0 ? "جاري استكمال التحميل..." : "جاري بدء التحميل...";
             ensureForeground(task);
@@ -298,6 +303,7 @@ public class MediaDownloadService extends Service {
             task.processId = null;
             task.postProcess = null;
             task.processStopRequested = false;
+            trackers.remove(task.taskId);
             task.executing.set(false);
             if (task.resumeRequested && !task.cancelled && !task.paused) {
                 task.resumeRequested = false;
@@ -333,12 +339,20 @@ public class MediaDownloadService extends Service {
                 if (task.cancelled || task.paused) return Unit.INSTANCE;
                 int value = progress == null ? task.progress
                         : Math.max(0, Math.min(100, Math.round(progress)));
-                task.progress = Math.max(task.progress, value);
                 task.etaSeconds = eta == null ? 0L : Math.max(0L, eta);
                 task.speed = extractSpeed(line);
-                task.totalBytes = task.estimatedSize > 0 ? task.estimatedSize : task.totalBytes;
-                if (task.totalBytes > 0) {
-                    task.downloadedBytes = Math.round(task.totalBytes * (value / 100d));
+                DownloadProgressTracker tracker = trackers.get(task.taskId);
+                if (tracker != null && progress != null && progress >= 0) {
+                    // yt-dlp restarts at 0% for each file; combine them instead of keeping the maximum.
+                    tracker.update(progress, line);
+                    task.progress = tracker.percent();
+                    long total = tracker.totalBytes();
+                    task.totalBytes = total > 0 ? total : task.estimatedSize;
+                    task.downloadedBytes = tracker.downloadedBytes();
+                } else {
+                    task.progress = Math.max(task.progress, value);
+                    task.totalBytes = task.estimatedSize > 0 ? task.estimatedSize : task.totalBytes;
+                    if (task.totalBytes > 0) task.downloadedBytes = Math.round(task.totalBytes * (value / 100d));
                 }
                 task.message = buildProgressMessage(task, line);
                 updateNotification(task);
