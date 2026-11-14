@@ -105,7 +105,34 @@ public class MediaDownloadService extends Service {
     private static final int FOREGROUND_BASE_ID = 41000;
     private static final Pattern SPEED_PATTERN = Pattern.compile("\\bat\\s+([^\\s]+/s)", Pattern.CASE_INSENSITIVE);
 
-    private final Map<String, TaskState> tasks = new ConcurrentHashMap<>();
+    // Static so the downloads screen can list running video/audio downloads.
+    private static final Map<String, TaskState> tasks = new ConcurrentHashMap<>();
+
+    /** Read-only view of one video/audio download for the downloads screen. */
+    static final class Snapshot {
+        String id, title, state, speed, message;
+        int progress;
+        long eta, downloaded, total;
+    }
+
+    static List<Snapshot> snapshot() {
+        List<Snapshot> list = new ArrayList<>();
+        for (TaskState task : tasks.values()) {
+            if (STATE_COMPLETED.equals(task.state) || STATE_CANCELLED.equals(task.state)) continue;
+            Snapshot item = new Snapshot();
+            item.id = task.taskId;
+            item.title = TextUtils.isEmpty(task.title) ? "فيديو" : task.title;
+            item.state = task.state;
+            item.speed = task.speed == null ? "" : task.speed;
+            item.message = task.message == null ? "" : task.message;
+            item.progress = task.progress;
+            item.eta = task.etaSeconds;
+            item.downloaded = task.downloadedBytes;
+            item.total = task.totalBytes;
+            list.add(item);
+        }
+        return list;
+    }
     private final ExecutorService executor = Executors.newFixedThreadPool(2);
     private final AtomicBoolean engineReady = new AtomicBoolean(false);
     private final Object foregroundLock = new Object();
@@ -251,6 +278,9 @@ public class MediaDownloadService extends Service {
             if (task.cancelled) {
                 task.state = STATE_CANCELLED;
                 task.message = "تم إلغاء التحميل";
+                notificationManager.cancel(notificationId(task.taskId));
+                broadcast(task);
+                return;
             } else if (task.processStopRequested || task.paused) {
                 task.state = task.resumeRequested ? STATE_QUEUED : STATE_PAUSED;
                 task.message = task.resumeRequested ? "جاري استئناف التحميل..." : "متوقف مؤقتاً — اضغط استئناف";
@@ -592,9 +622,10 @@ public class MediaDownloadService extends Service {
         destroyProcess(task);
         deleteRecursively(getTaskWorkDirectory(task.taskId));
         broadcast(task);
-        notificationManager.cancel(notificationId(task.taskId));
         tasks.remove(task.taskId);
-        releaseForegroundIfNeeded(task.taskId);
+        // Remove (not detach) the foreground notification, then clear it.
+        releaseForegroundIfNeeded(task.taskId, true);
+        notificationManager.cancel(notificationId(task.taskId));
     }
 
     private void queryTask(String taskId) {
@@ -735,6 +766,10 @@ public class MediaDownloadService extends Service {
     }
 
     private void releaseForegroundIfNeeded(String finishedTaskId) {
+        releaseForegroundIfNeeded(finishedTaskId, false);
+    }
+
+    private void releaseForegroundIfNeeded(String finishedTaskId, boolean removeNotification) {
         synchronized (foregroundLock) {
             if (!TextUtils.equals(foregroundTaskId, finishedTaskId)) return;
             TaskState replacement = null;
@@ -750,9 +785,9 @@ public class MediaDownloadService extends Service {
             } else {
                 foregroundTaskId = null;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    stopForeground(STOP_FOREGROUND_DETACH);
+                    stopForeground(removeNotification ? STOP_FOREGROUND_REMOVE : STOP_FOREGROUND_DETACH);
                 } else {
-                    stopForeground(false);
+                    stopForeground(removeNotification);
                 }
                 stopSelf();
             }

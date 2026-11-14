@@ -2842,6 +2842,10 @@ public class MainActivity extends Activity {
             addMessageCard(downloadsList, "تعذر قراءة مدير التنزيل: " + safeMessage(error));
         }
         Set<String> nativeNames = GeneralDownloadCatalog.representedNames(nativeFiles);
+        for (MediaDownloadService.Snapshot media : MediaDownloadService.snapshot()) {
+            downloadsList.addView(mediaDownloadCard(media));
+            found++;
+        }
         for (FileDownloadService.Task task : FileDownloadService.snapshot(this)) {
             if (FileDownloadService.DONE.equals(task.state)) continue;
             downloadsList.addView(engineDownloadCard(task));
@@ -2957,6 +2961,72 @@ public class MainActivity extends Activity {
                 }).show());
         card.addView(actions);
         return card;
+    }
+
+    /** A running video/audio download (yt-dlp service). */
+    private View mediaDownloadCard(MediaDownloadService.Snapshot media) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(dp(14), dp(12), dp(14), dp(12));
+        card.setBackground(roundedBackground(0xFF151219, 0xFFFF4B9F, 15));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.setMargins(0, 0, 0, dp(9));card.setLayoutParams(params);
+        TextView title = new TextView(this);
+        title.setText("🎬 " + media.title);
+        title.setTextColor(Color.WHITE);title.setTextSize(14);title.setTypeface(Typeface.DEFAULT_BOLD);
+        card.addView(title);
+        boolean active = MediaDownloadService.STATE_RUNNING.equals(media.state) || MediaDownloadService.STATE_QUEUED.equals(media.state);
+        String state = MediaDownloadService.STATE_PAUSED.equals(media.state) ? "متوقف مؤقتاً"
+                : MediaDownloadService.STATE_FAILED.equals(media.state) ? "فشل"
+                : MediaDownloadService.STATE_QUEUED.equals(media.state) ? "بالانتظار" : "جاري التنزيل";
+        StringBuilder line = new StringBuilder(state).append("  •  ").append(media.progress).append('%');
+        if (active && !TextUtils.isEmpty(media.speed)) line.append("  •  ").append(media.speed);
+        if (active && media.eta > 0) line.append("  •  ").append(formatEta(media.eta));
+        if (media.total > 0) line.append('\n').append(FileDownloadService.Formats.bytes(media.downloaded))
+                .append(" / ").append(FileDownloadService.Formats.bytes(media.total));
+        if (MediaDownloadService.STATE_FAILED.equals(media.state) && !TextUtils.isEmpty(media.message)) line.append('\n').append(media.message);
+        TextView status = new TextView(this);
+        status.setText(line.toString());
+        status.setTextColor(0xFFAAA3B2);status.setTextSize(11);status.setPadding(0, dp(5), 0, dp(10));
+        card.addView(status);
+        ProgressBar progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        progress.setMax(100);progress.setProgress(media.progress);
+        card.addView(progress, new LinearLayout.LayoutParams(-1, dp(8)));
+        LinearLayout actions = new LinearLayout(this);
+        actions.setOrientation(LinearLayout.HORIZONTAL);actions.setGravity(Gravity.END);
+        actions.setPadding(0, dp(8), 0, 0);
+        if (active) {
+            Button pause = smallDownloadActionButton("إيقاف مؤقت");actions.addView(pause);
+            pause.setOnClickListener(v -> {mediaTaskAction(media.id, MediaDownloadService.ACTION_PAUSE);refreshDownloads();});
+        } else if (MediaDownloadService.STATE_PAUSED.equals(media.state) || MediaDownloadService.STATE_FAILED.equals(media.state)) {
+            boolean failed = MediaDownloadService.STATE_FAILED.equals(media.state);
+            Button resume = smallDownloadActionButton(failed ? "إعادة المحاولة" : "استكمال");actions.addView(resume);
+            resume.setOnClickListener(v -> {mediaTaskAction(media.id, failed ? MediaDownloadService.ACTION_RETRY : MediaDownloadService.ACTION_RESUME);refreshDownloads();});
+        }
+        Button cancel = smallDownloadActionButton("إلغاء");actions.addView(cancel);
+        cancel.setTextColor(0xFFFF7DAA);
+        cancel.setOnClickListener(v -> new AlertDialog.Builder(this)
+                .setTitle("إلغاء التنزيل")
+                .setMessage("إلغاء التنزيل وحذف الجزء المحمّل؟\n" + media.title)
+                .setNegativeButton("رجوع", null)
+                .setPositiveButton("إلغاء التنزيل", (dialog, which) -> {
+                    mediaTaskAction(media.id, MediaDownloadService.ACTION_CANCEL);
+                    refreshDownloads();
+                }).show());
+        card.addView(actions);
+        return card;
+    }
+
+    private void mediaTaskAction(String taskId, String action) {
+        Intent intent = new Intent(this, MediaDownloadService.class).setAction(action)
+                .putExtra(MediaDownloadService.EXTRA_TASK_ID, taskId);
+        try {
+            if ((MediaDownloadService.ACTION_RESUME.equals(action) || MediaDownloadService.ACTION_RETRY.equals(action))
+                    && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent);
+            else startService(intent);
+        } catch (Throwable error) {
+            Toast.makeText(this, "تعذر تنفيذ الأمر: " + safeMessage(error), Toast.LENGTH_SHORT).show();
+        }
     }
 
     /** A file or torrent download from the multi-connection engine. */
