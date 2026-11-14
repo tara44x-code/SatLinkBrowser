@@ -7,16 +7,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          set -e
           base=https://repo1.maven.org/maven2/io/github/junkfood02/youtubedl-android
           curl -sSfLo a.aar $base/aria2c/0.18.1/aria2c-0.18.1.aar
           curl -sSfLo l.aar $base/library/0.18.1/library-0.18.1.aar
-          unzip -l a.aar
-          mkdir a l && (cd a && unzip -q ../a.aar) && (cd l && unzip -q ../l.aar)
-          (cd a && unzip -l classes.jar)
-          (cd a && unzip -q classes.jar -d cls && for c in $(find cls -name '*.class'); do javap -p -constants "$c"; done)
-          (cd l && unzip -q classes.jar -d cls && javap -p -constants $(find cls -name 'YoutubeDL.class') | head -80)
-          (cd l && for c in $(find cls -name 'YoutubeDL*.class' -o -name 'Constants*.class'); do echo "== $c"; strings "$c" | grep -i -E 'packages|usr/lib|LD_LIBRARY|aria2|SSL_CERT|python|ffmpeg' ; done)
-          (cd a && for c in $(find cls -name '*.class'); do echo "== $c"; strings "$c" | grep -i -E 'packages|usr|zip|aria2|lib' ; done)
-          (cd a && find jni -type f | xargs ls -la)
-          mkdir z && cd z && unzip -q ../a/jni/arm64-v8a/libaria2c.zip.so && find . | head -40
+          mkdir a l && (cd a && unzip -q ../a.aar && unzip -q classes.jar -d cls) && (cd l && unzip -q ../l.aar && unzip -q classes.jar -d cls)
+          echo "== SSL / env strings in YoutubeDL"
+          strings l/cls/com/yausername/youtubedl_android/YoutubeDL.class | grep -n -i -E 'cert|tls|etc|ssl|tmp|usr' || true
+          echo "== Aria2c strings"
+          strings a/cls/com/yausername/aria2c/Aria2c.class || true
+          echo "== libaria2c.zip.so contents (arm64)"
+          mkdir z && cd z && unzip -q ../a/jni/arm64-v8a/libaria2c.zip.so; find . -maxdepth 4 | head -40
+          echo "== python zip cert files"
+          cd .. && mkdir p && cd p && unzip -q ../l/jni/arm64-v8a/libpython.zip.so 2>/dev/null; find . -iname '*.pem' -o -iname '*cert*' | head
+          echo "== aria2c version/features (x86_64 via readelf deps)"
+          cd .. && readelf -d a/jni/arm64-v8a/libaria2c.so | grep NEEDED || true
+          strings a/jni/arm64-v8a/libaria2c.so | grep -i -E '^aria2 version|BitTorrent|OpenSSL|async-dns|c-ares' | head -20
